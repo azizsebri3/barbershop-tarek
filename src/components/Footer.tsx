@@ -1,0 +1,51 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import { useLanguage } from '@/lib/language-context'
+
+export default function Footer() {
+  const { t } = useLanguage()
+  const currentYear = new Date().getFullYear()
+
+  return (
+    <footer className="bg-primary border-t border-secondary py-12 mt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8"
+        >
+          <div>
+            <h3 className="text-accent font-bold text-lg mb-4">✂️ Style & Coupe</h3>
+            <p className="text-gray-400">{t.hero.description}</p>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-4">{t.nav.home}</h4>
+            <ul className="space-y-2 text-gray-400">
+              <li><a href="/" className="hover:text-accent transition-colors">{t.nav.home}</a></li>
+              <li><a href="/pricing" className="hover:text-accent transition-colors">{t.nav.services}</a></li>
+              <li><a href="/pricing" className="hover:text-accent transition-colors">{t.nav.pricing}</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-4">{t.hours.phone}</h4>
+            <p className="text-gray-400">Email: contact@stylecoupe.be</p>
+            <p className="text-gray-400">{t.hours.phone}</p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="border-t border-secondary pt-8 text-center text-gray-500 text-sm"
+        >
+          <p>&copy; {currentYear} Style & Coupe. {t.cta.title}.</p>
+        </motion.div>
+      </div>
+    </footer>
+  )
+}
