@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useLanguage } from '@/lib/language-context'
+import { useRouter } from 'next/navigation'
 
 interface ServiceCardProps {
   title: string
@@ -13,6 +14,13 @@ interface ServiceCardProps {
 
 export default function ServiceCard({ title, description, price, duration, icon }: ServiceCardProps) {
   const { t } = useLanguage()
+  const router = useRouter()
+
+  const handleReserve = () => {
+    // Rediriger vers la page booking avec le service pré-sélectionné
+    router.push(`/booking?service=${encodeURIComponent(title)}`)
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -36,14 +44,15 @@ export default function ServiceCard({ title, description, price, duration, icon 
         </div>
         <div className="text-right">
           <p className="text-xs sm:text-sm text-gray-500">{t.services.from}</p>
-          <p className="text-accent text-xl sm:text-2xl font-bold">${price}</p>
+          <p className="text-accent text-xl sm:text-2xl font-bold">{price}€</p>
         </div>
       </div>
 
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="w-full bg-accent text-primary py-2 sm:py-3 rounded-lg font-bold hover:bg-accent/90 transition-colors text-sm sm:text-base"
+        onClick={handleReserve}
+        className="w-full bg-accent text-primary py-2 sm:py-3 rounded-lg font-bold hover:bg-accent/90 transition-colors text-sm sm:text-base cursor-pointer"
       >
         {t.services.reserve}
       </motion.button>

@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+if (!url || !serviceKey) {
+  throw new Error('Missing Supabase environment variables')
+}
+
+const supabase = createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 
 export async function GET(
   request: NextRequest,
@@ -44,25 +53,24 @@ export async function PUT(
       )
     }
 
-    const { data, error } = await supabase
+    console.log('🔄 Mise à jour du statut de la réservation:', params.id, '->', status)
+
+    const { error } = await supabase
       .from('bookings')
-      .update({ status })
+      .update({ status, updated_at: new Date().toISOString() })
       .eq('id', params.id)
-      .select()
-      .single()
 
     if (error) {
-      return NextResponse.json(
-        { error: 'Erreur lors de la mise à jour' },
-        { status: 500 }
-      )
+      console.error('❌ Erreur Supabase:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ booking: data }, { status: 200 })
+    console.log('✅ Statut de la réservation mis à jour avec succès')
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('PUT booking error:', error)
+    console.error('❌ Erreur lors de la mise à jour:', error)
     return NextResponse.json(
-      { error: 'Une erreur serveur s\'est produite' },
+      { error: 'Erreur interne du serveur' },
       { status: 500 }
     )
   }
@@ -73,26 +81,24 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log('🗑️ Suppression de la réservation:', params.id)
+
     const { error } = await supabase
       .from('bookings')
       .delete()
       .eq('id', params.id)
 
     if (error) {
-      return NextResponse.json(
-        { error: 'Erreur lors de la suppression' },
-        { status: 500 }
-      )
+      console.error('❌ Erreur Supabase:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(
-      { message: 'Réservation supprimée avec succès' },
-      { status: 200 }
-    )
+    console.log('✅ Réservation supprimée avec succès')
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('DELETE booking error:', error)
+    console.error('❌ Erreur lors de la suppression:', error)
     return NextResponse.json(
-      { error: 'Une erreur serveur s\'est produite' },
+      { error: 'Erreur interne du serveur' },
       { status: 500 }
     )
   }

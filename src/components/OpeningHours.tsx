@@ -2,13 +2,50 @@
 
 import { motion } from 'framer-motion'
 import { Clock, MapPin, Phone } from 'lucide-react'
-import { openingHours, isOpenNow } from '@/lib/data'
+import { useOpeningHours } from '@/lib/useOpeningHours'
 import { useLanguage } from '@/lib/language-context'
 
 export default function OpeningHours() {
   const { t } = useLanguage()
+  const { hours, loading } = useOpeningHours()
+
+  // Fonction pour vérifier si le salon est ouvert maintenant
+  const isOpenNow = () => {
+    if (loading) return false
+
+    const now = new Date()
+    const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+    const currentTime = now.getHours() * 60 + now.getMinutes()
+
+    const todayHours = hours[dayOfWeek as keyof typeof hours]
+    if (!todayHours || todayHours.closed) return false
+
+    const [openHour, openMinute] = todayHours.open.split(':').map(Number)
+    const [closeHour, closeMinute] = todayHours.close.split(':').map(Number)
+
+    const openTime = openHour * 60 + openMinute
+    const closeTime = closeHour * 60 + closeMinute
+
+    return currentTime >= openTime && currentTime < closeTime
+  }
+
   const open = isOpenNow()
-  const days = Object.entries(openingHours)
+  const days = Object.entries(hours)
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-secondary rounded-xl p-6 sm:p-8 max-w-md mx-auto border border-accent/10"
+      >
+        <div className="flex items-center gap-3 mb-6">
+          <Clock className="text-accent animate-pulse" size={24} />
+          <h3 className="text-lg sm:text-xl font-bold text-white">Chargement...</h3>
+        </div>
+      </motion.div>
+    )
+  }
 
   return (
     <motion.div

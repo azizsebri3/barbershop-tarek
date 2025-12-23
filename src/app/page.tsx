@@ -36,7 +36,9 @@ export default function Home() {
       <Hero />
 
       {/* Services Carousel */}
-      <ServiceCarousel />
+      <section id="services">
+        <ServiceCarousel />
+      </section>
 
       {/* Client Portfolio */}
       <ClientPortfolio />
@@ -93,7 +95,7 @@ export default function Home() {
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Horaires <span className="text-accent">d'Ouverture</span>
+            Horaires <span className="text-accent">d&apos;Ouverture</span>
           </h2>
           <p className="text-gray-400 text-lg">Nous vous accueillons du lundi au samedi</p>
         </motion.div>

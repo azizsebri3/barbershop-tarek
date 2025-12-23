@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useLanguage } from '@/lib/language-context'
 
@@ -67,20 +68,24 @@ export default function Hero() {
           variants={itemVariants}
           className="flex flex-col sm:flex-row gap-3 sm:gap-4"
         >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-6 sm:px-8 py-3 sm:py-4 bg-accent text-primary font-bold rounded-lg hover:bg-accent/80 transition-colors text-sm sm:text-base md:text-lg"
-          >
-            {t.hero.btnBook}
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-6 sm:px-8 py-3 sm:py-4 border-2 border-accent text-accent font-bold rounded-lg hover:bg-accent/10 transition-colors text-sm sm:text-base md:text-lg"
-          >
-            {t.hero.btnLearn}
-          </motion.button>
+          <Link href="/booking">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 sm:px-8 py-3 sm:py-4 bg-accent text-primary font-bold rounded-lg hover:bg-accent/80 transition-colors text-sm sm:text-base md:text-lg"
+            >
+              {t.hero.btnBook}
+            </motion.button>
+          </Link>
+          <Link href="/pricing">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 sm:px-8 py-3 sm:py-4 border-2 border-accent text-accent font-bold rounded-lg hover:bg-accent/10 transition-colors text-sm sm:text-base md:text-lg"
+            >
+              {t.hero.btnLearn}
+            </motion.button>
+          </Link>
         </motion.div>
 
         {/* Stats */}

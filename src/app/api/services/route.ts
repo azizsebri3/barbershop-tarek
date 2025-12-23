@@ -1,0 +1,98 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+if (!url || !serviceKey) {
+  throw new Error('Missing Supabase environment variables')
+}
+
+const supabase = createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
+
+// GET /api/services - Récupérer les services depuis la table services
+export async function GET() {
+  try {
+    console.log('📥 Chargement des services depuis la table services...')
+
+    const { data, error } = await supabase
+      .from('services')
+      .select('*')
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      console.error('❌ Erreur DB:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    if (data && data.length > 0) {
+      console.log('✅ Services chargés depuis table services:', data)
+      return NextResponse.json({ services: data })
+    } else {
+      console.log('⚠️ Aucun service trouvé dans la table services')
+      return NextResponse.json({ services: [] })
+    }
+  } catch (error) {
+    console.error('❌ Erreur lors du chargement des services:', error)
+    return NextResponse.json(
+      { error: 'Erreur interne du serveur' },
+      { status: 500 }
+    )
+  }
+}
+
+// POST /api/services - Sauvegarder les services dans la table services
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { services } = body
+
+    if (!services || !Array.isArray(services)) {
+      return NextResponse.json(
+        { error: 'Données services manquantes ou invalides' },
+        { status: 400 }
+      )
+    }
+
+    console.log('💾 Sauvegarde des services dans la table services:', services)
+
+    // Supprimer tous les anciens services
+    const { error: deleteError } = await supabase
+      .from('services')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000')
+
+    if (deleteError) {
+      console.error('❌ Erreur suppression:', deleteError)
+    }
+
+    // Insérer les nouveaux services
+    const servicesToInsert = services.map((service: { id?: string; name: string; description: string; price: number; duration: number }) => ({
+      id: service.id || crypto.randomUUID(),
+      name: service.name,
+      description: service.description,
+      price: service.price,
+      duration: service.duration,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }))
+
+    const { error: insertError } = await supabase
+      .from('services')
+      .insert(servicesToInsert)
+
+    if (insertError) {
+      console.error('❌ Erreur insertion:', insertError)
+      return NextResponse.json({ error: insertError.message }, { status: 500 })
+    }
+
+    console.log('✅ Services sauvegardés avec succès dans la table services')
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('❌ Erreur lors de la sauvegarde:', error)
+    return NextResponse.json(
+      { error: 'Erreur interne du serveur' },
+      { status: 500 }
+    )
+  }
+}

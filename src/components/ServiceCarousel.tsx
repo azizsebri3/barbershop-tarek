@@ -6,10 +6,25 @@ import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import ServiceCard from './ServiceCard'
-import { services } from '@/lib/data'
+import { useServices } from '@/lib/useServices'
 import { motion } from 'framer-motion'
 
 export default function ServiceCarousel() {
+  const { services, loading } = useServices()
+
+  if (loading) {
+    return (
+      <section className="py-12 sm:py-20 px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+            <p className="text-gray-400 mt-4">Chargement des services...</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="py-12 sm:py-20 px-3 sm:px-4 md:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">

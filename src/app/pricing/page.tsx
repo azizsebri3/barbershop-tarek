@@ -2,10 +2,13 @@
 
 import { motion } from 'framer-motion'
 import ServiceCard from '@/components/ServiceCard'
-import { services } from '@/lib/data'
+import { useServices } from '@/lib/useServices'
 import { Check } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 export default function PricingPage() {
+  const { t } = useLanguage()
+  const { services, loading } = useServices()
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -26,6 +29,17 @@ export default function PricingPage() {
     },
   }
 
+  if (loading) {
+    return (
+      <div className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+          <p className="text-gray-400 mt-4">Chargement des tarifs...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
       {/* Pricing Header */}
@@ -37,10 +51,10 @@ export default function PricingPage() {
           className="max-w-4xl mx-auto text-center"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Nos <span className="text-accent">Tarifs</span>
+            {t.pricing.title} <span className="text-accent">{t.pricing.titleAccent}</span>
           </h1>
           <p className="text-gray-400 text-lg">
-            Des tarifs transparents pour tous nos services de coiffure. Réductions possibles pour forfaits.
+            {t.pricing.description}
           </p>
         </motion.div>
       </div>

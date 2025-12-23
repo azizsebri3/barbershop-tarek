@@ -19,7 +19,7 @@ export default function Error({
         <h1 className="text-5xl font-bold text-accent mb-4">Oups!</h1>
         <h2 className="text-2xl font-bold text-white mb-4">Une erreur s'est produite</h2>
         <p className="text-gray-400 mb-8">
-          {error.message || 'Quelque chose s\'est mal passé. Veuillez réessayer.'}
+          {error.message || 'Quelque chose s&apos;est mal passé. Veuillez réessayer.'}
         </p>
         <div className="flex gap-4 justify-center">
           <button

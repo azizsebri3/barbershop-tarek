@@ -1,10 +1,13 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useLanguage } from '@/lib/language-context'
+import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettings'
 
 export default function Footer() {
   const { t } = useLanguage()
+  const { settings } = usePublicGeneralSettings()
   const currentYear = new Date().getFullYear()
 
   return (
@@ -17,23 +20,23 @@ export default function Footer() {
           className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8"
         >
           <div>
-            <h3 className="text-accent font-bold text-lg mb-4">✂️ Style & Coupe</h3>
-            <p className="text-gray-400">{t.hero.description}</p>
+            <h3 className="text-accent font-bold text-lg mb-4">✂️ {settings.salonName}</h3>
+            <p className="text-gray-400">{settings.description}</p>
           </div>
 
           <div>
             <h4 className="text-white font-bold mb-4">{t.nav.home}</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="/" className="hover:text-accent transition-colors">{t.nav.home}</a></li>
-              <li><a href="/pricing" className="hover:text-accent transition-colors">{t.nav.services}</a></li>
-              <li><a href="/pricing" className="hover:text-accent transition-colors">{t.nav.pricing}</a></li>
+              <li><Link href="/" className="hover:text-accent transition-colors">{t.nav.home}</Link></li>
+              <li><Link href="/pricing" className="hover:text-accent transition-colors">{t.nav.services}</Link></li>
+              <li><Link href="/pricing" className="hover:text-accent transition-colors">{t.nav.pricing}</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-white font-bold mb-4">{t.hours.phone}</h4>
-            <p className="text-gray-400">Email: contact@stylecoupe.be</p>
-            <p className="text-gray-400">{t.hours.phone}</p>
+            <p className="text-gray-400">Email: {settings.email}</p>
+            <p className="text-gray-400">{settings.phone}</p>
           </div>
         </motion.div>
 
@@ -43,7 +46,7 @@ export default function Footer() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="border-t border-secondary pt-8 text-center text-gray-500 text-sm"
         >
-          <p>&copy; {currentYear} Style & Coupe. {t.cta.title}.</p>
+          <p>&copy; {currentYear} {settings.salonName}. {t.cta.title}.</p>
         </motion.div>
       </div>
     </footer>

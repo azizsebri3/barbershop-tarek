@@ -25,7 +25,7 @@ export const translations = {
       title: 'Nos Services',
       titleAccent: 'Premium',
       description:
-        'Découvrez notre gamme complète de services de coiffure pour hommes et femmes',
+        'Découvrez nos services spécialisés pour hommes : coupes modernes et entretien de barbe professionnel',
       reserve: 'Réserver',
       duration: 'Durée',
       from: 'À partir de',
@@ -42,6 +42,18 @@ export const translations = {
       title: 'Avis de nos',
       titleAccent: 'Clients',
       description: 'Découvrez ce que nos clients pensent de notre service et de nos coiffeurs',
+    },
+    // Pricing
+    pricing: {
+      title: 'Nos',
+      titleAccent: 'Tarifs',
+      description: 'Des tarifs transparents pour tous nos services spécialisés pour hommes',
+    },
+    // Booking Page
+    bookingPage: {
+      title: 'Réservez Votre',
+      titleAccent: 'Rendez-vous',
+      description: 'Choisissez votre service et votre date. Une confirmation sera envoyée à votre email.',
     },
     // Opening hours
     hours: {
@@ -123,7 +135,7 @@ export const translations = {
     services: {
       title: 'Our Services',
       titleAccent: 'Premium',
-      description: 'Discover our complete range of hair services for men and women',
+      description: 'Discover our specialized services for men: modern cuts and professional beard care',
       reserve: 'Reserve',
       duration: 'Duration',
       from: 'From',
@@ -139,6 +151,18 @@ export const translations = {
       title: 'What Our',
       titleAccent: 'Clients Say',
       description: 'Discover what our clients think about our service and hairdressers',
+    },
+    // Pricing
+    pricing: {
+      title: 'Our',
+      titleAccent: 'Pricing',
+      description: 'Transparent pricing for all our specialized services for men',
+    },
+    // Booking Page
+    bookingPage: {
+      title: 'Book Your',
+      titleAccent: 'Appointment',
+      description: 'Choose your service and date. A confirmation will be sent to your email.',
     },
     // Opening hours
     hours: {

@@ -1,0 +1,60 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { supabase } from './supabase'
+
+interface GeneralSettings {
+  salonName: string
+  description: string
+  phone: string
+  email: string
+  address: string
+  facebook?: string
+  instagram?: string
+}
+
+const defaultSettings: GeneralSettings = {
+  salonName: 'Style & Coupe',
+  description: 'Votre salon de coiffure et barbershop en Belgique. Coupes modernes, colorations tendance et rasage traditionnel premium.',
+  phone: '+32 2 123 45 67',
+  email: 'contact@stylecoupe.be',
+  address: 'Belgique',
+  facebook: '',
+  instagram: ''
+}
+
+export function usePublicGeneralSettings() {
+  const [settings, setSettings] = useState<GeneralSettings>(defaultSettings)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadSettings()
+  }, [])
+
+  const loadSettings = async () => {
+    try {
+      if (!supabase) {
+        setLoading(false)
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'general')
+        .single()
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+        console.error('Erreur lors du chargement des paramètres:', error)
+      } else if (data) {
+        setSettings({ ...defaultSettings, ...data.value })
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des paramètres:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { settings, loading, refetch: loadSettings }
+}

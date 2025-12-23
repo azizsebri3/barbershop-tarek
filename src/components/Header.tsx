@@ -6,10 +6,12 @@ import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import LanguageSwitcher from './LanguageSwitcher'
 import { useLanguage } from '@/lib/language-context'
+import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettings'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const { t } = useLanguage()
+  const { settings } = usePublicGeneralSettings()
 
   return (
     <header className="fixed top-0 w-full bg-primary/95 backdrop-blur-md z-50 border-b border-secondary">
@@ -20,7 +22,7 @@ export default function Header() {
           transition={{ duration: 0.5 }}
         >
           <Link href="/" className="text-xl sm:text-2xl font-bold text-accent whitespace-nowrap">
-            ✂️ Style & Coupe
+            ✂️ {settings.salonName}
           </Link>
         </motion.div>
 
@@ -38,7 +40,7 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <Link href="/pricing" className="text-gray-300 hover:text-accent transition-colors">
+              <Link href="/#services" className="text-gray-300 hover:text-accent transition-colors">
                 {t.nav.services}
               </Link>
             </li>
@@ -53,6 +55,16 @@ export default function Header() {
               </Link>
             </li>
           </motion.ul>
+
+          {/* Admin Link (discret) */}
+          <Link
+            href="/admin"
+            className="text-gray-500 hover:text-accent transition-colors text-xs opacity-50 hover:opacity-100"
+            title="Administration"
+          >
+            ⚙️
+          </Link>
+
           <LanguageSwitcher />
         </div>
 

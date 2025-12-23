@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { motion } from 'framer-motion'
 import toast, { Toaster } from 'react-hot-toast'
-import { services } from '@/lib/data'
+import { useServices } from '@/lib/useServices'
+import { useOpeningHours } from '@/lib/useOpeningHours'
 import { useLanguage } from '@/lib/language-context'
 
 interface BookingFormData {
@@ -19,10 +20,31 @@ interface BookingFormData {
 
 export default function BookingForm() {
   const { t } = useLanguage()
+  const { services, loading: servicesLoading } = useServices()
+  const { hours: openingHours } = useOpeningHours()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { register, handleSubmit, reset, formState: { errors } } = useForm<BookingFormData>()
 
+  const validateBookingTime = (date: string, time: string) => {
+    const bookingDate = new Date(`${date}T${time}`)
+    const dayOfWeek = bookingDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+    const hours = openingHours[dayOfWeek as keyof typeof openingHours]
+
+    if (!hours || hours.closed) {
+      return false
+    }
+
+    const bookingTime = time
+    return bookingTime >= hours.open && bookingTime <= hours.close
+  }
+
   const onSubmit = async (data: BookingFormData) => {
+    // Validate booking time
+    if (!validateBookingTime(data.date, data.time)) {
+      toast.error('Le salon est fermé à cette heure. Veuillez choisir un autre horaire.')
+      return
+    }
+
     try {
       setIsSubmitting(true)
 
@@ -36,10 +58,10 @@ export default function BookingForm() {
       const result = await response.json()
 
       if (response.ok) {
-        toast.success(t.booking.title)
+        toast.success('✅ Rendez-vous réservé ! Un email de confirmation vous a été envoyé.')
         reset()
       } else {
-        toast.error(result.error || t.booking.title)
+        toast.error(result.error || 'Erreur lors de la réservation')
       }
     } catch (error) {
       console.error('Booking error:', error)
@@ -106,8 +128,11 @@ export default function BookingForm() {
             <select
               {...register('service', { required: t.booking.errors.serviceRequired })}
               className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-primary border border-primary rounded-lg text-white text-sm focus:outline-none focus:border-accent"
+              disabled={servicesLoading}
             >
-              <option value="">{t.booking.chooseService}</option>
+              <option value="">
+                {servicesLoading ? 'Chargement...' : t.booking.chooseService}
+              </option>
               {services.map(service => (
                 <option key={service.id} value={service.id}>{service.name}</option>
               ))}
@@ -147,6 +172,17 @@ export default function BookingForm() {
             className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-primary border border-primary rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:border-accent"
             placeholder={t.booking.placeholders.message}
           />
+        </div>
+
+        {/* Opening Hours Info */}
+        <div className="bg-primary/50 rounded-lg p-4 border border-accent/20">
+          <h4 className="text-accent font-semibold text-sm mb-2">ℹ️ Horaires d&apos;ouverture</h4>
+          <div className="text-xs text-gray-300 space-y-1">
+            <p>Lundi - Jeudi : 9h00 - 19h00</p>
+            <p>Vendredi : 9h00 - 20h00</p>
+            <p>Samedi : 9h00 - 18h00</p>
+            <p>Dimanche : Fermé</p>
+          </div>
         </div>
 
         {/* Submit Button */}
