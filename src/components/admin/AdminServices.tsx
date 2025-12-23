@@ -56,12 +56,15 @@ export default function AdminServices() {
     try {
       console.log('💾 Sauvegarde des services:', services)
 
+      // Enlever l'id lors de l'envoi (l'API génère les UUIDs)
+      const servicesToSave = services.map(({ id: _, ...service }) => service)
+
       const response = await fetch('/api/services', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ services }),
+        body: JSON.stringify({ services: servicesToSave }),
       })
 
       const data = await response.json()
