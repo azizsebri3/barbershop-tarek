@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "booking": "Réservation",
+    "pricing": "Tarifs",
+    "admin": "Admin"
+  },
+  "home": {
+    "title": "Elite Services",
+    "subtitle": "Expérience Premium de Barbershop",
+    "cta": "Réserver",
+    "ourServices": "Nos Services",
+    "openingHours": "Horaires d'Ouverture"
+  },
+  "services": {
+    "coupeman": "Coupe Homme",
+    "coupeman_desc": "Coupe classique ou moderne avec finition impeccable. Dégradé précis, ciseaux ou tondeuse selon votre préférence.",
+    "barbe": "Barbe",
+    "barbe_desc": "Rasage traditionnel et taille de barbe premium. Soin complet avec produits haut de gamme pour une barbe impeccable.",
+    "coupebarbe": "Coupe + Barbe",
+    "coupebarbe_desc": "Entretien complet de la barbe combiné avec une coupe de cheveux. Le combo parfait pour une transformation totale."
+  },
+  "booking": {
+    "title": "Réserver une Appointment",
+    "name": "Nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "date": "Date",
+    "time": "Heure",
+    "service": "Sélectionner un Service",
+    "message": "Message (Optionnel)",
+    "submit": "Réserver",
+    "success": "Réservation confirmée !",
+    "error": "Erreur lors de la réservation"
+  },
+  "pricing": {
+    "title": "Nos Tarifs",
+    "description": "Tarification transparente pour tous nos services",
+    "duration": "Durée",
+    "price": "Prix",
+    "book": "Réserver"
+  },
+  "admin": {
+    "title": "Tableau de Bord Admin",
+    "services": "Gestion des Services",
+    "hours": "Horaires d'Ouverture",
+    "settings": "Paramètres",
+    "save": "Enregistrer",
+    "add": "Ajouter",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "name": "Nom",
+    "description": "Description",
+    "price": "Prix",
+    "duration": "Durée",
+    "addService": "Ajouter un Nouveau Service",
+    "saveSuccess": "Enregistré avec succès !",
+    "deleteSuccess": "Supprimé avec succès !",
+    "error": "Une erreur s'est produite"
+  },
+  "footer": {
+    "followUs": "Suivez-nous",
+    "rights": "Tous droits réservés",
+    "contact": "Nous Contacter"
+  },
+  "language": "Langue"
+}

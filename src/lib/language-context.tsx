@@ -1,47 +1,45 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { translations } from '@/lib/translations'
+import { useRouter } from 'next/navigation'
 
-type Language = 'fr' | 'en'
+type Locale = 'en' | 'fr' | 'ar'
 
 interface LanguageContextType {
-  language: Language
-  setLanguage: (lang: Language) => void
-  t: (typeof translations)[Language]
+  locale: Locale
+  setLocale: (locale: Locale) => void
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>('fr')
-  const [isLoaded, setIsLoaded] = useState(false)
+export function LanguageProvider({ children, initialLocale = 'en' }: { children: React.ReactNode; initialLocale?: string }) {
+  const [locale, setLocaleState] = useState<Locale>((initialLocale as Locale) || 'en')
+  const router = useRouter()
 
   // Charger la langue depuis localStorage au montage du composant
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('language') as Language | null
-      if (savedLanguage === 'fr' || savedLanguage === 'en') {
-        setLanguage(savedLanguage)
+      const savedLocale = localStorage.getItem('preferred-locale') as Locale | null
+      if (savedLocale && ['en', 'fr', 'ar'].includes(savedLocale)) {
+        setLocaleState(savedLocale)
       }
-      setIsLoaded(true)
     }
   }, [])
 
-  // Sauvegarder la langue dans localStorage quand elle change
-  const handleSetLanguage = (lang: Language) => {
-    setLanguage(lang)
+  // Changer la langue ET rediriger vers la bonne route
+  const handleSetLocale = (newLocale: Locale) => {
+    setLocaleState(newLocale)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('language', lang)
+      localStorage.setItem('preferred-locale', newLocale)
+      // Rediriger vers la page dans la nouvelle langue
+      const pathSegments = window.location.pathname.split('/')
+      pathSegments[1] = newLocale // Remplacer la locale dans l'URL
+      router.push(pathSegments.join('/'))
     }
   }
 
-  if (!isLoaded) {
-    return null
-  }
-
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t: translations[language] }}>
+    <LanguageContext.Provider value={{ locale, setLocale: handleSetLocale }}>
       {children}
     </LanguageContext.Provider>
   )

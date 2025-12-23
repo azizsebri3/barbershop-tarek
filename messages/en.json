@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "home": "Home",
+    "booking": "Booking",
+    "pricing": "Pricing",
+    "admin": "Admin"
+  },
+  "home": {
+    "title": "Elite Services",
+    "subtitle": "Premium Barbershop Experience",
+    "cta": "Book Now",
+    "ourServices": "Our Services",
+    "openingHours": "Opening Hours"
+  },
+  "services": {
+    "coupeman": "Men's Haircut",
+    "coupeman_desc": "Classic or modern cut with impeccable finish. Precise fade, scissors or clipper according to your preference.",
+    "barbe": "Beard",
+    "barbe_desc": "Traditional shave and premium beard trim. Complete care with high-end products for an impeccable beard.",
+    "coupebarbe": "Haircut + Beard",
+    "coupebarbe_desc": "Complete beard care combined with a haircut. The perfect combo for a total transformation."
+  },
+  "booking": {
+    "title": "Book an Appointment",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "date": "Date",
+    "time": "Time",
+    "service": "Select a Service",
+    "message": "Message (Optional)",
+    "submit": "Book Now",
+    "success": "Appointment booked successfully!",
+    "error": "Error booking appointment"
+  },
+  "pricing": {
+    "title": "Our Pricing",
+    "description": "Transparent pricing for all our services",
+    "duration": "Duration",
+    "price": "Price",
+    "book": "Book Now"
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "services": "Services Management",
+    "hours": "Opening Hours",
+    "settings": "Settings",
+    "save": "Save",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "name": "Name",
+    "description": "Description",
+    "price": "Price",
+    "duration": "Duration",
+    "addService": "Add New Service",
+    "saveSuccess": "Saved successfully!",
+    "deleteSuccess": "Deleted successfully!",
+    "error": "An error occurred"
+  },
+  "footer": {
+    "followUs": "Follow Us",
+    "rights": "All rights reserved",
+    "contact": "Contact Us"
+  },
+  "language": "Language"
+}
