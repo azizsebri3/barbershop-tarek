@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!url || !serviceKey) {
-  throw new Error('Missing Supabase environment variables')
+  if (!url || !serviceKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+
+  return createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 }
-
-const supabase = createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 
 export async function GET(
   _request: NextRequest,
@@ -16,6 +18,7 @@ export async function GET(
 ) {
   const { id } = await params
   try {
+    const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('bookings')
       .select('*')
@@ -57,6 +60,7 @@ export async function PUT(
 
     console.log('🔄 Mise à jour du statut de la réservation:', id, '->', status)
 
+    const supabase = getSupabaseClient()
     const { error } = await supabase
       .from('bookings')
       .update({ status, updated_at: new Date().toISOString() })
@@ -86,6 +90,7 @@ export async function DELETE(
   try {
     console.log('🗑️ Suppression de la réservation:', id)
 
+    const supabase = getSupabaseClient()
     const { error } = await supabase
       .from('bookings')
       .delete()

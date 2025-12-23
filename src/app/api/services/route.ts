@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!url || !serviceKey) {
-  throw new Error('Missing Supabase environment variables')
+  if (!url || !serviceKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+
+  return createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 }
-
-const supabase = createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 
 // GET /api/services - Récupérer les services depuis la table services
 export async function GET() {
   try {
     console.log('📥 Chargement des services depuis la table services...')
 
+    const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('services')
       .select('*')
@@ -56,6 +59,7 @@ export async function POST(request: NextRequest) {
 
     console.log('💾 Sauvegarde des services dans la table services:', services)
 
+    const supabase = getSupabaseClient()
     // Supprimer tous les anciens services
     const { error: deleteError } = await supabase
       .from('services')

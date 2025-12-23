@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!url || !serviceKey) {
-  throw new Error('Missing Supabase environment variables')
+  if (!url || !serviceKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+
+  return createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 }
-
-const supabase = createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 
 // GET /api/hours - Récupérer les horaires d'ouverture
 export async function GET() {
   try {
     console.log('📥 Chargement des horaires depuis DB...')
 
+    const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('settings')
       .select('value')
@@ -67,6 +70,7 @@ export async function POST(request: NextRequest) {
 
     console.log('💾 Sauvegarde des horaires:', hours)
 
+    const supabase = getSupabaseClient()
     const { error } = await supabase
       .from('settings')
       .upsert({
