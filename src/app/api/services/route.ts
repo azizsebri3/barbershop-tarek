@@ -70,9 +70,9 @@ export async function POST(request: NextRequest) {
       console.error('❌ Erreur suppression:', deleteError)
     }
 
-    // Insérer les nouveaux services
+    // Insérer les nouveaux services avec de vrais UUIDs
     const servicesToInsert = services.map((service: { id?: string; name: string; description: string; price: number; duration: number }) => ({
-      id: service.id || crypto.randomUUID(),
+      id: crypto.randomUUID(), // Toujours générer un UUID valide
       name: service.name,
       description: service.description,
       price: service.price,
