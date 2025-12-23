@@ -1,6 +1,4 @@
 import { Metadata } from 'next'
-import BookingForm from '@/components/BookingForm'
-import { motion } from 'framer-motion'
 import BookingPageContent from '@/components/BookingPageContent'
 
 export const metadata: Metadata = {

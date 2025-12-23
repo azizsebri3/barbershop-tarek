@@ -2,12 +2,10 @@
 
 import { motion } from 'framer-motion'
 import Hero from '@/components/Hero'
-import ServiceCard from '@/components/ServiceCard'
 import ServiceCarousel from '@/components/ServiceCarousel'
 import ClientPortfolio from '@/components/ClientPortfolio'
 import Testimonials from '@/components/Testimonials'
 import OpeningHours from '@/components/OpeningHours'
-import { services } from '@/lib/data'
 import { Star, Zap, Shield } from 'lucide-react'
 
 export default function Home() {

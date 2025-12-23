@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+if (!url || !serviceKey) {
+  throw new Error('Missing Supabase environment variables')
+}
+
+const supabase = createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,31 +21,6 @@ export async function POST(request: NextRequest) {
         { error: 'Tous les champs requis doivent être remplis' },
         { status: 400 }
       )
-    }
-
-    // Check if Supabase is configured
-    if (!supabase) {
-      console.warn('Supabase not configured - storing booking locally (demo mode)')
-      // Simulate successful booking for demo purposes
-      const mockBooking = {
-        id: `demo-${Date.now()}`,
-        name,
-        email,
-        phone,
-        date,
-        time,
-        service,
-        message,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      }
-
-      console.log('Demo booking created:', mockBooking)
-
-      return NextResponse.json({
-        message: 'Réservation créée avec succès (mode démo)',
-        booking: mockBooking
-      })
     }
 
     // Insert booking into Supabase
@@ -81,7 +65,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { data, error } = await supabase
       .from('bookings')

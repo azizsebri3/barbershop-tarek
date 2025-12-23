@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import Link from 'next/link'
 
 export default function Error({
   error,
@@ -17,7 +18,7 @@ export default function Error({
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="text-center max-w-md">
         <h1 className="text-5xl font-bold text-accent mb-4">Oups!</h1>
-        <h2 className="text-2xl font-bold text-white mb-4">Une erreur s'est produite</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">Une erreur s&apos;est produite</h2>
         <p className="text-gray-400 mb-8">
           {error.message || 'Quelque chose s&apos;est mal passé. Veuillez réessayer.'}
         </p>
@@ -28,12 +29,12 @@ export default function Error({
           >
             Réessayer
           </button>
-          <a
+          <Link
             href="/"
             className="px-6 py-2 border-2 border-accent text-accent font-bold rounded-lg hover:bg-accent/10 transition-colors"
           >
             Retour
-          </a>
+          </Link>
         </div>
       </div>
     </div>

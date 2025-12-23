@@ -11,14 +11,15 @@ if (!url || !serviceKey) {
 const supabase = createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const { data, error } = await supabase
       .from('bookings')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error) {
@@ -40,8 +41,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const body = await request.json()
     const { status } = body
@@ -53,12 +55,12 @@ export async function PUT(
       )
     }
 
-    console.log('🔄 Mise à jour du statut de la réservation:', params.id, '->', status)
+    console.log('🔄 Mise à jour du statut de la réservation:', id, '->', status)
 
     const { error } = await supabase
       .from('bookings')
       .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) {
       console.error('❌ Erreur Supabase:', error)
@@ -77,16 +79,17 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
-    console.log('🗑️ Suppression de la réservation:', params.id)
+    console.log('🗑️ Suppression de la réservation:', id)
 
     const { error } = await supabase
       .from('bookings')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) {
       console.error('❌ Erreur Supabase:', error)

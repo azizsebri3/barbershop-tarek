@@ -11,7 +11,6 @@ type BookingStatus = 'pending' | 'confirmed' | 'cancelled'
 export default function AdminBookings() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
 
   useEffect(() => {
     fetchBookings()
