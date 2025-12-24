@@ -130,24 +130,24 @@ export default function AdminDashboard() {
         {/* Sidebar - Mobile Bottom Navigation */}
         <div className="lg:w-80 lg:flex-shrink-0">
           {/* Mobile Bottom Navigation */}
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-secondary/95 backdrop-blur-md border-t border-accent/20 z-50">
-            <div className="flex justify-around py-2">
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-secondary/95 backdrop-blur-md border-t border-accent/20 z-50 overflow-x-auto">
+            <div className="flex gap-1 py-2 px-2 min-w-max">
               {tabs.map((tab) => {
                 const Icon = tab.icon
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 flex-1 relative ${
+                    className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-[70px] relative ${
                       activeTab === tab.id
                         ? 'bg-accent text-primary'
                         : 'text-gray-400 hover:text-accent'
                     }`}
                   >
                     <Icon size={18} />
-                    <span className="text-xs mt-1 truncate">{tab.label}</span>
+                    <span className="text-xs mt-1 truncate max-w-[60px]">{tab.label}</span>
                     {tab.badge && tab.badge > 0 && (
-                      <span className="absolute top-0 right-1/4 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                      <span className="absolute top-0 right-2 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                         {tab.badge > 9 ? '9+' : tab.badge}
                       </span>
                     )}
