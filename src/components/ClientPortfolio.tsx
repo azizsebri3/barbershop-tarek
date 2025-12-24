@@ -7,6 +7,7 @@ import 'swiper/css'
 import 'swiper/css/effect-coverflow'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
+import Image from 'next/image'
 
 interface Photo {
   id: string
@@ -104,12 +105,13 @@ export default function ClientPortfolio() {
                   }}
                 >
                   {/* Image */}
-                  <img
+                  <Image
                     src={photo.url}
                     alt={photo.name}
-                    crossOrigin="anonymous"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 80vw, 50vw"
+                    className="object-cover"
+                    unoptimized
                   />
 
                   {/* Gradient Overlay */}
@@ -153,12 +155,13 @@ export default function ClientPortfolio() {
               className="max-w-5xl max-h-[90vh] w-full flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
             >
-              <img
+              <Image
                 src={selectedPhoto.url}
                 alt={selectedPhoto.name}
-                crossOrigin="anonymous"
-                referrerPolicy="no-referrer"
+                width={1200}
+                height={800}
                 className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                unoptimized
               />
             </motion.div>
           </motion.div>

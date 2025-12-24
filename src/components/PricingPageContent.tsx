@@ -115,7 +115,7 @@ export default function PricingPageContent() {
           viewport={{ once: true }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
         >
-          {services.map((service, index) => (
+          {services.map((service) => (
             <motion.div key={service.id} variants={itemVariants}>
               <ServiceCard
                 title={service.name}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ZoomIn } from 'lucide-react'
+import Image from 'next/image'
 
 interface Photo {
   id: string
@@ -64,16 +65,13 @@ export default function Gallery() {
             className="relative group cursor-pointer aspect-square overflow-hidden rounded-lg bg-secondary"
             onClick={() => setSelectedPhoto(photo)}
           >
-            <img
+            <Image
               src={photo.url}
               alt="Photo salon"
-              crossOrigin="anonymous"
-              referrerPolicy="no-referrer"
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-              onError={(e) => {
-                console.error('❌ Erreur chargement image:', photo.url)
-                e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23333" width="400" height="400"/%3E%3Ctext fill="%23999" x="50%" y="50%" text-anchor="middle" dy=".3em"%3EImage non disponible%3C/text%3E%3C/svg%3E'
-              }}
+              fill
+              sizes="(max-width: 768px) 50vw, 25vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-110"
+              unoptimized
             />
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <ZoomIn className="text-white w-8 h-8" />
@@ -105,12 +103,13 @@ export default function Gallery() {
               className="max-w-5xl max-h-[90vh] relative"
               onClick={(e) => e.stopPropagation()}
             >
-              <img
+              <Image
                 src={selectedPhoto.url}
                 alt="Photo salon"
-                crossOrigin="anonymous"
-                referrerPolicy="no-referrer"
+                width={1200}
+                height={800}
                 className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                unoptimized
               />
             </motion.div>
           </motion.div>
