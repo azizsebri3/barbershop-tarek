@@ -10,17 +10,21 @@ import {
   Image,
   Building,
   LogOut,
-  Calendar
+  Calendar,
+  Bell
 } from 'lucide-react'
 import AdminHours from '@/components/admin/AdminHours'
 import AdminServices from '@/components/admin/AdminServices'
 import AdminGeneral from '@/components/admin/AdminGeneral'
 import AdminImages from '@/components/admin/AdminImages'
 import AdminBookings from '@/components/admin/AdminBookings'
+import PushNotificationToggle from '@/components/admin/PushNotificationToggle'
+import { useLanguage } from '@/lib/language-context'
 
-type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings'
+type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'notifications'
 
 export default function AdminDashboard() {
+  const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<TabType>('general')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const router = useRouter()
@@ -48,11 +52,12 @@ export default function AdminDashboard() {
   }
 
   const tabs = [
-    { id: 'general' as TabType, label: 'Général', icon: Building },
-    { id: 'hours' as TabType, label: 'Horaires', icon: Clock },
-    { id: 'services' as TabType, label: 'Services', icon: Scissors },
-    { id: 'images' as TabType, label: 'Images', icon: Image },
-    { id: 'bookings' as TabType, label: 'Réservations', icon: Calendar },
+    { id: 'general' as TabType, label: t.admin.general, icon: Building },
+    { id: 'hours' as TabType, label: t.admin.hours, icon: Clock },
+    { id: 'services' as TabType, label: t.admin.services, icon: Scissors },
+    { id: 'images' as TabType, label: t.admin.images, icon: Image },
+    { id: 'bookings' as TabType, label: t.admin.bookings, icon: Calendar },
+    { id: 'notifications' as TabType, label: 'Notifications', icon: Bell },
   ]
 
   return (
@@ -154,6 +159,25 @@ export default function AdminDashboard() {
             {activeTab === 'services' && <AdminServices />}
             {activeTab === 'images' && <AdminImages />}
             {activeTab === 'bookings' && <AdminBookings />}
+            {activeTab === 'notifications' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-accent">Notifications Push</h2>
+                <p className="text-gray-400">
+                  Activez les notifications pour recevoir une alerte sur votre téléphone 
+                  à chaque nouvelle réservation, même quand le site est fermé.
+                </p>
+                <PushNotificationToggle />
+                
+                <div className="mt-8 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <h3 className="font-semibold text-blue-400 mb-2">📱 Comment installer l&apos;app PWA ?</h3>
+                  <ul className="text-sm text-gray-300 space-y-2">
+                    <li><strong>Sur iPhone/iPad:</strong> Safari → Partager → &quot;Sur l&apos;écran d&apos;accueil&quot;</li>
+                    <li><strong>Sur Android:</strong> Chrome → Menu ⋮ → &quot;Installer l&apos;application&quot;</li>
+                    <li><strong>Sur Desktop:</strong> Chrome → Barre d&apos;adresse → Icône d&apos;installation</li>
+                  </ul>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

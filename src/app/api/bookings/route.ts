@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import webpush from 'web-push'
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -10,6 +11,63 @@ function getSupabaseClient() {
   }
 
   return createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
+}
+
+// Configure VAPID for push notifications
+const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY
+
+if (vapidPublicKey && vapidPrivateKey) {
+  webpush.setVapidDetails(
+    'mailto:admin@elitebarbershop.com',
+    vapidPublicKey,
+    vapidPrivateKey
+  )
+}
+
+// Fonction pour envoyer une notification push à tous les admins
+async function sendPushNotification(booking: { name: string; service: string; date: string; time: string }) {
+  try {
+    const supabase = getSupabaseClient()
+    
+    // Récupérer toutes les subscriptions
+    const { data: subscriptions } = await supabase
+      .from('push_subscriptions')
+      .select('*')
+    
+    if (!subscriptions || subscriptions.length === 0) {
+      console.log('⚠️ Aucune subscription push enregistrée')
+      return
+    }
+
+    const payload = JSON.stringify({
+      title: '🔔 Nouvelle Réservation!',
+      body: `${booking.name} - ${booking.service}\n📅 ${booking.date} à ${booking.time}`,
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-72x72.png',
+      tag: 'booking-' + Date.now(),
+      data: { url: '/admin/dashboard' }
+    })
+
+    for (const sub of subscriptions) {
+      try {
+        await webpush.sendNotification(sub.subscription, payload)
+        console.log('✅ Notification push envoyée')
+      } catch (err) {
+        console.error('❌ Erreur envoi push:', err)
+        // Si subscription expirée, la supprimer
+        const webPushError = err as { statusCode?: number }
+        if (webPushError.statusCode === 410 || webPushError.statusCode === 404) {
+          await supabase
+            .from('push_subscriptions')
+            .delete()
+            .eq('endpoint', sub.endpoint)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('❌ Erreur notification push:', error)
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -48,6 +106,9 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    // Envoyer une notification push aux admins
+    await sendPushNotification({ name, service, date, time })
 
     // Send confirmation email (optional - you can use SendGrid, Resend, or nodemailer)
     // await sendConfirmationEmail(email, name, date, time)

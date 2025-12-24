@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Save, RefreshCw, Clock } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { openingHours as defaultHours } from '@/lib/data'
+import { useLanguage } from '@/lib/language-context'
 
 interface OpeningHours {
   monday: { open: string; close: string; closed: boolean }
@@ -16,19 +17,20 @@ interface OpeningHours {
   sunday: { open: string; close: string; closed: boolean }
 }
 
-const daysOfWeek = [
-  { key: 'monday', label: 'Lundi' },
-  { key: 'tuesday', label: 'Mardi' },
-  { key: 'wednesday', label: 'Mercredi' },
-  { key: 'thursday', label: 'Jeudi' },
-  { key: 'friday', label: 'Vendredi' },
-  { key: 'saturday', label: 'Samedi' },
-  { key: 'sunday', label: 'Dimanche' },
-]
-
 export default function AdminHours() {
+  const { t } = useLanguage()
   const [hours, setHours] = useState<OpeningHours>(defaultHours)
   const [isSaving, setIsSaving] = useState(false)
+
+  const daysOfWeek = [
+    { key: 'monday', label: t.admin.monday },
+    { key: 'tuesday', label: t.admin.tuesday },
+    { key: 'wednesday', label: t.admin.wednesday },
+    { key: 'thursday', label: t.admin.thursday },
+    { key: 'friday', label: t.admin.friday },
+    { key: 'saturday', label: t.admin.saturday },
+    { key: 'sunday', label: t.admin.sunday },
+  ]
 
   useEffect(() => {
     loadHours()
@@ -111,7 +113,7 @@ export default function AdminHours() {
     <div>
       <Toaster position="top-right" />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">Horaires d&apos;Ouverture</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-white">{t.admin.hours}</h2>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -120,7 +122,7 @@ export default function AdminHours() {
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-accent text-primary rounded-lg hover:bg-accent/80 disabled:opacity-50 text-sm sm:text-base"
         >
           {isSaving ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
-          Sauvegarder
+          {isSaving ? t.admin.saving : t.admin.save}
         </motion.button>
       </div>
 
@@ -144,7 +146,7 @@ export default function AdminHours() {
                   onChange={(e) => updateHours(day.key as keyof OpeningHours, 'closed', e.target.checked)}
                   className="rounded border-accent/20 bg-primary text-accent focus:ring-accent w-4 h-4"
                 />
-                <span className="text-gray-300">Fermé</span>
+                <span className="text-gray-300">{t.admin.closed}</span>
               </label>
             </div>
 
@@ -152,7 +154,7 @@ export default function AdminHours() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs sm:text-sm text-gray-400 mb-1">
-                    Ouverture
+                    {t.admin.open}
                   </label>
                   <input
                     type="time"
@@ -164,7 +166,7 @@ export default function AdminHours() {
 
                 <div>
                   <label className="block text-xs sm:text-sm text-gray-400 mb-1">
-                    Fermeture
+                    {t.admin.close}
                   </label>
                   <input
                     type="time"
@@ -177,13 +179,6 @@ export default function AdminHours() {
             )}
           </motion.div>
         ))}
-      </div>
-
-      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-accent/10 rounded-lg border border-accent/20">
-        <h4 className="text-accent font-semibold mb-2 text-sm sm:text-base">ℹ️ Informations</h4>
-        <p className="text-xs sm:text-sm text-gray-300">
-          Les horaires modifiés ici seront automatiquement appliqués sur le site public et utilisés pour valider les réservations.
-        </p>
       </div>
     </div>
   )

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Save, RefreshCw, Plus, Trash2, Edit } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { services as defaultServices } from '@/lib/data'
+import { useLanguage } from '@/lib/language-context'
 
 interface Service {
   id: string
@@ -15,6 +16,7 @@ interface Service {
 }
 
 export default function AdminServices() {
+  const { t } = useLanguage()
   const [services, setServices] = useState<Service[]>(defaultServices)
   const [isSaving, setIsSaving] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -106,7 +108,7 @@ export default function AdminServices() {
 
     setServices(prev => [...prev, service])
     setNewService({})
-    toast.success('Service ajouté !')
+    toast.success(t.admin.saveSuccess)
   }
 
   const updateService = (id: string, updates: Partial<Service>) => {
@@ -117,14 +119,14 @@ export default function AdminServices() {
 
   const deleteService = (id: string) => {
     setServices(prev => prev.filter(service => service.id !== id))
-    toast.success('Service supprimé !')
+    toast.success(t.admin.deleteSuccess)
   }
 
   return (
     <div>
       <Toaster position="top-right" />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">Gestion des Services</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-white">{t.admin.services}</h2>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -133,7 +135,7 @@ export default function AdminServices() {
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-accent text-primary rounded-lg hover:bg-accent/80 disabled:opacity-50 text-sm sm:text-base"
         >
           {isSaving ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
-          Sauvegarder
+          {isSaving ? t.admin.saving : t.admin.save}
         </motion.button>
       </div>
 
@@ -141,34 +143,34 @@ export default function AdminServices() {
       <div className="bg-primary/50 rounded-lg p-3 sm:p-6 border border-accent/20 mb-4 sm:mb-6">
         <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
           <Plus size={18} />
-          Ajouter un nouveau service
+          {t.admin.addService}
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
           <input
             type="text"
-            placeholder="Nom du service"
+            placeholder={t.admin.name}
             value={newService.name || ''}
             onChange={(e) => setNewService(prev => ({ ...prev, name: e.target.value }))}
             className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
           />
           <input
             type="text"
-            placeholder="Description"
+            placeholder={t.admin.description}
             value={newService.description || ''}
             onChange={(e) => setNewService(prev => ({ ...prev, description: e.target.value }))}
             className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
           />
           <input
             type="number"
-            placeholder="Prix (€)"
+            placeholder={`${t.admin.price} (€)`}
             value={newService.price || ''}
             onChange={(e) => setNewService(prev => ({ ...prev, price: parseInt(e.target.value) || 0 }))}
             className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
           />
           <input
             type="number"
-            placeholder="Durée (minutes)"
+            placeholder={`${t.admin.duration} (${t.admin.minutes})`}
             value={newService.duration || ''}
             onChange={(e) => setNewService(prev => ({ ...prev, duration: parseInt(e.target.value) || 0 }))}
             className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
@@ -179,13 +181,13 @@ export default function AdminServices() {
           onClick={addService}
           className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-accent text-primary rounded-lg hover:bg-accent/80 transition-colors font-semibold text-sm sm:text-base"
         >
-          Ajouter le service
+          {t.admin.add}
         </button>
       </div>
 
       {/* Services List */}
       <div className="space-y-3 sm:space-y-4">
-        <h3 className="text-base sm:text-lg font-semibold text-white">Services existants</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-white">{t.admin.services}</h3>
 
         {services.map((service) => (
           <motion.div

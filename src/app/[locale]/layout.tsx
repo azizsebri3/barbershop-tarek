@@ -6,7 +6,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { LanguageProvider } from '@/lib/language-context'
 
-const locales = ['en', 'fr', 'ar']
+const locales = ['en', 'fr']
 
 export const metadata: Metadata = {
   title: 'Elite Services - Barbershop',
