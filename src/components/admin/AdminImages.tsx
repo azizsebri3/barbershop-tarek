@@ -6,6 +6,7 @@ import { Save, RefreshCw, Upload, X, Image as ImageIcon } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { adminTranslations } from '@/lib/admin-translations'
 import { useDropzone } from 'react-dropzone'
+import Image from 'next/image'
 
 interface SiteImages {
   hero: string
@@ -48,7 +49,7 @@ export default function AdminImages() {
     } finally {
       setLoadingGallery(false)
     }
-  }, [])
+  }, [t.error])
 
   useEffect(() => {
     // Load images from localStorage
@@ -137,7 +138,7 @@ export default function AdminImages() {
 
     setUploading(false)
     fetchPhotos()
-  }, [fetchPhotos])
+  }, [fetchPhotos, t.error, t.imageUploaded])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -240,12 +241,12 @@ export default function AdminImages() {
                     transition={{ delay: index * 0.05 }}
                     className="relative group aspect-square bg-secondary rounded-lg overflow-hidden"
                   >
-                    <img
+                    <Image
                       src={photo.url}
                       alt={photo.name}
-                      crossOrigin="anonymous"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover"
                     />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <button
@@ -276,9 +277,9 @@ export default function AdminImages() {
           <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Logo du Salon</h3>
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <div className="w-24 h-24 sm:w-20 sm:h-20 bg-secondary rounded-lg overflow-hidden flex-shrink-0 mx-auto sm:mx-0">
+            <div className="w-24 h-24 sm:w-20 sm:h-20 bg-secondary rounded-lg overflow-hidden flex-shrink-0 mx-auto sm:mx-0 relative">
               {images.logo ? (
-                <img src={images.logo} alt="Logo" className="w-full h-full object-contain" />
+                <Image src={images.logo} alt="Logo" fill sizes="80px" className="object-contain" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                   <ImageIcon size={24} />

@@ -37,7 +37,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t.error])
 
   useEffect(() => {
     fetchBookings()
