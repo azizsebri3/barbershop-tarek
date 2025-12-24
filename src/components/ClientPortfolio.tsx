@@ -1,59 +1,55 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, EffectCoverflow } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/effect-coverflow'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X } from 'lucide-react'
 
-interface ClientPhoto {
+interface Photo {
   id: string
   name: string
-  service: string
-  image: string
+  url: string
+  createdAt: string
 }
 
-// Mock data - à remplacer par vos vraies photos
-const clientPhotos: ClientPhoto[] = [
-  {
-    id: '1',
-    name: 'Coupe Moderne',
-    service: 'Coupe Homme Premium',
-    image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"%3E%3Crect fill="%23d4af37" width="400" height="500"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="%23000000"%3ECoupe 1%3C/text%3E%3C/svg%3E',
-  },
-  {
-    id: '2',
-    name: 'Coloration Tendance',
-    service: 'Coloration Premium',
-    image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"%3E%3Crect fill="%231a1a1a" width="400" height="500"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="%23d4af37"%3EColoration 2%3C/text%3E%3C/svg%3E',
-  },
-  {
-    id: '3',
-    name: 'Rasage Traditionnel',
-    service: 'Rasage & Barbe',
-    image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"%3E%3Crect fill="%23000000" width="400" height="500"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="%23d4af37"%3ERasage 3%3C/text%3E%3C/svg%3E',
-  },
-  {
-    id: '4',
-    name: 'Dégradé Parfait',
-    service: 'Coupe Homme ',
-    image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"%3E%3Crect fill="%231a1a1a" width="400" height="500"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="%23d4af37"%3EDégradé 4%3C/text%3E%3C/svg%3E',
-  },
-  {
-    id: '5',
-    name: 'Coupe Femme Moderne',
-    service: 'Coupe Femme',
-    image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"%3E%3Crect fill="%23d4af37" width="400" height="500"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="%23000000"%3ECoupe Femme 5%3C/text%3E%3C/svg%3E',
-  },
-  {
-    id: '6',
-    name: 'Soin Intensif',
-    service: 'Soin Cheveux',
-    image: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"%3E%3Crect fill="%23000000" width="400" height="500"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="24" fill="%23d4af37"%3ESoin 6%3C/text%3E%3C/svg%3E',
-  },
-]
-
 export default function ClientPortfolio() {
+  const [photos, setPhotos] = useState<Photo[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
+
+  useEffect(() => {
+    fetchPhotos()
+  }, [])
+
+  const fetchPhotos = async () => {
+    try {
+      const response = await fetch('/api/gallery')
+      const data = await response.json()
+      console.log('🎨 Portfolio - Photos chargées:', data.photos?.length || 0)
+      setPhotos(data.photos || [])
+    } catch (error) {
+      console.error('❌ Portfolio - Erreur chargement:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <section className="py-12 sm:py-20 px-3 sm:px-4 md:px-6 lg:px-8 bg-gradient-to-b from-transparent via-secondary/30 to-transparent">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+        </div>
+      </section>
+    )
+  }
+
+  if (photos.length === 0) {
+    return null // Ne rien afficher si pas de photos
+  }
   return (
     <section className="py-12 sm:py-20 px-3 sm:px-4 md:px-6 lg:px-8 bg-gradient-to-b from-transparent via-secondary/30 to-transparent">
       <div className="max-w-7xl mx-auto">
@@ -89,19 +85,30 @@ export default function ClientPortfolio() {
               delay: 5000,
               disableOnInteraction: false,
             }}
-            loop={true}
+            loop={photos.length > 2}
             className="!w-full !pb-8"
           >
-            {clientPhotos.map((photo) => (
+            {photos.map((photo) => (
               <SwiperSlide key={photo.id} className="!w-72 sm:!w-80 !h-80 sm:!h-96">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl group"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedPhoto(photo)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setSelectedPhoto(photo)
+                    }
+                  }}
                 >
                   {/* Image */}
                   <img
-                    src={photo.image}
+                    src={photo.url}
                     alt={photo.name}
+                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
                     className="w-full h-full object-cover"
                   />
 
@@ -110,8 +117,8 @@ export default function ClientPortfolio() {
 
                   {/* Text Overlay */}
                   <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <h3 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2">{photo.name}</h3>
-                    <p className="text-accent text-xs sm:text-sm font-semibold">{photo.service}</p>
+                    <h3 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2">Portfolio Tarek Salon</h3>
+                    <p className="text-accent text-xs sm:text-sm font-semibold">Coiffure Premium</p>
                   </div>
                 </motion.div>
               </SwiperSlide>
@@ -119,6 +126,44 @@ export default function ClientPortfolio() {
           </Swiper>
         </div>
       </div>
+
+      <AnimatePresence>
+        {selectedPhoto && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setSelectedPhoto(null)}
+          >
+            <button
+              aria-label="Fermer l'image"
+              className="absolute top-6 right-6 text-white hover:text-accent transition-colors"
+              onClick={(e) => {
+                e.stopPropagation()
+                setSelectedPhoto(null)
+              }}
+            >
+              <X size={32} />
+            </button>
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="max-w-5xl max-h-[90vh] w-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={selectedPhoto.url}
+                alt={selectedPhoto.name}
+                crossOrigin="anonymous"
+                referrerPolicy="no-referrer"
+                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <style jsx>{`
         :global(.swiper-slide-shadow-l),

@@ -1,22 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Calendar, Clock, User, Mail, Phone, MessageSquare, CheckCircle, XCircle, AlertCircle, Trash2, RefreshCw } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Calendar, Clock, User, Mail, Phone, MessageSquare, CheckCircle, XCircle, AlertCircle, Trash2, RefreshCw, Search } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { supabase, Booking } from '@/lib/supabase'
 
 type BookingStatus = 'pending' | 'confirmed' | 'cancelled'
+type FilterType = 'all' | 'pending' | 'confirmed' | 'cancelled'
 
-export default function AdminBookings() {
+interface AdminBookingsProps {
+  onStatusChange?: () => void
+}
+
+export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<FilterType>('all')
+  const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    fetchBookings()
-  }, [])
-
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
       setLoading(true)
       const { data, error } = await supabase!
@@ -32,7 +35,11 @@ export default function AdminBookings() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchBookings()
+  }, [fetchBookings])
 
   const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus) => {
     try {
@@ -59,6 +66,11 @@ export default function AdminBookings() {
       ))
 
       toast.success(`Réservation ${newStatus === 'confirmed' ? 'confirmée' : newStatus === 'cancelled' ? 'annulée' : 'mise en attente'}`)
+      
+      // Notify parent to update pending count
+      if (onStatusChange) {
+        onStatusChange()
+      }
     } catch (error) {
       console.error('❌ Erreur lors de la mise à jour:', error)
       toast.error('Erreur lors de la mise à jour')
@@ -85,6 +97,11 @@ export default function AdminBookings() {
       console.log('✅ Réservation supprimée avec succès')
       setBookings(bookings.filter(booking => booking.id !== bookingId))
       toast.success('Réservation supprimée')
+      
+      // Notify parent to update pending count
+      if (onStatusChange) {
+        onStatusChange()
+      }
     } catch (error) {
       console.error('❌ Erreur lors de la suppression:', error)
       toast.error('Erreur lors de la suppression')
@@ -113,6 +130,23 @@ export default function AdminBookings() {
     }
   }
 
+  // Filter and search bookings
+  const filteredBookings = bookings
+    .filter(booking => filter === 'all' || booking.status === filter)
+    .filter(booking => 
+      booking.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.phone.includes(searchTerm) ||
+      booking.service.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+  const stats = {
+    total: bookings.length,
+    pending: bookings.filter(b => b.status === 'pending').length,
+    confirmed: bookings.filter(b => b.status === 'confirmed').length,
+    cancelled: bookings.filter(b => b.status === 'cancelled').length,
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -130,7 +164,7 @@ export default function AdminBookings() {
     >
       <Toaster position="top-right" />
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-white">Gestion des Réservations</h2>
         <button
           onClick={fetchBookings}
@@ -141,20 +175,99 @@ export default function AdminBookings() {
         </button>
       </div>
 
-      {bookings.length === 0 ? (
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          onClick={() => setFilter('all')}
+          className={`p-4 rounded-xl cursor-pointer transition-all ${
+            filter === 'all' 
+              ? 'bg-accent/20 border-accent' 
+              : 'bg-secondary/50 border-accent/20 hover:border-accent/50'
+          } border`}
+        >
+          <p className="text-2xl font-bold text-white">{stats.total}</p>
+          <p className="text-sm text-gray-400">Total</p>
+        </motion.div>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          onClick={() => setFilter('pending')}
+          className={`p-4 rounded-xl cursor-pointer transition-all ${
+            filter === 'pending' 
+              ? 'bg-yellow-500/20 border-yellow-500' 
+              : 'bg-secondary/50 border-accent/20 hover:border-yellow-500/50'
+          } border`}
+        >
+          <p className="text-2xl font-bold text-yellow-400">{stats.pending}</p>
+          <p className="text-sm text-gray-400">En attente</p>
+        </motion.div>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          onClick={() => setFilter('confirmed')}
+          className={`p-4 rounded-xl cursor-pointer transition-all ${
+            filter === 'confirmed' 
+              ? 'bg-green-500/20 border-green-500' 
+              : 'bg-secondary/50 border-accent/20 hover:border-green-500/50'
+          } border`}
+        >
+          <p className="text-2xl font-bold text-green-400">{stats.confirmed}</p>
+          <p className="text-sm text-gray-400">Confirmées</p>
+        </motion.div>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          onClick={() => setFilter('cancelled')}
+          className={`p-4 rounded-xl cursor-pointer transition-all ${
+            filter === 'cancelled' 
+              ? 'bg-red-500/20 border-red-500' 
+              : 'bg-secondary/50 border-accent/20 hover:border-red-500/50'
+          } border`}
+        >
+          <p className="text-2xl font-bold text-red-400">{stats.cancelled}</p>
+          <p className="text-sm text-gray-400">Annulées</p>
+        </motion.div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+        <input
+          type="text"
+          placeholder="Rechercher (nom, email, téléphone, service)..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-12 pr-4 py-3 bg-secondary/50 border border-accent/20 rounded-xl text-white placeholder-gray-500 focus:border-accent focus:outline-none transition-colors"
+        />
+      </div>
+
+      {filteredBookings.length === 0 ? (
         <div className="text-center py-12">
           <Calendar className="mx-auto text-gray-500 mb-4" size={48} />
-          <p className="text-gray-400">Aucune réservation trouvée</p>
+          <p className="text-gray-400">
+            {searchTerm || filter !== 'all' 
+              ? 'Aucune réservation trouvée avec ces critères' 
+              : 'Aucune réservation trouvée'}
+          </p>
+          {(searchTerm || filter !== 'all') && (
+            <button
+              onClick={() => { setSearchTerm(''); setFilter('all'); }}
+              className="mt-4 text-accent hover:underline"
+            >
+              Réinitialiser les filtres
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid gap-4">
-          {bookings.map((booking) => (
-            <motion.div
-              key={booking.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-secondary/50 backdrop-blur-md border border-accent/20 rounded-lg p-6"
-            >
+          <AnimatePresence mode="popLayout">
+            {filteredBookings.map((booking) => (
+              <motion.div
+                key={booking.id}
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-secondary/50 backdrop-blur-md border border-accent/20 rounded-lg p-6"
+              >
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
@@ -238,8 +351,9 @@ export default function AdminBookings() {
                   </button>
                 </div>
               </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </motion.div>

@@ -2,27 +2,73 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { Menu, X, Settings, LogOut, Bell, LayoutDashboard } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import LanguageSwitcher from './LanguageSwitcher'
 import { useLanguage } from '@/lib/language-context'
 import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettings'
+import { isAdminAuthenticated, clearAdminSession, getSessionInfo } from '@/lib/admin-auth'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [showAdminMenu, setShowAdminMenu] = useState(false)
+  const [sessionInfo, setSessionInfo] = useState<{ expiresIn: string } | null>(null)
   const { t } = useLanguage()
   const { settings } = usePublicGeneralSettings()
 
+  useEffect(() => {
+    // Vérifier le statut admin
+    const checkAdmin = () => {
+      const authenticated = isAdminAuthenticated()
+      setIsAdmin(authenticated)
+      if (authenticated) {
+        setSessionInfo(getSessionInfo())
+      }
+    }
+    checkAdmin()
+    
+    // Revérifier périodiquement (pour détecter les changements de session)
+    const interval = setInterval(checkAdmin, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleAdminLogout = () => {
+    clearAdminSession()
+    setIsAdmin(false)
+    setShowAdminMenu(false)
+  }
+
   return (
-    <header className="fixed top-0 w-full bg-primary/95 backdrop-blur-md z-50 border-b border-secondary">
+    <header className={`fixed top-0 w-full backdrop-blur-md z-50 border-b ${isAdmin ? 'bg-secondary/95 border-accent/30' : 'bg-primary/95 border-secondary'}`}>
+      {/* Admin Banner */}
+      {isAdmin && (
+        <div className="bg-accent/10 border-b border-accent/20 px-4 py-1">
+          <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
+            <span className="text-accent font-medium flex items-center gap-2">
+              <Settings size={12} className="animate-spin-slow" />
+              Mode Administrateur
+            </span>
+            <span className="text-gray-400">
+              Session: {sessionInfo?.expiresIn || 'Active'}
+            </span>
+          </div>
+        </div>
+      )}
+      
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex justify-between items-center">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Link href="/" className="text-xl sm:text-2xl font-bold text-accent whitespace-nowrap">
+          <Link href="/" className="text-xl sm:text-2xl font-bold text-accent whitespace-nowrap flex items-center gap-2">
             ✂️ {settings.salonName}
+            {isAdmin && (
+              <span className="text-xs bg-accent text-primary px-2 py-0.5 rounded-full font-bold">
+                ADMIN
+              </span>
+            )}
           </Link>
         </motion.div>
 
@@ -56,14 +102,75 @@ export default function Header() {
             </li>
           </motion.ul>
 
-          {/* Admin Link (discret) */}
-          <Link
-            href="/admin"
-            className="text-gray-500 hover:text-accent transition-colors text-xs opacity-50 hover:opacity-100"
-            title="Administration"
-          >
-            ⚙️
-          </Link>
+          {/* Admin Controls */}
+          {isAdmin ? (
+            <div className="relative">
+              <button
+                onClick={() => setShowAdminMenu(!showAdminMenu)}
+                className="flex items-center gap-2 px-3 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors text-sm font-medium border border-accent/30"
+              >
+                <LayoutDashboard size={16} />
+                <span className="hidden lg:inline">Admin Panel</span>
+              </button>
+              
+              {/* Admin Dropdown Menu */}
+              {showAdminMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute right-0 mt-2 w-56 bg-secondary border border-accent/30 rounded-xl shadow-2xl overflow-hidden"
+                >
+                  <div className="p-3 border-b border-accent/20">
+                    <p className="text-xs text-gray-400">Connecté en tant qu&apos;admin</p>
+                    <p className="text-sm text-accent font-medium">{sessionInfo?.expiresIn || 'Session active'}</p>
+                  </div>
+                  <div className="p-2">
+                    <Link
+                      href="/admin/dashboard"
+                      className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-accent/10 hover:text-white rounded-lg transition-colors"
+                      onClick={() => setShowAdminMenu(false)}
+                    >
+                      <LayoutDashboard size={16} />
+                      Tableau de bord
+                    </Link>
+                    <Link
+                      href="/admin/dashboard"
+                      className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-accent/10 hover:text-white rounded-lg transition-colors"
+                      onClick={() => setShowAdminMenu(false)}
+                    >
+                      <Bell size={16} />
+                      Réservations
+                    </Link>
+                    <Link
+                      href="/admin/dashboard"
+                      className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-accent/10 hover:text-white rounded-lg transition-colors"
+                      onClick={() => setShowAdminMenu(false)}
+                    >
+                      <Settings size={16} />
+                      Paramètres
+                    </Link>
+                  </div>
+                  <div className="p-2 border-t border-accent/20">
+                    <button
+                      onClick={handleAdminLogout}
+                      className="flex items-center gap-3 w-full px-3 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                    >
+                      <LogOut size={16} />
+                      Déconnexion Admin
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/admin"
+              className="text-gray-500 hover:text-accent transition-colors text-xs opacity-50 hover:opacity-100"
+              title="Administration"
+            >
+              ⚙️
+            </Link>
+          )}
 
           <LanguageSwitcher />
         </div>
@@ -117,6 +224,30 @@ export default function Header() {
             >
               {t.nav.booking}
             </Link>
+            
+            {/* Mobile Admin Controls */}
+            {isAdmin && (
+              <div className="pt-3 mt-3 border-t border-accent/20 space-y-2">
+                <Link
+                  href="/admin/dashboard"
+                  className="flex items-center gap-3 px-4 py-2 bg-accent/20 text-accent rounded-lg font-medium"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <LayoutDashboard size={18} />
+                  Admin Panel
+                </Link>
+                <button
+                  onClick={() => {
+                    handleAdminLogout()
+                    setIsOpen(false)
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-2 text-red-400 hover:bg-red-500/10 rounded-lg"
+                >
+                  <LogOut size={18} />
+                  Déconnexion Admin
+                </button>
+              </div>
+            )}
           </div>
         </motion.div>
       )}

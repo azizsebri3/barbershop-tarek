@@ -5,6 +5,7 @@ import ServiceCard from '@/components/ServiceCard'
 import { useServices } from '@/lib/useServices'
 import { Check } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
+import ClientPortfolio from '@/components/ClientPortfolio'
 
 export default function PricingPageContent() {
   const { t } = useLanguage()
@@ -31,12 +32,15 @@ export default function PricingPageContent() {
 
   if (loading) {
     return (
-      <div className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
-          <p className="text-gray-400 mt-4">Chargement des tarifs...</p>
+      <>
+        <ClientPortfolio />
+        <div className="py-20 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+            <p className="text-gray-400 mt-4">Chargement des tarifs...</p>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
@@ -50,6 +54,8 @@ export default function PricingPageContent() {
           Coupe homme, dégradé, barbe, coloration. Meilleur rapport qualité-prix de Namur, Belgique.
         </p>
       </div>
+
+      <ClientPortfolio />
 
       {/* Pricing Header */}
       <div className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary via-secondary to-primary">
@@ -113,23 +119,23 @@ export default function PricingPageContent() {
             {[
               {
                 question: 'Où se trouve Tarek Salon à Namur ?',
-                answer: 'Notre salon de coiffure est situé en plein centre de Namur, facilement accessible en transport en commun ou en voiture avec parking à proximité.',
+                answer: 'Passage de la Gare 5, en plein centre. Bus, train et parking sont à deux pas, venez quand ça vous arrange.',
               },
               {
                 question: 'Puis-je modifier ma réservation ?',
-                answer: 'Oui, vous pouvez modifier votre réservation jusqu\'à 24 heures avant le rendez-vous en contactant notre équipe.',
+                answer: "Bien sûr. Prévenez-nous 24h à l'avance et on ajuste votre créneau en douceur.",
               },
               {
                 question: 'Offrez-vous des réductions pour les forfaits ?',
-                answer: 'Oui, nous proposons des réductions spéciales pour les services en forfait ou les abonnements réguliers.',
+                answer: 'Oui, on a des tarifs doux pour les forfaits barbe + coupe et pour vos visites régulières.',
               },
               {
                 question: 'Quel est le meilleur coiffeur à Namur ?',
-                answer: 'Tarek Salon est reconnu comme l\'un des meilleurs barbershops de Namur, avec une note moyenne de 4.9/5 sur Google.',
+                answer: 'Nos clients nous classent parmi les meilleures adresses de Namur (4.9/5). On vous accueille comme un habitué.',
               },
               {
                 question: 'Acceptez-vous les paiements par carte ?',
-                answer: 'Oui, nous acceptons tous les types de cartes bancaires, Bancontact et les paiements en espèces.',
+                answer: 'Carte, Bancontact ou cash : payez comme vous préférez.',
               },
             ].map((faq, index) => (
               <motion.div

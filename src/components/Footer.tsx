@@ -23,7 +23,7 @@ export default function Footer() {
               <p className="text-gray-400 text-sm leading-relaxed">
                 Votre coiffeur et barbershop de confiance à Namur, Belgique. 
                 Spécialisés dans les coupes hommes, dégradés modernes, entretien de barbe 
-                et soins capillaires professionnels. Plus de 10 ans d&apos;expérience au service 
+                .Plus de 10 ans d&apos;expérience au service 
                 de la clientèle namuroise.
               </p>
             </div>
@@ -33,10 +33,8 @@ export default function Footer() {
               <h3 className="text-xl font-bold text-accent mb-4">Nos Services</h3>
               <ul className="text-gray-400 text-sm space-y-2">
                 <li>✂️ Coupe homme à Namur</li>
-                <li>✂️ Dégradé américain</li>
+                <li>✂️ Dégradé</li>
                 <li>✂️ Taille de barbe</li>
-                <li>✂️ Coloration</li>
-                <li>✂️ Soins capillaires</li>
                 <li>✂️ Coupe enfant Namur</li>
               </ul>
             </div>
@@ -46,11 +44,6 @@ export default function Footer() {
               <h3 className="text-xl font-bold text-accent mb-4">Zone de Service</h3>
               <ul className="text-gray-400 text-sm space-y-2">
                 <li>📍 Namur Centre</li>
-                <li>📍 Jambes</li>
-                <li>📍 Salzinnes</li>
-                <li>📍 Saint-Servais</li>
-                <li>📍 Bouge</li>
-                <li>📍 Province de Namur</li>
               </ul>
             </div>
 

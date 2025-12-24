@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Save, RefreshCw, Upload, X, Image as ImageIcon } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
+import { useDropzone } from 'react-dropzone'
 
 interface SiteImages {
   hero: string
@@ -20,12 +21,39 @@ export default function AdminImages() {
     testimonials: []
   })
   const [isSaving, setIsSaving] = useState(false)
+  const [photos, setPhotos] = useState<Photo[]>([])
+  const [loadingGallery, setLoadingGallery] = useState(true)
+  const [uploading, setUploading] = useState(false)
+
+  interface Photo {
+    id?: string
+    name: string
+    path?: string
+    url: string
+    createdAt?: string
+    size?: number
+  }
 
   useEffect(() => {
     // Load images from localStorage
     const saved = localStorage.getItem('admin_images')
     if (saved) {
       setImages(JSON.parse(saved))
+    }
+    fetchPhotos()
+  }, [])
+
+  const fetchPhotos = useCallback(async () => {
+    setLoadingGallery(true)
+    try {
+      const response = await fetch('/api/gallery')
+      const data = await response.json()
+      setPhotos(data.photos || [])
+    } catch (error) {
+      console.error('❌ Erreur chargement photos:', error)
+      toast.error('Erreur de chargement des photos')
+    } finally {
+      setLoadingGallery(false)
     }
   }, [])
 
@@ -78,6 +106,73 @@ export default function AdminImages() {
     }
   }
 
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    setUploading(true)
+
+    for (const file of acceptedFiles) {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      try {
+        const response = await fetch('/api/gallery/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          toast.error(data.error || 'Erreur upload')
+          continue
+        }
+
+        toast.success(`Photo ${file.name} uploadée !`)
+      } catch (error) {
+        console.error('Erreur upload:', error)
+        toast.error(`Erreur upload de ${file.name}`)
+      }
+    }
+
+    setUploading(false)
+    fetchPhotos()
+  }, [fetchPhotos])
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/webp': ['.webp']
+    },
+    maxSize: 10 * 1024 * 1024,
+    multiple: true
+  })
+
+  const deletePhoto = async (fileName: string, path?: string) => {
+    if (!confirm('Supprimer cette photo ?')) return
+
+    try {
+      const response = await fetch('/api/gallery/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: path || fileName })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        toast.error(data.error || 'Erreur de suppression')
+        return
+      }
+
+      toast.success('Photo supprimée')
+      fetchPhotos()
+    } catch (error) {
+      console.error('Erreur suppression:', error)
+      toast.error('Erreur de suppression')
+    }
+  }
+
   return (
     <div>
       <Toaster position="top-right" />
@@ -96,6 +191,83 @@ export default function AdminImages() {
       </div>
 
       <div className="space-y-4 sm:space-y-8">
+        {/* Galerie Supabase */}
+        <div className="bg-primary/50 rounded-lg p-3 sm:p-6 border border-accent/20">
+          <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Galerie (Supabase)</h3>
+
+          {/* Dropzone */}
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-all ${
+              isDragActive
+                ? 'border-accent bg-accent/10'
+                : 'border-gray-600 hover:border-accent/50 bg-secondary'
+            }`}
+          >
+            <input {...getInputProps()} />
+            <Upload className="mx-auto text-accent mb-3" size={36} />
+            {uploading ? (
+              <p className="text-white font-semibold">Upload en cours...</p>
+            ) : isDragActive ? (
+              <p className="text-white font-semibold">Déposez les photos ici...</p>
+            ) : (
+              <>
+                <p className="text-white font-semibold mb-1">Glissez-déposez des photos</p>
+                <p className="text-gray-400 text-sm">ou cliquez pour sélectionner (JPG, PNG, WEBP - Max 10 MB)</p>
+              </>
+            )}
+          </div>
+
+          {/* Liste des photos */}
+          <div className="mt-6">
+            {loadingGallery ? (
+              <div className="flex justify-center py-8 text-gray-400">Chargement...</div>
+            ) : photos.length === 0 ? (
+              <div className="text-center py-8 bg-secondary rounded-xl">
+                <ImageIcon className="mx-auto text-gray-600 mb-3" size={48} />
+                <p className="text-gray-400">Aucune photo pour le moment</p>
+                <p className="text-gray-500 text-sm mt-1">Uploadez vos premières photos ci-dessus</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {photos.map((photo, index) => (
+                  <motion.div
+                    key={photo.name + index}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="relative group aspect-square bg-secondary rounded-lg overflow-hidden"
+                  >
+                    <img
+                      src={photo.url}
+                      alt={photo.name}
+                      crossOrigin="anonymous"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        onClick={() => deletePhoto(photo.name, photo.path)}
+                        className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg transition-colors"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                      <p className="text-white text-xs truncate">{photo.name}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Statistiques */}
+          <div className="mt-4 text-gray-400 text-sm">
+            {photos.length} photo{photos.length !== 1 ? 's' : ''} dans la galerie
+          </div>
+        </div>
+
         {/* Hero Image */}
         <div className="bg-primary/50 rounded-lg p-3 sm:p-6 border border-accent/20">
           <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Image Hero (Arrière-plan)</h3>

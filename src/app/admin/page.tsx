@@ -1,15 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Lock, Eye, EyeOff } from 'lucide-react'
+import { Lock, Eye, EyeOff, Smartphone } from 'lucide-react'
+import { createAdminSession, isAdminAuthenticated } from '@/lib/admin-auth'
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+
+  // Vérifier si déjà connecté
+  useEffect(() => {
+    if (isAdminAuthenticated()) {
+      router.push('/admin/dashboard')
+    } else {
+      setIsLoading(false)
+    }
+  }, [router])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -18,11 +30,19 @@ export default function AdminLogin() {
     const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
 
     if (password === adminPassword) {
-      localStorage.setItem('adminAuthenticated', 'true')
+      createAdminSession(rememberMe)
       router.push('/admin/dashboard')
     } else {
       setError('Mot de passe incorrect')
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+      </div>
+    )
   }
 
   return (
@@ -68,6 +88,21 @@ export default function AdminLogin() {
             )}
           </div>
 
+          {/* Remember Me Checkbox */}
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-600 bg-primary text-accent focus:ring-accent focus:ring-offset-0"
+            />
+            <label htmlFor="rememberMe" className="text-sm text-gray-300 flex items-center gap-2">
+              <Smartphone size={16} className="text-accent" />
+              Rester connecté 30 jours (recommandé pour PWA)
+            </label>
+          </div>
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -78,7 +113,16 @@ export default function AdminLogin() {
           </motion.button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <p className="text-xs text-blue-400 flex items-start gap-2">
+            <Smartphone size={14} className="mt-0.5 flex-shrink-0" />
+            <span>
+              <strong>Astuce PWA :</strong> Cochez &quot;Rester connecté&quot; pour recevoir les notifications push sans vous reconnecter à chaque ouverture de l&apos;app.
+            </span>
+          </p>
+        </div>
+
+        <div className="mt-4 text-center">
           <p className="text-xs text-gray-500">
             Mot de passe par défaut : admin123
           </p>

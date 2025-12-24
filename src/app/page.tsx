@@ -36,12 +36,11 @@ export default function Home() {
 
       {/* SEO Content Section - Invisible mais indexé */}
       <section className="sr-only">
-        <h1>Tarek Salon - Coiffeur et Barbershop à Namur, Belgique</h1>
+        <h1>Tarek Salon — Maison de coiffure & barbershop signature à Namur</h1>
         <p>
-          Bienvenue chez Tarek Salon, votre coiffeur professionnel à Namur. 
-          Spécialisés dans les coupes hommes, dégradés, entretien de barbe et soins capillaires.
-          Situé au cœur de Namur, nous offrons un service de qualité premium.
-          Meilleur barbershop de la région namuroise. Réservation en ligne disponible 24h/24.
+          Rendez-vous dans notre salon signature à Namur pour des coupes modernes, des dégradés précis et une barbe entretenue avec soin.
+          Nous travaillons des looks sur-mesure avec des produits professionnels et un accueil chaleureux, du premier clic à votre sortie du fauteuil.
+          Réservation en ligne 24h/24.
         </p>
       </section>
 
@@ -65,7 +64,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-2 text-gray-300">
               <Scissors className="w-5 h-5 text-accent" />
-              <span>Coiffeur • Barbier • Dégradé</span>
+              <span>Coupe • Dégradé • Barbe soignée</span>
             </div>
           </div>
         </div>
@@ -92,7 +91,7 @@ export default function Home() {
               Pourquoi Choisir <span className="text-accent">Tarek Salon</span> à Namur ?
             </h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              Le meilleur salon de coiffure et barbershop de Namur, Belgique
+              Une équipe passionnée, des looks taillés pour vous et une ambiance chaleureuse.
             </p>
           </motion.div>
 
@@ -103,9 +102,9 @@ export default function Home() {
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
-              { icon: Star, title: 'Coiffeurs Experts à Namur', description: 'Nos coiffeurs namurois sont formés aux dernières tendances et techniques de coupe' },
-              { icon: Zap, title: 'Service Rapide & Efficace', description: 'Résultats impeccables en respectant votre emploi du temps chargé' },
-              { icon: Shield, title: 'Produits Professionnels', description: 'Produits de qualité premium et soins capillaires haut de gamme' },
+              { icon: Star, title: 'Signature sur-mesure', description: 'Looks personnalisés, conseils dédiés et finitions couture.' },
+              { icon: Zap, title: 'Expérience fluide', description: 'Rendez-vous rapides, gestes précis, zéro minute perdue.' },
+              { icon: Shield, title: 'Soins haute qualité', description: 'Produits pros, rituels barbe & cheveux pensés pour durer.' },
             ].map((feature, index) => {
               const Icon = feature.icon
               return (
@@ -142,6 +141,66 @@ export default function Home() {
         <OpeningHours />
       </section>
 
+      {/* Location Section with Maps */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Trouvez-Nous à <span className="text-accent">Namur</span>
+            </h2>
+            <p className="text-gray-400 text-lg">Passage de la Gare 5, au cœur de Namur — parking et transports à proximité</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="rounded-2xl overflow-hidden shadow-2xl border border-primary/50 hover:border-accent/50 transition-colors mb-12"
+          >
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2543.0826844788233!2d4.424165!3d50.468686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c23c1d0c0c0c0d%3A0x0!2zVGFyZWsgU2Fsb24!5e0!3m2!1sfr!2sbe!4v1702828800000"
+              width="100%"
+              height="500"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="w-full"
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            <div className="p-6 rounded-xl bg-primary border border-primary/50 hover:border-accent/50 transition-colors text-center">
+              <MapPin className="w-8 h-8 text-accent mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-white mb-2">Adresse</h3>
+              <p className="text-gray-400">Passage de la Gare 5<br />5000 Namur, Belgique</p>
+            </div>
+            <div className="p-6 rounded-xl bg-primary border border-primary/50 hover:border-accent/50 transition-colors text-center">
+              <Phone className="w-8 h-8 text-accent mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-white mb-2">Téléphone</h3>
+              <a href="tel:+32465632205" className="text-gray-400 hover:text-accent transition-colors">
+                +32 465 63 22 05
+              </a>
+            </div>
+            <div className="p-6 rounded-xl bg-primary border border-primary/50 hover:border-accent/50 transition-colors text-center">
+              <Clock className="w-8 h-8 text-accent mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-white mb-2">Horaires</h3>
+              <p className="text-gray-400">Lun-Sam: 9h-18h<br />Dimanche: Fermé</p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <Testimonials />
 
@@ -160,11 +219,10 @@ export default function Home() {
           className="max-w-4xl mx-auto text-center relative z-10"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Réservez Votre Rendez-vous à Namur
+            Réservez votre créneau à Namur
           </h2>
           <p className="text-lg text-gray-300 mb-8">
-            Prenez rendez-vous en ligne chez Tarek Salon, votre coiffeur et barbershop à Namur, Belgique.
-            Service premium, résultat garanti.
+            Choisissez l'heure qui vous arrange, on s'occupe du reste avec un accueil chaleureux et des finitions impeccables.
           </p>
 
           <Link href="/booking">

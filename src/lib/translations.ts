@@ -9,23 +9,23 @@ export const translations = {
     },
     // Hero
     hero: {
-      subtitle: '✂️ Salon de Coiffure',
+      subtitle: 'Salon Signature 2025',
       title: 'Style & ',
       titleAccent: 'Coupe',
       description:
-        'Votre salon de coiffure et barbershop en Belgique. Coupes modernes, colorations tendance et rasage traditionnel premium.',
-      btnBook: 'Réserver Maintenant',
-      btnLearn: 'En Savoir Plus',
-      stat1: 'Clients Satisfaits',
-      stat2: 'Coupes Réalisées',
-      stat3: "Années d'Expérience",
+        'Maison de coiffure & barbershop à Namur. Looks sur-mesure, couleurs lumineuses et rituels barbe avec finition premium.',
+      btnBook: 'Réserver en 2 clics',
+      btnLearn: 'Découvrir le salon',
+      stat1: 'Clients ravis',
+      stat2: 'Looks créés',
+      stat3: "Années d'expertise",
     },
     // Services
     services: {
       title: 'Nos Services',
       titleAccent: 'Premium',
       description:
-        'Découvrez nos services spécialisés pour hommes : coupes modernes et entretien de barbe professionnel',
+        'Coupes sur-mesure, dégradés précis et entretien de barbe avec gestes experts',
       reserve: 'Réserver',
       duration: 'Durée',
       from: 'À partir de',
@@ -35,25 +35,25 @@ export const translations = {
       title: 'Portfolio',
       titleAccent: 'Clients',
       description:
-        'Découvrez les magnifiques transformations réalisées pour nos clients satisfaits',
+        'Une sélection de looks qui font briller nos clients',
     },
     // Testimonials
     testimonials: {
       title: 'Avis de nos',
       titleAccent: 'Clients',
-      description: 'Découvrez ce que nos clients pensent de notre service et de nos coiffeurs',
+      description: 'Leurs mots valent plus que mille pubs',
     },
     // Pricing
     pricing: {
       title: 'Nos',
       titleAccent: 'Tarifs',
-      description: 'Des tarifs transparents pour tous nos services spécialisés pour hommes',
+      description: 'Des tarifs clairs, pensés pour chaque style masculin',
     },
     // Booking Page
     bookingPage: {
       title: 'Réservez Votre',
       titleAccent: 'Rendez-vous',
-      description: 'Choisissez votre service et votre date. Une confirmation sera envoyée à votre email.',
+      description: "Choisissez votre service et l'heure idéale. Confirmation express par email.",
     },
     // Opening hours
     hours: {
@@ -62,7 +62,7 @@ export const translations = {
       open: '✓ Actuellement ouvert',
       closed: '✗ Actuellement fermé',
       phone: '+32 2 123 45 67',
-      location: 'Belgique',
+      location: 'Namur, Belgique',
     },
     // Booking
     booking: {
@@ -97,17 +97,28 @@ export const translations = {
     cta: {
       title: 'Réservez Votre Rendez-vous',
       description:
-        'Prenez rendez-vous en ligne et bénéficiez de notre service de coiffure premium en Belgique.',
+        "Réservez en ligne et profitez d'une expérience signature au salon.",
     },
     // Features
     features: {
       title: 'Pourquoi Nous Choisir ?',
-      feature1Title: 'Coiffeurs Experts',
-      feature1Desc: 'Nos coiffeurs sont formés aux dernières tendances',
-      feature2Title: 'Rapide & Efficace',
-      feature2Desc: 'Résultats impeccables respectant vos délais',
-      feature3Title: 'Produits de Qualité',
-      feature3Desc: 'Produits professionnels et soins capillaires premium',
+      feature1Title: 'Experts Signature',
+      feature1Desc: 'Des coiffeurs passionnés, formés aux tendances 2025',
+      feature2Title: 'Rapide & Précis',
+      feature2Desc: 'Un service fluide et des finitions nettes, sans attente inutile',
+      feature3Title: 'Produits Haute Qualité',
+      feature3Desc: 'Rituels barbe et cheveux avec des soins professionnels',
+    },
+    // Location
+    location: {
+      title: 'Trouvez-Nous à',
+      titleAccent: 'Namur',
+      description: 'Passage de la Gare 5, au cœur de Namur — parking et transports à proximité',
+      address: 'Adresse',
+      addressValue: 'Passage de la Gare 5, 5000 Namur, Belgique',
+      phone: 'Téléphone',
+      hours: 'Horaires',
+      hoursValue: 'Lun-Sam: 9h-18h, Dimanche: Fermé',
     },
     // Admin Panel
     admin: {
@@ -175,22 +186,22 @@ export const translations = {
     },
     // Hero
     hero: {
-      subtitle: '✂️ Hair Salon',
+      subtitle: 'Signature Salon 2025',
       title: 'Style & ',
       titleAccent: 'Cut',
       description:
-        'Your premium hair salon and barbershop in Belgium. Modern cuts, trendy colorations and premium traditional shaving.',
-      btnBook: 'Book Now',
-      btnLearn: 'Learn More',
-      stat1: 'Satisfied Clients',
-      stat2: 'Cuts Performed',
-      stat3: 'Years Experience',
+        'Signature hair house in Namur. Bespoke looks, luminous color, and premium barber rituals.',
+      btnBook: 'Book in 2 taps',
+      btnLearn: 'Explore the salon',
+      stat1: 'Happy clients',
+      stat2: 'Looks crafted',
+      stat3: 'Years of craft',
     },
     // Services
     services: {
       title: 'Our Services',
       titleAccent: 'Premium',
-      description: 'Discover our specialized services for men: modern cuts and professional beard care',
+      description: 'Tailored cuts, sharp fades, and expert beard care',
       reserve: 'Reserve',
       duration: 'Duration',
       from: 'From',
@@ -199,25 +210,25 @@ export const translations = {
     portfolio: {
       title: 'Portfolio',
       titleAccent: 'Clients',
-      description: 'Discover the magnificent transformations made for our satisfied clients',
+      description: 'Curated looks our clients love',
     },
     // Testimonials
     testimonials: {
       title: 'What Our',
       titleAccent: 'Clients Say',
-      description: 'Discover what our clients think about our service and hairdressers',
+      description: 'Their words say it best',
     },
     // Pricing
     pricing: {
       title: 'Our',
       titleAccent: 'Pricing',
-      description: 'Transparent pricing for all our specialized services for men',
+      description: 'Clear pricing designed for every style',
     },
     // Booking Page
     bookingPage: {
       title: 'Book Your',
       titleAccent: 'Appointment',
-      description: 'Choose your service and date. A confirmation will be sent to your email.',
+      description: 'Pick your service and perfect time. Email confirmation in moments.',
     },
     // Opening hours
     hours: {
@@ -226,7 +237,7 @@ export const translations = {
       open: '✓ Currently open',
       closed: '✗ Currently closed',
       phone: '+32 2 123 45 67',
-      location: 'Belgium',
+      location: 'Namur, Belgium',
     },
     // Booking
     booking: {
@@ -261,17 +272,28 @@ export const translations = {
     cta: {
       title: 'Book Your Appointment',
       description:
-        'Book online and enjoy our premium hair salon service in Belgium.',
+        'Book online and enjoy a signature in-salon experience.',
     },
     // Features
     features: {
       title: 'Why Choose Us?',
-      feature1Title: 'Expert Hairdressers',
-      feature1Desc: 'Our hairdressers are trained in the latest trends',
-      feature2Title: 'Fast & Efficient',
-      feature2Desc: 'Impeccable results respecting your deadlines',
-      feature3Title: 'Quality Products',
-      feature3Desc: 'Professional products and premium hair care',
+      feature1Title: 'Signature Experts',
+      feature1Desc: 'Passionate stylists trained on 2025 trends',
+      feature2Title: 'Fast & Precise',
+      feature2Desc: 'Fluid service and crisp finishes, no wasted time',
+      feature3Title: 'High-End Products',
+      feature3Desc: 'Barber and hair rituals with pro-grade care',
+    },
+    // Location
+    location: {
+      title: 'Find Us in',
+      titleAccent: 'Namur',
+      description: 'Passage de la Gare 5, heart of Namur — parking and transit nearby',
+      address: 'Address',
+      addressValue: 'Passage de la Gare 5, 5000 Namur, Belgium',
+      phone: 'Phone',
+      hours: 'Hours',
+      hoursValue: 'Mon-Sat: 9am-6pm, Sunday: Closed',
     },
     // Admin Panel
     admin: {

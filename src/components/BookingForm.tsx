@@ -134,7 +134,7 @@ export default function BookingForm() {
                 {servicesLoading ? 'Chargement...' : t.booking.chooseService}
               </option>
               {services.map(service => (
-                <option key={service.id} value={service.id}>{service.name}</option>
+                <option key={service.id} value={service.name}>{service.name}</option>
               ))}
             </select>
             {errors.service && <p className="text-accent text-xs mt-1">{errors.service.message}</p>}
