@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import webpush from 'web-push'
+import { sendBookingEmails } from '@/lib/email-service'
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -110,8 +111,9 @@ export async function POST(request: NextRequest) {
     // Envoyer une notification push aux admins
     await sendPushNotification({ name, service, date, time })
 
-    // Send confirmation email (optional - you can use SendGrid, Resend, or nodemailer)
-    // await sendConfirmationEmail(email, name, date, time)
+    // Envoyer les emails de confirmation
+    const emailResults = await sendBookingEmails({ name, email, phone, date, time, service, message })
+    console.log('📧 Résultat envoi emails:', emailResults)
 
     return NextResponse.json(
       {
