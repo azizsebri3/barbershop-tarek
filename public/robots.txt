@@ -1,0 +1,31 @@
+# Robots.txt pour Tarek Salon - Coiffeur Namur
+# https://tareksalon.be
+
+User-agent: *
+Allow: /
+
+# Fichiers importants
+Allow: /sitemap.xml
+Allow: /manifest.json
+
+# Bloquer les pages admin
+Disallow: /admin/
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://tareksalon.be/sitemap.xml
+
+# Crawl-delay (optionnel, respecté par certains bots)
+Crawl-delay: 1
+
+# Googlebot spécifique
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Bingbot
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
