@@ -5,11 +5,9 @@ import { motion } from 'framer-motion'
 import { Save, RefreshCw } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { useGeneralSettings } from '@/lib/useGeneralSettings'
-import { useLanguage } from '@/lib/language-context'
 import { adminTranslations } from '@/lib/admin-translations'
 
 export default function AdminGeneral() {
-  const { t } = useLanguage()
   const t_admin = adminTranslations.general
   const { settings, updateSettings } = useGeneralSettings()
   const [isSaving, setIsSaving] = useState(false)
