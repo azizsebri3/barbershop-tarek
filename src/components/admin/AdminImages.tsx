@@ -34,15 +34,6 @@ export default function AdminImages() {
     size?: number
   }
 
-  useEffect(() => {
-    // Load images from localStorage
-    const saved = localStorage.getItem('admin_images')
-    if (saved) {
-      setImages(JSON.parse(saved))
-    }
-    fetchPhotos()
-  }, [])
-
   const fetchPhotos = useCallback(async () => {
     setLoadingGallery(true)
     try {
@@ -56,6 +47,15 @@ export default function AdminImages() {
       setLoadingGallery(false)
     }
   }, [])
+
+  useEffect(() => {
+    // Load images from localStorage
+    const saved = localStorage.getItem('admin_images')
+    if (saved) {
+      setImages(JSON.parse(saved))
+    }
+    fetchPhotos()
+  }, [fetchPhotos])
 
   const handleSave = async () => {
     setIsSaving(true)

@@ -222,7 +222,7 @@ export default function Home() {
             Réservez votre créneau à Namur
           </h2>
           <p className="text-lg text-gray-300 mb-8">
-            Choisissez l'heure qui vous arrange, on s'occupe du reste avec un accueil chaleureux et des finitions impeccables.
+            Choisissez l&apos;heure qui vous arrange, on s&apos;occupe du reste avec un accueil chaleureux et des finitions impeccables.
           </p>
 
           <Link href="/booking">

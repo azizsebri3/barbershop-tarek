@@ -112,7 +112,7 @@ export default function AdminHistory() {
     return (
       <div className="flex items-center justify-center py-12">
         <RefreshCw className="animate-spin text-accent" size={24} />
-        <span className="ml-2 text-gray-300">Chargement de l'historique...</span>
+        <span className="ml-2 text-gray-300">Chargement de l&apos;historique...</span>
       </div>
     )
   }

@@ -88,7 +88,7 @@ export default function TestGalleryPage() {
               onClick={testDirectUrl}
               className="mb-6 px-4 py-2 bg-accent text-primary rounded-lg hover:bg-accent/80 transition-colors font-bold"
             >
-              🔗 Tester l'URL directement
+              🔗 Tester l&apos;URL directement
             </button>
 
             <div className="bg-secondary p-6 rounded-lg mb-6">
@@ -179,8 +179,8 @@ export default function TestGalleryPage() {
             <li>Ouvrez la console (F12)</li>
             <li>Regardez les logs de chargement</li>
             <li>Vérifiez si les images ont une bordure rouge (= erreur)</li>
-            <li>Cliquez sur "Tester l'URL directement" pour ouvrir l'image</li>
-            <li>Si l'image s'ouvre mais ne s'affiche pas ici = problème CORS</li>
+            <li>Cliquez sur &quot;Tester l&apos;URL directement&quot; pour ouvrir l&apos;image</li>
+            <li>Si l&apos;image s&apos;ouvre mais ne s&apos;affiche pas ici = problème CORS</li>
           </ol>
         </div>
       </div>

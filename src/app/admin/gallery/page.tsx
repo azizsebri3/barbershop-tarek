@@ -21,11 +21,7 @@ export default function AdminGalleryPage() {
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
 
-  useEffect(() => {
-    fetchPhotos()
-  }, [])
-
-  const fetchPhotos = async () => {
+  const fetchPhotos = useCallback(async () => {
     try {
       const response = await fetch('/api/gallery')
       const data = await response.json()
@@ -38,7 +34,11 @@ export default function AdminGalleryPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchPhotos()
+  }, [fetchPhotos])
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setUploading(true)
