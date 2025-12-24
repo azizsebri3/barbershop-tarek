@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { supabase, Booking } from '@/lib/supabase'
+import { adminTranslations } from '@/lib/admin-translations'
 
 interface ClientHistory {
   email: string
@@ -34,6 +35,7 @@ export default function AdminHistory() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedClient, setSelectedClient] = useState<ClientHistory | null>(null)
+  const t = adminTranslations.history
 
   const fetchHistory = useCallback(async () => {
     try {
@@ -112,7 +114,7 @@ export default function AdminHistory() {
     return (
       <div className="flex items-center justify-center py-12">
         <RefreshCw className="animate-spin text-accent" size={24} />
-        <span className="ml-2 text-gray-300">Chargement de l&apos;historique...</span>
+        <span className="ml-2 text-gray-300">{adminTranslations.common.loading}</span>
       </div>
     )
   }
@@ -130,10 +132,10 @@ export default function AdminHistory() {
         <div>
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
             <History className="text-accent" />
-            Historique Clients
+            {t.title}
           </h2>
           <p className="text-gray-400 text-sm mt-1">
-            Clients ayant déjà été coiffés chez vous
+            Clients who have already been here
           </p>
         </div>
         <button
@@ -141,7 +143,7 @@ export default function AdminHistory() {
           className="flex items-center gap-2 px-4 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors"
         >
           <RefreshCw size={16} />
-          Actualiser
+          {adminTranslations.common.refresh}
         </button>
       </div>
 
@@ -153,7 +155,7 @@ export default function AdminHistory() {
         >
           <Users className="text-blue-400 mb-2" size={24} />
           <p className="text-2xl font-bold text-white">{stats.totalClients}</p>
-          <p className="text-sm text-gray-400">Clients uniques</p>
+          <p className="text-sm text-gray-400">Unique clients</p>
         </motion.div>
 
         <motion.div
@@ -162,7 +164,7 @@ export default function AdminHistory() {
         >
           <Award className="text-amber-400 mb-2" size={24} />
           <p className="text-2xl font-bold text-white">{stats.loyalClients}</p>
-          <p className="text-sm text-gray-400">Clients fidèles (3+)</p>
+          <p className="text-sm text-gray-400">Loyal clients (3+)</p>
         </motion.div>
 
         <motion.div
@@ -171,7 +173,7 @@ export default function AdminHistory() {
         >
           <TrendingUp className="text-green-400 mb-2" size={24} />
           <p className="text-2xl font-bold text-white">{stats.totalVisits}</p>
-          <p className="text-sm text-gray-400">Visites totales</p>
+          <p className="text-sm text-gray-400">Total visits</p>
         </motion.div>
 
         <motion.div
@@ -180,7 +182,7 @@ export default function AdminHistory() {
         >
           <Star className="text-purple-400 mb-2" size={24} />
           <p className="text-2xl font-bold text-white">{stats.avgVisits}</p>
-          <p className="text-sm text-gray-400">Visites moyennes</p>
+          <p className="text-sm text-gray-400">Average visits</p>
         </motion.div>
       </div>
 
@@ -189,7 +191,7 @@ export default function AdminHistory() {
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         <input
           type="text"
-          placeholder="Rechercher un client (nom, email, téléphone)..."
+          placeholder={t.searchClient}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-12 pr-4 py-3 bg-secondary/50 border border-accent/20 rounded-xl text-white placeholder-gray-500 focus:border-accent focus:outline-none transition-colors"
@@ -201,7 +203,7 @@ export default function AdminHistory() {
         <div className="text-center py-12">
           <History className="mx-auto text-gray-500 mb-4" size={48} />
           <p className="text-gray-400">
-            {searchTerm ? 'Aucun client trouvé' : 'Aucun historique disponible'}
+            {searchTerm ? 'No client found' : t.noHistory}
           </p>
         </div>
       ) : (
@@ -260,13 +262,13 @@ export default function AdminHistory() {
                 <div className="flex items-center gap-6 text-sm">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-accent">{client.visits}</p>
-                    <p className="text-gray-400">visites</p>
+                    <p className="text-gray-400">visits</p>
                   </div>
                   <div className="text-center">
                     <p className="text-lg font-semibold text-white">
-                      {new Date(client.lastVisit).toLocaleDateString('fr-FR')}
+                      {new Date(client.lastVisit).toLocaleDateString('en-US')}
                     </p>
-                    <p className="text-gray-400">dernière visite</p>
+                    <p className="text-gray-400">last visit</p>
                   </div>
                 </div>
               </div>
@@ -280,7 +282,7 @@ export default function AdminHistory() {
                 >
                   <h4 className="text-sm font-semibold text-accent mb-3 flex items-center gap-2">
                     <Scissors size={16} />
-                    Services demandés
+                    Services requested
                   </h4>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {client.totalServices.map((service) => (
@@ -295,7 +297,7 @@ export default function AdminHistory() {
 
                   <h4 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
                     <Calendar size={16} />
-                    Historique des visites
+                    Visits history
                   </h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {client.bookings.map((booking) => (
@@ -306,7 +308,7 @@ export default function AdminHistory() {
                         <div className="flex items-center gap-3">
                           <Calendar className="text-gray-400" size={14} />
                           <span className="text-gray-300">
-                            {new Date(booking.date).toLocaleDateString('fr-FR')}
+                            {new Date(booking.date).toLocaleDateString('en-US')}
                           </span>
                           <Clock className="text-gray-400" size={14} />
                           <span className="text-gray-300">{booking.time}</span>

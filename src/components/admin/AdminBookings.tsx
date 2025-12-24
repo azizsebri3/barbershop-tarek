@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, User, Mail, Phone, MessageSquare, CheckCircle, XCircle, AlertCircle, Trash2, RefreshCw, Search } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { supabase, Booking } from '@/lib/supabase'
+import { adminTranslations } from '@/lib/admin-translations'
 
 type BookingStatus = 'pending' | 'confirmed' | 'cancelled'
 type FilterType = 'all' | 'pending' | 'confirmed' | 'cancelled'
@@ -18,6 +19,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<FilterType>('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const t = adminTranslations.bookings
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -31,7 +33,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       setBookings(data || [])
     } catch (error) {
       console.error('Erreur lors du chargement des réservations:', error)
-      toast.error('Erreur lors du chargement des réservations')
+      toast.error(t.error)
     } finally {
       setLoading(false)
     }
@@ -65,7 +67,10 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         booking.id === bookingId ? { ...booking, status: newStatus } : booking
       ))
 
-      toast.success(`Réservation ${newStatus === 'confirmed' ? 'confirmée' : newStatus === 'cancelled' ? 'annulée' : 'mise en attente'}`)
+      const successMessage = newStatus === 'confirmed' ? t.bookingConfirmed : 
+                            newStatus === 'cancelled' ? t.bookingCancelled : 
+                            'Booking updated'
+      toast.success(successMessage)
       
       // Notify parent to update pending count
       if (onStatusChange) {
@@ -73,12 +78,12 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       }
     } catch (error) {
       console.error('❌ Erreur lors de la mise à jour:', error)
-      toast.error('Erreur lors de la mise à jour')
+      toast.error(t.error)
     }
   }
 
   const deleteBooking = async (bookingId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) return
+    if (!confirm(t.deleteMessage)) return
 
     try {
       console.log('🗑️ Suppression de la réservation:', bookingId)
@@ -96,7 +101,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
 
       console.log('✅ Réservation supprimée avec succès')
       setBookings(bookings.filter(booking => booking.id !== bookingId))
-      toast.success('Réservation supprimée')
+      toast.success(t.bookingDeleted)
       
       // Notify parent to update pending count
       if (onStatusChange) {
@@ -104,7 +109,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       }
     } catch (error) {
       console.error('❌ Erreur lors de la suppression:', error)
-      toast.error('Erreur lors de la suppression')
+      toast.error(t.error)
     }
   }
 
@@ -151,7 +156,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
     return (
       <div className="flex items-center justify-center py-12">
         <RefreshCw className="animate-spin text-accent" size={24} />
-        <span className="ml-2 text-gray-300">Chargement des réservations...</span>
+        <span className="ml-2 text-gray-300">{adminTranslations.common.loading}</span>
       </div>
     )
   }
@@ -165,13 +170,13 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       <Toaster position="top-right" />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-white">Gestion des Réservations</h2>
+        <h2 className="text-2xl font-bold text-white">{t.title}</h2>
         <button
           onClick={fetchBookings}
           className="flex items-center gap-2 px-4 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors"
         >
           <RefreshCw size={16} />
-          Actualiser
+          {adminTranslations.common.refresh}
         </button>
       </div>
 
@@ -199,7 +204,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
           } border`}
         >
           <p className="text-2xl font-bold text-yellow-400">{stats.pending}</p>
-          <p className="text-sm text-gray-400">En attente</p>
+          <p className="text-sm text-gray-400">{t.statusPending}</p>
         </motion.div>
         <motion.div
           whileHover={{ scale: 1.02 }}
@@ -211,7 +216,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
           } border`}
         >
           <p className="text-2xl font-bold text-green-400">{stats.confirmed}</p>
-          <p className="text-sm text-gray-400">Confirmées</p>
+          <p className="text-sm text-gray-400">{t.statusConfirmed}</p>
         </motion.div>
         <motion.div
           whileHover={{ scale: 1.02 }}
@@ -223,7 +228,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
           } border`}
         >
           <p className="text-2xl font-bold text-red-400">{stats.cancelled}</p>
-          <p className="text-sm text-gray-400">Annulées</p>
+          <p className="text-sm text-gray-400">{t.statusCancelled}</p>
         </motion.div>
       </div>
 
@@ -232,7 +237,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         <input
           type="text"
-          placeholder="Rechercher (nom, email, téléphone, service)..."
+          placeholder={`${adminTranslations.common.search} (name, email, phone, service)...`}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-12 pr-4 py-3 bg-secondary/50 border border-accent/20 rounded-xl text-white placeholder-gray-500 focus:border-accent focus:outline-none transition-colors"
@@ -244,15 +249,15 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
           <Calendar className="mx-auto text-gray-500 mb-4" size={48} />
           <p className="text-gray-400">
             {searchTerm || filter !== 'all' 
-              ? 'Aucune réservation trouvée avec ces critères' 
-              : 'Aucune réservation trouvée'}
+              ? 'No bookings found with these criteria' 
+              : t.noBookings}
           </p>
           {(searchTerm || filter !== 'all') && (
             <button
               onClick={() => { setSearchTerm(''); setFilter('all'); }}
               className="mt-4 text-accent hover:underline"
             >
-              Réinitialiser les filtres
+              Reset filters
             </button>
           )}
         </div>
@@ -275,7 +280,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                     <h3 className="text-lg font-semibold text-white">{booking.name}</h3>
                     <div className={`flex items-center gap-1 px-2 py-1 rounded-full border text-xs ${getStatusColor(booking.status)}`}>
                       {getStatusIcon(booking.status)}
-                      {booking.status === 'confirmed' ? 'Confirmée' : booking.status === 'cancelled' ? 'Annulée' : 'En attente'}
+                      {booking.status === 'confirmed' ? t.statusConfirmed : booking.status === 'cancelled' ? t.statusCancelled : t.statusPending}
                     </div>
                   </div>
 
@@ -301,7 +306,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                       <span className="text-gray-300">{booking.service}</span>
                     </div>
                     <div className="text-xs text-gray-500">
-                      Créée le {new Date(booking.created_at).toLocaleString('fr-FR')}
+                      Created {new Date(booking.created_at).toLocaleString('en-US')}
                     </div>
                   </div>
 
@@ -320,14 +325,14 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                         className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
                       >
                         <CheckCircle size={16} />
-                        Confirmer
+                        {t.confirmBooking}
                       </button>
                       <button
                         onClick={() => updateBookingStatus(booking.id, 'cancelled')}
                         className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                       >
                         <XCircle size={16} />
-                        Annuler
+                        {t.cancelBooking}
                       </button>
                     </>
                   )}
@@ -338,7 +343,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                       className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                     >
                       <XCircle size={16} />
-                      Annuler
+                      {t.cancelBooking}
                     </button>
                   )}
 
@@ -347,7 +352,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                     className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
                   >
                     <Trash2 size={16} />
-                    Supprimer
+                    {t.deleteBooking}
                   </button>
                 </div>
               </div>

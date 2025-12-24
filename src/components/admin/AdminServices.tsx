@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Save, RefreshCw, Plus, Trash2, Edit } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { services as defaultServices } from '@/lib/data'
-import { useLanguage } from '@/lib/language-context'
+import { adminTranslations } from '@/lib/admin-translations'
 
 interface Service {
   id: string
@@ -16,7 +16,7 @@ interface Service {
 }
 
 export default function AdminServices() {
-  const { t } = useLanguage()
+  const t = adminTranslations.services
   const [services, setServices] = useState<Service[]>(defaultServices)
   const [isSaving, setIsSaving] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -28,23 +28,23 @@ export default function AdminServices() {
 
   const loadServices = async () => {
     try {
-      console.log('📥 Chargement des services depuis API...')
+      console.log('📥 Loading services from API...')
       const response = await fetch('/api/services')
       const data = await response.json()
 
       if (data.error) {
-        console.error('❌ Erreur API:', data.error)
+        console.error('❌ API Error:', data.error)
         // Fallback to localStorage
         const saved = localStorage.getItem('admin_services')
         if (saved) {
           setServices(JSON.parse(saved))
         }
       } else if (data.services) {
-        console.log('✅ Services chargés:', data.services)
+        console.log('✅ Services loaded:', data.services)
         setServices(data.services)
       }
     } catch (error) {
-      console.error('❌ Erreur lors du chargement des services:', error)
+      console.error('❌ Error loading services:', error)
       // Fallback to localStorage
       const saved = localStorage.getItem('admin_services')
       if (saved) {
@@ -56,9 +56,9 @@ export default function AdminServices() {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      console.log('💾 Sauvegarde des services:', services)
+      console.log('💾 Saving services:', services)
 
-      // Enlever l'id lors de l'envoi (l'API génère les UUIDs)
+      // Remove id when sending (API generates UUIDs)
       const servicesToSave = services.map(({ id: _, ...service }) => service)
 
       const response = await fetch('/api/services', {
@@ -72,21 +72,21 @@ export default function AdminServices() {
       const data = await response.json()
 
       if (!response.ok) {
-        console.error('❌ Erreur API:', data.error)
+        console.error('❌ API Error:', data.error)
         // Fallback to localStorage
         localStorage.setItem('admin_services', JSON.stringify(services))
-        throw new Error(data.error || 'Erreur lors de la sauvegarde')
+        throw new Error(data.error || 'Error while saving')
       }
 
-      console.log('✅ Services sauvegardés avec succès')
+      console.log('✅ Services saved successfully')
       // Also save to localStorage as backup
       localStorage.setItem('admin_services', JSON.stringify(services))
-      toast.success('Services sauvegardés avec succès !')
+      toast.success(t.serviceAdded)
     } catch (error) {
-      console.error('❌ Erreur lors de la sauvegarde:', error)
+      console.error('❌ Error while saving:', error)
       // Fallback to localStorage
       localStorage.setItem('admin_services', JSON.stringify(services))
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(t.error)
     } finally {
       setIsSaving(false)
     }
@@ -94,7 +94,7 @@ export default function AdminServices() {
 
   const addService = () => {
     if (!newService.name || !newService.description || !newService.price || !newService.duration) {
-      toast.error('Veuillez remplir tous les champs')
+      toast.error('Please fill in all fields')
       return
     }
 
@@ -108,7 +108,7 @@ export default function AdminServices() {
 
     setServices(prev => [...prev, service])
     setNewService({})
-    toast.success(t.admin.saveSuccess)
+    toast.success(t.serviceAdded)
   }
 
   const updateService = (id: string, updates: Partial<Service>) => {
@@ -119,14 +119,14 @@ export default function AdminServices() {
 
   const deleteService = (id: string) => {
     setServices(prev => prev.filter(service => service.id !== id))
-    toast.success(t.admin.deleteSuccess)
+    toast.success(t.serviceDeleted)
   }
 
   return (
     <div>
       <Toaster position="top-right" />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">{t.admin.services}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-white">{t.title}</h2>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -135,7 +135,7 @@ export default function AdminServices() {
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-accent text-primary rounded-lg hover:bg-accent/80 disabled:opacity-50 text-sm sm:text-base"
         >
           {isSaving ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
-          {isSaving ? t.admin.saving : t.admin.save}
+          {isSaving ? 'Saving...' : t.save}
         </motion.button>
       </div>
 
@@ -143,34 +143,34 @@ export default function AdminServices() {
       <div className="bg-primary/50 rounded-lg p-3 sm:p-6 border border-accent/20 mb-4 sm:mb-6">
         <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
           <Plus size={18} />
-          {t.admin.addService}
+          {t.addService}
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
           <input
             type="text"
-            placeholder={t.admin.name}
+            placeholder={t.namePlaceholder}
             value={newService.name || ''}
             onChange={(e) => setNewService(prev => ({ ...prev, name: e.target.value }))}
             className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
           />
           <input
             type="text"
-            placeholder={t.admin.description}
+            placeholder={t.descriptionPlaceholder}
             value={newService.description || ''}
             onChange={(e) => setNewService(prev => ({ ...prev, description: e.target.value }))}
             className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
           />
           <input
             type="number"
-            placeholder={`${t.admin.price} (€)`}
+            placeholder={t.pricePlaceholder}
             value={newService.price || ''}
             onChange={(e) => setNewService(prev => ({ ...prev, price: parseInt(e.target.value) || 0 }))}
             className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
           />
           <input
             type="number"
-            placeholder={`${t.admin.duration} (${t.admin.minutes})`}
+            placeholder={t.durationPlaceholder}
             value={newService.duration || ''}
             onChange={(e) => setNewService(prev => ({ ...prev, duration: parseInt(e.target.value) || 0 }))}
             className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
@@ -181,13 +181,13 @@ export default function AdminServices() {
           onClick={addService}
           className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-accent text-primary rounded-lg hover:bg-accent/80 transition-colors font-semibold text-sm sm:text-base"
         >
-          {t.admin.add}
+          Add Service
         </button>
       </div>
 
       {/* Services List */}
       <div className="space-y-3 sm:space-y-4">
-        <h3 className="text-base sm:text-lg font-semibold text-white">{t.admin.services}</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-white">{t.title}</h3>
 
         {services.map((service) => (
           <motion.div
@@ -230,7 +230,7 @@ export default function AdminServices() {
                     onClick={() => setEditingId(null)}
                     className="w-full sm:w-auto px-4 py-2 bg-accent text-primary rounded-lg hover:bg-accent/80 transition-colors text-sm sm:text-base"
                   >
-                    Terminer
+                    Done
                   </button>
                 </div>
               </div>
@@ -241,8 +241,8 @@ export default function AdminServices() {
                   <h4 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">{service.name}</h4>
                   <p className="text-gray-400 mb-2 sm:mb-3 text-sm">{service.description}</p>
                   <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-gray-300">
-                    <span>Prix: {service.price}€</span>
-                    <span>Durée: {service.duration} min</span>
+                    <span>Price: {service.price}€</span>
+                    <span>Duration: {service.duration} min</span>
                   </div>
                 </div>
                 <div className="flex gap-2 sm:ml-4">
