@@ -51,12 +51,12 @@ export default function Home() {
           <div className="flex flex-wrap justify-center items-center gap-6 md:gap-12 text-sm md:text-base">
             <div className="flex items-center gap-2 text-gray-300">
               <MapPin className="w-5 h-5 text-accent" />
-              <span>Namur, Belgique</span>
+              <span>Passage de la Gare 5, Namur</span>
             </div>
             <div className="flex items-center gap-2 text-gray-300">
               <Phone className="w-5 h-5 text-accent" />
-              <a href="tel:+32470000000" className="hover:text-accent transition-colors">
-                +32 470 00 00 00
+              <a href="tel:+32465632205" className="hover:text-accent transition-colors">
+                +32 465 63 22 05
               </a>
             </div>
             <div className="flex items-center gap-2 text-gray-300">
@@ -224,8 +224,8 @@ export default function Home() {
             <div>
               <h3 className="text-xl font-bold text-accent mb-4">Contact</h3>
               <ul className="text-gray-400 text-sm space-y-2">
-                <li>📍 Rue de Bruxelles, 5000 Namur</li>
-                <li>📞 <a href="tel:+32470000000" className="hover:text-accent">+32 470 00 00 00</a></li>
+                <li>📍 Passage de la Gare 5, 5000 Namur</li>
+                <li>📞 <a href="tel:+32465632205" className="hover:text-accent">+32 465 63 22 05</a></li>
                 <li>📧 <a href="mailto:contact@tareksalon.be" className="hover:text-accent">contact@tareksalon.be</a></li>
                 <li>🌐 <a href="https://tareksalon.be" className="hover:text-accent">tareksalon.be</a></li>
               </ul>

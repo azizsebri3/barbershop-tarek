@@ -133,9 +133,9 @@ const jsonLd = {
   '@id': 'https://tareksalon.be/#organization',
   name: 'Tarek Salon',
   alternateName: 'Tarek Barbershop Namur',
-  description: 'Salon de coiffure et barbershop professionnel à Namur, Belgique. Spécialisé dans les coupes hommes, dégradés, barbes et soins capillaires.',
+  description: 'Salon de coiffure et barbershop professionnel à Namur, Belgique. Spécialisé dans les coupes hommes, dégradés, barbes et soins capillaires. Situé près de la gare de Namur.',
   url: 'https://tareksalon.be',
-  telephone: '+32470000000', // À remplacer par le vrai numéro
+  telephone: '+32465632205',
   email: 'contact@tareksalon.be',
   image: 'https://tareksalon.be/og-image.jpg',
   logo: 'https://tareksalon.be/icons/icon-512x512.png',
@@ -143,21 +143,21 @@ const jsonLd = {
   currenciesAccepted: 'EUR',
   paymentAccepted: 'Cash, Credit Card, Bancontact',
   
-  // Adresse (À REMPLIR avec la vraie adresse!)
+  // Adresse réelle
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'Rue de Bruxelles 123', // À remplacer
+    streetAddress: 'Passage de la Gare 5',
     addressLocality: 'Namur',
     addressRegion: 'Namur',
     postalCode: '5000',
     addressCountry: 'BE'
   },
   
-  // Coordonnées GPS (À REMPLIR!)
+  // Coordonnées GPS réelles
   geo: {
     '@type': 'GeoCoordinates',
-    latitude: 50.4649, // Coordonnées de Namur centre
-    longitude: 4.8674
+    latitude: 50.467900303318515,
+    longitude: 4.8633730935488275
   },
   
   // Zone de service
@@ -254,12 +254,8 @@ const jsonLd = {
     worstRating: '1'
   },
   
-  // Réseaux sociaux
-  sameAs: [
-    'https://www.facebook.com/tareksalon',
-    'https://www.instagram.com/tareksalon',
-    // Ajouter les vrais liens
-  ]
+  // Réseaux sociaux (à ajouter plus tard)
+  sameAs: []
 }
 
 export default function RootLayout({
@@ -278,8 +274,8 @@ export default function RootLayout({
         {/* Geo meta tags pour SEO local */}
         <meta name="geo.region" content="BE-WNA" />
         <meta name="geo.placename" content="Namur" />
-        <meta name="geo.position" content="50.4649;4.8674" />
-        <meta name="ICBM" content="50.4649, 4.8674" />
+        <meta name="geo.position" content="50.467900;4.863373" />
+        <meta name="ICBM" content="50.467900, 4.863373" />
       </head>
       <body className="bg-primary text-white">
         <LanguageProvider>
