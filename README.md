@@ -1,96 +1,134 @@
-# 🎯 Elite Services - Site Vitrine Moderne
+# 🎯 Tarek Salon - Modern Barbershop Booking Platform
 
-Un site vitrine moderne créé avec **Next.js 15**, **TypeScript**, **Tailwind CSS** et **Framer Motion**. 
-Incluant un système complet de réservation de rendez-vous avec base de données Supabase et animations fluides.
+A modern barbershop booking platform built with **Next.js 15**, **TypeScript**, **Tailwind CSS**, and **Framer Motion**. 
+Features a complete appointment booking system with Supabase database, admin panel, multilanguage support, and PWA capabilities.
 
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC)
 ![React](https://img.shields.io/badge/React-19-61DAFB)
+![PWA](https://img.shields.io/badge/PWA-Ready-success)
 
-## ✨ Fonctionnalités
+## ✨ Features
 
 ### 📱 Design & UX
-- ✅ **Design Responsive** : Compatible mobile, tablet et desktop
-- ✅ **Animations Modernes** : Transitions fluides avec Framer Motion
-- ✅ **Dark Mode** : Interface élégante avec palette de couleurs modernes
-- ✅ **Performance** : Optimisé pour les Core Web Vitals
-- ✅ **Scroll Animations** : Animations au défilement pour une meilleure expérience
+- ✅ **Responsive Design**: Mobile, tablet, and desktop compatible
+- ✅ **Modern Animations**: Smooth transitions with Framer Motion
+- ✅ **Elegant Interface**: Modern color palette with gold accents
+- ✅ **Performance**: Optimized for Core Web Vitals
+- ✅ **PWA Support**: Installable as mobile/desktop app
+- ✅ **Scroll Animations**: Engaging scroll-based interactions
+- ✅ **Image Gallery**: Swiper-based salon photo gallery
 
-### 📅 Système de Réservation
-- ✅ **Formulaire Dynamique** : Sélection date/heure/service
-- ✅ **Validation Complète** : Validation côté client et serveur
-- ✅ **Intégration Supabase** : Stockage sécurisé des réservations
-- ✅ **Notifications** : Feedback utilisateur avec React Hot Toast
-- ✅ **API REST** : Routes API pour créer, lire, mettre à jour et supprimer les réservations
+### 📅 Booking System
+- ✅ **Dynamic Form**: Date/time/service selection
+- ✅ **Complete Validation**: Client and server-side validation
+- ✅ **Supabase Integration**: Secure booking storage
+- ✅ **Notifications**: User feedback with React Hot Toast
+- ✅ **REST API**: Full CRUD operations for bookings
+- ✅ **Real-time Updates**: Instant booking confirmations
 
-### 💰 Section Tarifs
-- ✅ **Tarifs Détaillés** : Affichage complet des services et prix
-- ✅ **Tableau Comparatif** : Comparaison des caractéristiques
-- ✅ **FAQ** : Questions fréquentes avec réponses
-- ✅ **Options Flexibles** : 4 niveaux de service différents
+### 👨‍💼 Admin Panel
+- ✅ **Dashboard**: Comprehensive booking overview
+- ✅ **Booking Management**: View, update, and delete bookings
+- ✅ **Client History**: Track returning clients
+- ✅ **Service Management**: Add/edit/delete services
+- ✅ **Opening Hours**: Manage schedule for each day
+- ✅ **General Settings**: Salon information configuration
+- ✅ **Image Gallery**: Upload and manage salon photos
+- ✅ **English Interface**: Admin panel fully translated to English
 
-### 🕐 Horaires d'Ouverture
-- ✅ **Affichage Dynamique** : Horaires par jour de la semaine
-- ✅ **Statut en Temps Réel** : Indicateur ouvert/fermé
-- ✅ **Information Contact** : Adresse et téléphone affichés
+### 🌍 Multilanguage Support
+- ✅ **French**: Default language for clients
+- ✅ **English**: Admin panel interface
+- ✅ **Translation System**: Centralized translation management
+- ✅ **Dual Interface**: French frontend + English admin
 
-### 🎨 Composants Réutilisables
-- ✅ Header avec navigation
-- ✅ Footer informatif
-- ✅ Hero section animée
-- ✅ ServiceCard avec animations
-- ✅ BookingForm complet
-- ✅ OpeningHours
-- ✅ Facilement extensible
+### 💰 Pricing Section
+- ✅ **Detailed Pricing**: Complete service and price display
+- ✅ **Service Cards**: Visual presentation of services
+- ✅ **FAQ**: Frequently asked questions
+- ✅ **Flexible Options**: Multiple service levels
 
-## 🛠️ Stack Technologique
+### 🕐 Opening Hours
+- ✅ **Dynamic Display**: Hours for each day of the week
+- ✅ **Real-time Status**: Open/closed indicator
+- ✅ **Contact Information**: Address and phone displayed
+- ✅ **Admin Editable**: Update hours from admin panel
+
+### 📱 PWA Features
+- ✅ **Installable**: Add to home screen on mobile/desktop
+- ✅ **Offline Support**: Service worker with caching
+- ✅ **Push Notifications**: Ready for booking reminders
+- ✅ **App Icons**: Multiple sizes for all devices
+- ✅ **Manifest**: Complete PWA configuration
+- ✅ **Fast Loading**: Optimized for mobile networks
+
+### 🎨 Reusable Components
+- ✅ Header with language switcher
+- ✅ Informative footer
+- ✅ Animated hero section
+- ✅ ServiceCard with animations
+- ✅ Complete BookingForm
+- ✅ OpeningHours display
+- ✅ Admin components
+- ✅ Image uploader
+- ✅ Easily extensible
+
+## 🛠️ Tech Stack
 
 ### Frontend
 - **Next.js 15** - React framework
-- **TypeScript** - Typage statique
-- **Tailwind CSS** - Styling utilitaire
+- **TypeScript** - Static typing
+- **Tailwind CSS** - Utility-first styling
 - **Framer Motion** - Animations
-- **React Hook Form** - Gestion des formulaires
+- **React Hook Form** - Form management
 - **React Hot Toast** - Notifications
 - **Lucide React** - Icons
+- **Swiper** - Touch slider
 
 ### Backend & Database
-- **Supabase** - Base de données PostgreSQL
-- **Next.js API Routes** - API backend
+- **Supabase** - PostgreSQL database + Storage
+- **Next.js API Routes** - Backend API
 - **Node.js** - Runtime
+
+### PWA
+- **Service Worker** - Offline support
+- **Web App Manifest** - PWA configuration
+- **Workbox** - Service worker helpers
 
 ### DevTools
 - **ESLint** - Linting
 - **TypeScript** - Type checking
 - **npm** - Package manager
 
-## 📋 Prérequis
+## 📋 Prerequisites
 
-- **Node.js** : v18+ 
-- **npm** : v9+
-- **Compte Supabase** : https://supabase.com
-- **Git** (optionnel)
+- **Node.js**: v18+ 
+- **npm**: v9+
+- **Supabase Account**: https://supabase.com
+- **Git** (optional)
 
-## 🚀 Installation & Démarrage
+## 🚀 Installation & Setup
 
-### 1. Installation des dépendances
+### 1. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Configuration Supabase
+### 2. Supabase Configuration
 
-#### Créer un compte Supabase
-1. Allez sur https://supabase.com
-2. Créez un nouveau projet
-3. Notez votre **URL Supabase** et **Clé Anon**
+#### Create Supabase Account
+1. Go to https://supabase.com
+2. Create a new project
+3. Note your **Supabase URL** and **Anon Key**
 
-#### Créer la table des réservations
-Dans l'éditeur SQL de Supabase, exécutez :
+#### Create Required Tables
+In Supabase SQL Editor, execute:
 
 ```sql
+-- Bookings table
 CREATE TABLE bookings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
@@ -141,38 +179,236 @@ L'application est disponible à `http://localhost:3000`
 
 ```
 projet-tarek/
-├── public/                 # Fichiers statiques
+├── public/                 # Static files
+│   ├── icons/             # PWA app icons
+│   ├── manifest.json      # PWA manifest
+│   ├── sw.js             # Service worker
+│   └── register-sw.js    # SW registration
 ├── src/
 │   ├── app/
-│   │   ├── api/           # Routes API
-│   │   │   └── bookings/
-│   │   │       ├── route.ts         # GET, POST
-│   │   │       └── [id]/route.ts    # GET, PUT, DELETE
-│   │   ├── booking/        # Page de réservation
-│   │   ├── pricing/        # Page tarifs
-│   │   ├── layout.tsx      # Layout global
-│   │   ├── page.tsx        # Page d'accueil
-│   │   └── globals.css     # Styles globaux
-│   ├── components/         # Composants réutilisables
+│   │   ├── api/           # API routes
+│   │   │   ├── bookings/  # Booking CRUD
+│   │   │   ├── services/  # Service management
+│   │   │   ├── hours/     # Opening hours
+│   │   │   ├── settings/  # General settings
+│   │   │   └── gallery/   # Image gallery
+│   │   ├── admin/         # Admin panel pages
+│   │   │   └── dashboard/ # Admin dashboard
+│   │   ├── booking/       # Booking page
+│   │   ├── pricing/       # Pricing page
+│   │   ├── layout.tsx     # Root layout
+│   │   ├── page.tsx       # Homepage
+│   │   └── globals.css    # Global styles
+│   ├── components/        # Reusable components
 │   │   ├── Header.tsx
 │   │   ├── Footer.tsx
 │   │   ├── Hero.tsx
 │   │   ├── ServiceCard.tsx
 │   │   ├── BookingForm.tsx
-│   │   └── OpeningHours.tsx
-│   └── lib/               # Utilitaires
-│       ├── supabase.ts    # Client Supabase
-│       └── data.ts        # Données et fonctions utiles
-├── .env.local.example     # Template env
-├── .eslintrc.json         # Config ESLint
-├── next.config.mjs        # Config Next.js
-├── tailwind.config.ts     # Config Tailwind
-├── tsconfig.json          # Config TypeScript
+│   │   ├── OpeningHours.tsx
+│   │   └── admin/         # Admin components
+│   │       ├── AdminBookings.tsx
+│   │       ├── AdminHistory.tsx
+│   │       ├── AdminServices.tsx
+│   │       ├── AdminHours.tsx
+│   │       ├── AdminGeneral.tsx
+│   │       └── AdminImages.tsx
+│   └── lib/               # Utilities
+│       ├── supabase.ts    # Supabase client
+│       ├── data.ts        # Site data
+│       ├── email.ts       # Email utilities
+│       ├── language-context.tsx  # Language provider
+│       └── admin-translations.ts # Admin English translations
+├── .env.local.example     # Environment template
+├── .eslintrc.json         # ESLint config
+├── next.config.mjs        # Next.js config
+├── tailwind.config.ts     # Tailwind config
+├── tsconfig.json          # TypeScript config
 ├── package.json
 └── README.md
 ```
 
-## 🎨 Personnalisation
+## 👨‍💼 Admin Panel
+
+Access the admin panel at `/admin/dashboard`
+
+### Features
+- **Dashboard**: Overview of bookings and statistics
+- **Bookings**: Manage all appointments (view, update status, delete)
+- **History**: Track client visit history
+- **Services**: Add, edit, and delete services with pricing
+- **Opening Hours**: Set opening/closing times for each day
+- **General Settings**: Update salon information
+- **Gallery**: Upload and manage salon photos
+- **English Interface**: Complete English translation for admin
+
+### Admin Database Setup
+
+Create additional tables for services, hours, and settings:
+
+```sql
+-- Services table
+CREATE TABLE services (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  price DECIMAL(10,2) NOT NULL,
+  duration INTEGER NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Opening hours table
+CREATE TABLE opening_hours (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  day_of_week VARCHAR(20) NOT NULL,
+  open_time TIME,
+  close_time TIME,
+  is_closed BOOLEAN DEFAULT false,
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Settings table
+CREATE TABLE settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  key VARCHAR(100) UNIQUE NOT NULL,
+  value TEXT,
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Create storage bucket for salon photos
+-- Go to Storage in Supabase and create a bucket named 'salon-photos'
+-- Make it public for gallery display
+```
+
+### Admin Authentication
+To protect the admin panel, you can add authentication:
+1. Use Supabase Auth
+2. Add middleware to check auth status
+3. Redirect unauthorized users
+
+Example with Supabase Auth:
+```typescript
+// middleware.ts
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req, res })
+  const { data: { session } } = await supabase.auth.getSession()
+
+  if (!session && req.nextUrl.pathname.startsWith('/admin')) {
+    return NextResponse.redirect(new URL('/login', req.url))
+  }
+
+  return res
+}
+```
+
+##  PWA (Progressive Web App)
+
+This project is PWA-ready! Users can install it on their mobile or desktop devices.
+
+### Features
+- ✅ **Installable**: Add to home screen on mobile/desktop
+- ✅ **Offline Support**: Service worker caches essential resources
+- ✅ **Push Notifications**: Ready for booking reminders
+- ✅ **App Icons**: 8 different sizes (72px to 512px)
+- ✅ **Manifest**: Complete PWA configuration
+- ✅ **Fast Loading**: Optimized for mobile networks
+
+### Testing PWA Installation
+
+#### On Chrome/Edge (Desktop)
+1. Visit your deployed site (must be HTTPS)
+2. Look for the install icon in the address bar
+3. Click "Install" to add to desktop
+
+#### On Chrome (Android)
+1. Open your site on mobile
+2. Tap the menu (⋮)
+3. Select "Install app" or "Add to Home screen"
+
+#### On Safari (iOS)
+1. Open your site on iPhone/iPad
+2. Tap the Share button
+3. Select "Add to Home Screen"
+
+### PWA Files
+- `/public/manifest.json` - PWA configuration
+- `/public/sw.js` - Service worker for offline support
+- `/public/register-sw.js` - Service worker registration
+- `/public/icons/` - App icons (72x72 to 512x512)
+
+### Verify PWA Readiness
+```bash
+# Run Lighthouse audit
+npm run build
+npm start
+# Then open Chrome DevTools > Lighthouse > Run PWA audit
+```
+
+Or use online tools:
+- [PWABuilder](https://www.pwabuilder.com/)
+- [Chrome DevTools Lighthouse](https://developers.google.com/web/tools/lighthouse)
+
+### Customizing PWA
+Edit `/public/manifest.json` to customize:
+- App name and short name
+- Theme colors
+- Display mode
+- App description
+
+```json
+{
+  "name": "Your Salon Name",
+  "short_name": "Salon",
+  "theme_color": "#D4AF37",
+  "background_color": "#1a1a2e"
+}
+```
+
+## � Multilanguage Support
+
+The project supports dual-language configuration:
+- **French** (default): For client-facing pages
+- **English**: For admin panel interface
+
+### Language Files
+- `/src/lib/language-context.tsx` - Language provider and switcher
+- `/src/lib/admin-translations.ts` - English translations for admin panel
+
+### Using Translations in Admin
+
+```typescript
+import { translations } from '@/lib/admin-translations';
+
+// Access translations
+const t = translations.bookings;
+console.log(t.title); // "Bookings Management"
+```
+
+### Adding New Translations
+Edit `/src/lib/admin-translations.ts`:
+
+```typescript
+export const translations = {
+  // ... existing translations
+  newSection: {
+    title: 'New Section',
+    description: 'Section description',
+    // Add more keys...
+  }
+};
+```
+
+### Language Switcher
+The Header component includes a language switcher that allows users to toggle between French and English. Admin panel is always in English regardless of the selected language.
+
+## �🎨 Personnalisation
 
 ### Modifier les couleurs
 Éditez `tailwind.config.ts` :

@@ -276,6 +276,8 @@ export default function RootLayout({
         <meta name="geo.placename" content="Namur" />
         <meta name="geo.position" content="50.467900;4.863373" />
         <meta name="ICBM" content="50.467900, 4.863373" />
+        {/* PWA Service Worker Registration */}
+        <script src="/register-sw.js" defer />
       </head>
       <body className="bg-primary text-white">
         <LanguageProvider>
