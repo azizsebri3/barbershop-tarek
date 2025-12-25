@@ -142,6 +142,19 @@ export default function AdminGeneral() {
               className="w-full px-3 sm:px-4 py-3 bg-primary border border-primary rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              TikTok (optional)
+            </label>
+            <input
+              type="url"
+              value={settings.tiktok || ''}
+              onChange={(e) => updateSetting('tiktok', e.target.value)}
+              placeholder="https://tiktok.com/@..."
+              className="w-full px-3 sm:px-4 py-3 bg-primary border border-primary rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
+            />
+          </div>
         </div>
       </div>
     </div>

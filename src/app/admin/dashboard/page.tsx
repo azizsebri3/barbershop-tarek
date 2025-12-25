@@ -12,7 +12,8 @@ import {
   LogOut,
   Calendar,
   Bell,
-  History
+  History,
+  Star
 } from 'lucide-react'
 import AdminHours from '@/components/admin/AdminHours'
 import AdminServices from '@/components/admin/AdminServices'
@@ -20,12 +21,13 @@ import AdminGeneral from '@/components/admin/AdminGeneral'
 import AdminImages from '@/components/admin/AdminImages'
 import AdminBookings from '@/components/admin/AdminBookings'
 import AdminHistory from '@/components/admin/AdminHistory'
+import AdminTestimonials from '@/components/admin/AdminTestimonials'
 import PushNotificationToggle from '@/components/admin/PushNotificationToggle'
 import { useLanguage } from '@/lib/language-context'
 import { supabase } from '@/lib/supabase'
 import { isAdminAuthenticated, clearAdminSession, renewAdminSession, getSessionInfo } from '@/lib/admin-auth'
 
-type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'history' | 'notifications'
+type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'history' | 'testimonials' | 'notifications'
 
 export default function AdminDashboard() {
   const { t } = useLanguage()
@@ -86,6 +88,7 @@ export default function AdminDashboard() {
     { id: 'images' as TabType, label: t.admin.images, icon: Image },
     { id: 'bookings' as TabType, label: t.admin.bookings, icon: Calendar, badge: pendingCount },
     { id: 'history' as TabType, label: 'Historique', icon: History },
+    { id: 'testimonials' as TabType, label: 'Avis Clients', icon: Star },
     { id: 'notifications' as TabType, label: 'Notifications', icon: Bell },
   ]
 
@@ -263,6 +266,7 @@ export default function AdminDashboard() {
             {activeTab === 'images' && <AdminImages />}
             {activeTab === 'bookings' && <AdminBookings onStatusChange={fetchPendingCount} />}
             {activeTab === 'history' && <AdminHistory />}
+            {activeTab === 'testimonials' && <AdminTestimonials />}
             {activeTab === 'notifications' && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-accent">Notifications Push</h2>

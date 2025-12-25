@@ -3,9 +3,24 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { MapPin, Phone, Mail, Globe, ArrowRight, Sparkles, Clock, Instagram, Facebook } from 'lucide-react'
+import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettings'
+
+// TikTok icon component
+const TikTokIcon = ({ size = 18 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+  </svg>
+)
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const { settings } = usePublicGeneralSettings()
 
   const footerLinks = {
     services: [
@@ -17,12 +32,6 @@ export default function Footer() {
     zones: [
       'Namur Centre',
     ],
-    contact: {
-      address: 'Passage de la Gare 5, 5000 Namur',
-      phone: '+32 465 63 22 05',
-      email: 'contact@tareksalon.be',
-      website: 'tareksalon.be',
-    }
   }
 
   return (
@@ -50,29 +59,48 @@ export default function Footer() {
                 <div className="w-12 h-12 bg-gradient-to-br from-accent to-yellow-500 rounded-xl flex items-center justify-center text-black font-bold text-xl shadow-lg shadow-accent/20">
                   ✂️
                 </div>
-                <span className="text-xl font-bold text-white">Tarek Salon</span>
+                <span className="text-xl font-bold text-white">{settings.salonName || 'Tarek Salon'}</span>
               </Link>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                Votre coiffeur et barbershop de confiance à Namur, Belgique. 
-                Spécialisés dans les coupes hommes, dégradés modernes et entretien de barbe.
+                {settings.description || 'Votre coiffeur et barbershop de confiance à Namur, Belgique.'}
               </p>
               <div className="flex items-center gap-3">
-                <motion.a
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  href="#"
-                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-accent hover:border-accent/50 transition-all duration-300"
-                >
-                  <Instagram size={18} />
-                </motion.a>
-                <motion.a
-                  whileHover={{ scale: 1.1, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  href="#"
-                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-accent hover:border-accent/50 transition-all duration-300"
-                >
-                  <Facebook size={18} />
-                </motion.a>
+                {settings.instagram && (
+                  <motion.a
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    href={settings.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-accent hover:border-accent/50 transition-all duration-300"
+                  >
+                    <Instagram size={18} />
+                  </motion.a>
+                )}
+                {settings.facebook && (
+                  <motion.a
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    href={settings.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-accent hover:border-accent/50 transition-all duration-300"
+                  >
+                    <Facebook size={18} />
+                  </motion.a>
+                )}
+                {settings.tiktok && (
+                  <motion.a
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    href={settings.tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-accent hover:border-accent/50 transition-all duration-300"
+                  >
+                    <TikTokIcon size={18} />
+                  </motion.a>
+                )}
               </div>
             </motion.div>
 
@@ -147,24 +175,24 @@ export default function Footer() {
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <MapPin size={18} className="text-accent flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-400 text-sm">{footerLinks.contact.address}</span>
+                  <span className="text-gray-400 text-sm">{settings.address || 'Passage de la Gare 5, 5000 Namur'}</span>
                 </li>
                 <li>
-                  <a href={`tel:${footerLinks.contact.phone.replace(/\s/g, '')}`} className="flex items-center gap-3 text-gray-400 hover:text-accent transition-colors duration-300">
+                  <a href={`tel:${(settings.phone || '+32465632205').replace(/\s/g, '')}`} className="flex items-center gap-3 text-gray-400 hover:text-accent transition-colors duration-300">
                     <Phone size={18} className="text-accent flex-shrink-0" />
-                    <span className="text-sm">{footerLinks.contact.phone}</span>
+                    <span className="text-sm">{settings.phone || '+32 465 63 22 05'}</span>
                   </a>
                 </li>
                 <li>
-                  <a href={`mailto:${footerLinks.contact.email}`} className="flex items-center gap-3 text-gray-400 hover:text-accent transition-colors duration-300">
+                  <a href={`mailto:${settings.email || 'contact@tareksalon.be'}`} className="flex items-center gap-3 text-gray-400 hover:text-accent transition-colors duration-300">
                     <Mail size={18} className="text-accent flex-shrink-0" />
-                    <span className="text-sm">{footerLinks.contact.email}</span>
+                    <span className="text-sm">{settings.email || 'contact@tareksalon.be'}</span>
                   </a>
                 </li>
                 <li>
-                  <a href={`https://${footerLinks.contact.website}`} className="flex items-center gap-3 text-gray-400 hover:text-accent transition-colors duration-300">
+                  <a href={`https://${settings.website || 'tareksalon.be'}`} className="flex items-center gap-3 text-gray-400 hover:text-accent transition-colors duration-300">
                     <Globe size={18} className="text-accent flex-shrink-0" />
-                    <span className="text-sm">{footerLinks.contact.website}</span>
+                    <span className="text-sm">{settings.website || 'tareksalon.be'}</span>
                   </a>
                 </li>
               </ul>

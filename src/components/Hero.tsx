@@ -133,31 +133,7 @@ export default function Hero() {
             </Link>
           </motion.div>
 
-          {/* Stats Section */}
-          <motion.div
-            variants={itemVariants}
-            className="mt-16 sm:mt-20 grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
-          >
-            {[
-              { label: t.hero.stat1, value: '800+' },
-              { label: t.hero.stat2, value: '3000+' },
-              { label: t.hero.stat3, value: '15+' },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
-                whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.08)' }}
-                className="text-center p-5 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 transition-all duration-300"
-              >
-                <p className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-accent to-yellow-400 bg-clip-text text-transparent mb-2">
-                  {stat.value}
-                </p>
-                <p className="text-white/60 text-sm sm:text-base">{stat.label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
+
         </div>
       </motion.div>
 

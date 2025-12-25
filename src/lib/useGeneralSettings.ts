@@ -9,8 +9,10 @@ interface GeneralSettings {
   phone: string
   email: string
   address: string
+  website?: string
   facebook?: string
   instagram?: string
+  tiktok?: string
 }
 
 const defaultSettings: GeneralSettings = {
@@ -19,8 +21,10 @@ const defaultSettings: GeneralSettings = {
   phone: '+32 2 123 45 67',
   email: 'contact@stylecoupe.be',
   address: 'Belgique',
+  website: 'stylecoupe.be',
   facebook: '',
-  instagram: ''
+  instagram: '',
+  tiktok: ''
 }
 
 export function useGeneralSettings() {
