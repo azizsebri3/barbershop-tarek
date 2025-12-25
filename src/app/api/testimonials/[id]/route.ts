@@ -13,7 +13,7 @@ async function verifyAdmin(request: Request): Promise<boolean> {
 // PATCH - Update testimonial (admin only - approve/reject)
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify admin authentication
@@ -40,11 +40,12 @@ export async function PATCH(
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseKey)
+    const { id } = await params
 
     const { data, error } = await supabaseAdmin
       .from('testimonials')
       .update({ is_approved })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -63,7 +64,7 @@ export async function PATCH(
 // DELETE - Delete testimonial (admin only)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify admin authentication
@@ -80,11 +81,12 @@ export async function DELETE(
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseKey)
+    const { id } = await params
 
     const { error } = await supabaseAdmin
       .from('testimonials')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) {
       console.error('Error deleting testimonial:', error)
