@@ -165,7 +165,7 @@ export default function Testimonials() {
               Soyez le premier à laisser un avis !
             </h3>
             <p className="text-gray-400 max-w-md mx-auto">
-              Partagez votre expérience avec notre salon et aidez d'autres clients à nous découvrir.
+              Partagez votre expérience avec notre salon et aidez d&apos;autres clients à nous découvrir.
             </p>
           </motion.div>
         ) : (
