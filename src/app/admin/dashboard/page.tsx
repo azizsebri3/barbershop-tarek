@@ -13,7 +13,8 @@ import {
   Calendar,
   Bell,
   History,
-  Star
+  Star,
+  Palette
 } from 'lucide-react'
 import AdminHours from '@/components/admin/AdminHours'
 import AdminServices from '@/components/admin/AdminServices'
@@ -22,12 +23,13 @@ import AdminImages from '@/components/admin/AdminImages'
 import AdminBookings from '@/components/admin/AdminBookings'
 import AdminHistory from '@/components/admin/AdminHistory'
 import AdminTestimonials from '@/components/admin/AdminTestimonials'
+import AdminBranding from '@/components/admin/AdminBranding'
 import PushNotificationToggle from '@/components/admin/PushNotificationToggle'
 import { useLanguage } from '@/lib/language-context'
 import { supabase } from '@/lib/supabase'
 import { isAdminAuthenticated, clearAdminSession, renewAdminSession, getSessionInfo } from '@/lib/admin-auth'
 
-type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'history' | 'testimonials' | 'notifications'
+type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'history' | 'testimonials' | 'branding' | 'notifications'
 
 export default function AdminDashboard() {
   const { t } = useLanguage()
@@ -86,6 +88,7 @@ export default function AdminDashboard() {
     { id: 'hours' as TabType, label: t.admin.hours, icon: Clock },
     { id: 'services' as TabType, label: t.admin.services, icon: Scissors },
     { id: 'images' as TabType, label: t.admin.images, icon: Image },
+    { id: 'branding' as TabType, label: 'Logo & Identité', icon: Palette },
     { id: 'bookings' as TabType, label: t.admin.bookings, icon: Calendar, badge: pendingCount },
     { id: 'history' as TabType, label: 'Historique', icon: History },
     { id: 'testimonials' as TabType, label: 'Avis Clients', icon: Star },
@@ -264,6 +267,7 @@ export default function AdminDashboard() {
             {activeTab === 'hours' && <AdminHours />}
             {activeTab === 'services' && <AdminServices />}
             {activeTab === 'images' && <AdminImages />}
+            {activeTab === 'branding' && <AdminBranding />}
             {activeTab === 'bookings' && <AdminBookings onStatusChange={fetchPendingCount} />}
             {activeTab === 'history' && <AdminHistory />}
             {activeTab === 'testimonials' && <AdminTestimonials />}

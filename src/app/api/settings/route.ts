@@ -23,7 +23,7 @@ export async function GET() {
     const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('settings')
-      .select('value')
+      .select('value, logo_url')
       .eq('key', 'general')
       .single()
 
@@ -32,7 +32,10 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ settings: data?.value || null })
+    return NextResponse.json({ 
+      settings: data?.value || null,
+      logo_url: data?.logo_url || '/logo.png'
+    })
   } catch (error) {
     console.error('Erreur API settings:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })

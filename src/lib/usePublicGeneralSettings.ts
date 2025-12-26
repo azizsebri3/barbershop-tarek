@@ -13,6 +13,7 @@ interface GeneralSettings {
   facebook?: string
   instagram?: string
   tiktok?: string
+  logo_url?: string
 }
 
 const defaultSettings: GeneralSettings = {
@@ -24,7 +25,8 @@ const defaultSettings: GeneralSettings = {
   website: 'stylecoupe.be',
   facebook: '',
   instagram: '',
-  tiktok: ''
+  tiktok: '',
+  logo_url: '/logo.png'
 }
 
 export function usePublicGeneralSettings() {
@@ -44,14 +46,18 @@ export function usePublicGeneralSettings() {
 
       const { data, error } = await supabase
         .from('settings')
-        .select('value')
+        .select('value, logo_url')
         .eq('key', 'general')
         .single()
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = not found
         console.error('Erreur lors du chargement des paramètres:', error)
       } else if (data) {
-        setSettings({ ...defaultSettings, ...data.value })
+        setSettings({ 
+          ...defaultSettings, 
+          ...data.value,
+          logo_url: data.logo_url || '/logo.png'
+        })
       }
     } catch (error) {
       console.error('Erreur lors du chargement des paramètres:', error)

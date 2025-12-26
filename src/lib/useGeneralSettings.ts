@@ -13,6 +13,7 @@ interface GeneralSettings {
   facebook?: string
   instagram?: string
   tiktok?: string
+  logo_url?: string
 }
 
 const defaultSettings: GeneralSettings = {
@@ -24,7 +25,8 @@ const defaultSettings: GeneralSettings = {
   website: 'stylecoupe.be',
   facebook: '',
   instagram: '',
-  tiktok: ''
+  tiktok: '',
+  logo_url: '/logo.png'
 }
 
 export function useGeneralSettings() {

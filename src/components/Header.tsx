@@ -89,8 +89,12 @@ export default function Header() {
           <Link href="/" className="group flex items-center gap-3">
             <div className="relative">
               <div className="absolute inset-0 bg-accent/30 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-accent to-yellow-500 rounded-xl flex items-center justify-center text-black font-bold text-lg sm:text-xl shadow-lg shadow-accent/20">
-                ✂️
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-accent/20 to-yellow-500/20 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-accent/20 border border-accent/20">
+                <img 
+                  src={settings.logo_url || '/logo.png'} 
+                  alt={settings.salonName}
+                  className="w-full h-full object-contain p-1"
+                />
               </div>
             </div>
             <div className="flex flex-col">
