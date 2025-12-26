@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 // Simple admin verification
-async function verifyAdmin(request: Request): Promise<boolean> {
+async function verifyAdmin(_request: Request): Promise<boolean> {
   // For now, we'll use a simple check
   // In production, you should implement proper JWT verification
   return true // Temporary: allow all for testing
