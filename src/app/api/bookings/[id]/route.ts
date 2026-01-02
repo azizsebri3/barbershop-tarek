@@ -50,7 +50,7 @@ export async function PUT(
   const { id } = await params
   try {
     const body = await request.json()
-    const { status, lang = 'fr' } = body
+    const { status, lang = 'fr', cancel_note } = body
 
     if (!status || !['pending', 'confirmed', 'cancelled'].includes(status)) {
       return NextResponse.json(
@@ -58,8 +58,6 @@ export async function PUT(
         { status: 400 }
       )
     }
-
-    console.log('🔄 Mise à jour du statut de la réservation:', id, '->', status)
 
     const supabase = getSupabaseClient()
     
@@ -76,9 +74,14 @@ export async function PUT(
     }
 
     // Mettre à jour le statut
+    const updateData: any = { status, updated_at: new Date().toISOString() }
+    if (status === 'cancelled' && cancel_note) {
+      updateData.cancel_note = cancel_note
+    }
+
     const { error } = await supabase
       .from('bookings')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(updateData)
       .eq('id', id)
 
     if (error) {
@@ -86,12 +89,9 @@ export async function PUT(
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    console.log('✅ Statut de la réservation mis à jour avec succès')
-
     // Envoyer l'email approprié selon le nouveau statut
     if (status === 'confirmed') {
-      console.log('📧 Envoi email de confirmation...')
-      const emailResult = await sendBookingConfirmedEmail({
+      await sendBookingConfirmedEmail({
         name: booking.name,
         email: booking.email,
         phone: booking.phone,
@@ -100,19 +100,17 @@ export async function PUT(
         service: booking.service,
         message: booking.message
       }, lang)
-      console.log('📧 Résultat email confirmation:', emailResult)
     } else if (status === 'cancelled') {
-      console.log('📧 Envoi email d\'annulation...')
-      const emailResult = await sendBookingCancelledEmail({
+      await sendBookingCancelledEmail({
         name: booking.name,
         email: booking.email,
         phone: booking.phone,
         date: booking.date,
         time: booking.time,
         service: booking.service,
-        message: booking.message
+        message: booking.message,
+        cancelNote: cancel_note
       }, lang)
-      console.log('📧 Résultat email annulation:', emailResult)
     }
 
     return NextResponse.json({ success: true })
@@ -131,8 +129,6 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
-    console.log('🗑️ Suppression de la réservation:', id)
-
     const supabase = getSupabaseClient()
     const { error } = await supabase
       .from('bookings')
@@ -144,7 +140,6 @@ export async function DELETE(
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    console.log('✅ Réservation supprimée avec succès')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('❌ Erreur lors de la suppression:', error)

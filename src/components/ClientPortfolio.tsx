@@ -29,7 +29,6 @@ export default function ClientPortfolio() {
     try {
       const response = await fetch('/api/gallery')
       const data = await response.json()
-      console.log('🎨 Portfolio - Photos chargées:', data.photos?.length || 0)
       setPhotos(data.photos || [])
     } catch (error) {
       console.error('❌ Portfolio - Erreur chargement:', error)

@@ -25,8 +25,6 @@ export default function AdminGalleryPage() {
     try {
       const response = await fetch('/api/gallery')
       const data = await response.json()
-      console.log('📸 Admin - Photos reçues:', data)
-      console.log('📸 Admin - Nombre:', data.photos?.length || 0)
       setPhotos(data.photos || [])
     } catch (error) {
       console.error('❌ Erreur chargement photos:', error)

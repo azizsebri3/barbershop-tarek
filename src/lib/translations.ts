@@ -61,7 +61,7 @@ export const translations = {
       titleAccent: "d'Ouverture",
       open: '✓ Actuellement ouvert',
       closed: '✗ Actuellement fermé',
-      phone: '+32 2 123 45 67',
+      phone: '+32465632205',
       location: 'Namur, Belgique',
     },
     // Booking
@@ -80,7 +80,7 @@ export const translations = {
       placeholders: {
         name: 'Jean Dupont',
         email: 'jean@example.com',
-        phone: '+32 2 123 45 67',
+        phone: '+32465632205',
         message: 'Ajouter des détails supplémentaires...',
       },
       errors: {
@@ -236,7 +236,7 @@ export const translations = {
       titleAccent: 'Hours',
       open: '✓ Currently open',
       closed: '✗ Currently closed',
-      phone: '+32 2 123 45 67',
+      phone: '+32465632205',
       location: 'Namur, Belgium',
     },
     // Booking
@@ -255,7 +255,7 @@ export const translations = {
       placeholders: {
         name: 'John Doe',
         email: 'john@example.com',
-        phone: '+32 2 123 45 67',
+        phone: '+32465632205',
         message: 'Add additional details...',
       },
       errors: {

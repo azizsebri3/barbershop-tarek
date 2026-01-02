@@ -18,8 +18,6 @@ export async function GET() {
   try {
     const supabase = getSupabaseClient()
     
-    console.log('📥 Chargement des photos depuis Supabase Storage...')
-
     const { data, error } = await supabase
       .storage
       .from('salon-photos')
@@ -51,8 +49,6 @@ export async function GET() {
       }
     })
 
-    console.log(`✅ ${photos.length} photos chargées`)
-    console.log('📸 URLs générées:', photos.map(p => p.url))
     return NextResponse.json({ photos })
   } catch (error) {
     console.error('❌ Erreur:', error)
@@ -91,8 +87,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('📤 Upload photo:', file.name)
-
     // Générer un nom unique
     const timestamp = Date.now()
     const extension = file.name.split('.').pop()
@@ -123,8 +117,6 @@ export async function POST(request: NextRequest) {
       .from('salon-photos')
       .getPublicUrl(fileName)
 
-    console.log('✅ Photo uploadée:', fileName)
-
     return NextResponse.json({
       success: true,
       photo: {
@@ -153,8 +145,6 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Nom de fichier manquant' }, { status: 400 })
     }
 
-    console.log('🗑️ Suppression photo:', fileName)
-
     const { error } = await supabase
       .storage
       .from('salon-photos')
@@ -165,7 +155,6 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    console.log('✅ Photo supprimée:', fileName)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('❌ Erreur suppression:', error)

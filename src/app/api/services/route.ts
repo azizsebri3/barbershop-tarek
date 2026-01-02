@@ -15,8 +15,6 @@ function getSupabaseClient() {
 // GET /api/services - Récupérer les services depuis la table services
 export async function GET() {
   try {
-    console.log('📥 Chargement des services depuis la table services...')
-
     const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('services')
@@ -29,10 +27,8 @@ export async function GET() {
     }
 
     if (data && data.length > 0) {
-      console.log('✅ Services chargés depuis table services:', data)
       return NextResponse.json({ services: data })
     } else {
-      console.log('⚠️ Aucun service trouvé dans la table services')
       return NextResponse.json({ services: [] })
     }
   } catch (error) {
@@ -56,8 +52,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-
-    console.log('💾 Sauvegarde des services dans la table services:', services)
 
     const supabase = getSupabaseClient()
     // Supprimer tous les anciens services
@@ -90,7 +84,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
-    console.log('✅ Services sauvegardés avec succès dans la table services')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('❌ Erreur lors de la sauvegarde:', error)

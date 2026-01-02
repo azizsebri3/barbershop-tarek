@@ -72,8 +72,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: updateError.message }, { status: 500 })
     }
 
-    console.log('✅ Logo uploaded:', pub.publicUrl)
-
     return NextResponse.json({
       success: true,
       url: pub.publicUrl,

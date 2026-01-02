@@ -2,18 +2,18 @@
 
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Settings, LogOut, Bell, LayoutDashboard, Sparkles, ChevronRight } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Sparkles, ChevronRight, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import LanguageSwitcher from './LanguageSwitcher'
 import { useLanguage } from '@/lib/language-context'
 import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettings'
-import { isAdminAuthenticated, clearAdminSession, getSessionInfo } from '@/lib/admin-auth'
+import { isAdminAuthenticated } from '@/lib/admin-auth'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
-  const [showAdminMenu, setShowAdminMenu] = useState(false)
-  const [sessionInfo, setSessionInfo] = useState<{ expiresIn: string } | null>(null)
+  const [showAdminModal, setShowAdminModal] = useState(false)
+  const [adminPassword, setAdminPassword] = useState('')
   const [scrolled, setScrolled] = useState(false)
   const { t } = useLanguage()
   const { settings } = usePublicGeneralSettings()
@@ -23,9 +23,6 @@ export default function Header() {
     const checkAdmin = () => {
       const authenticated = isAdminAuthenticated()
       setIsAdmin(authenticated)
-      if (authenticated) {
-        setSessionInfo(getSessionInfo())
-      }
     }
     checkAdmin()
     
@@ -43,10 +40,19 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const handleAdminLogout = () => {
-    clearAdminSession()
-    setIsAdmin(false)
-    setShowAdminMenu(false)
+  const handleAdminLogin = () => {
+    const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+    if (adminPassword === ADMIN_PASSWORD) {
+      // Simuler l'authentification (vous pouvez remplacer par une vraie logique)
+      localStorage.setItem('admin_auth', 'true')
+      localStorage.setItem('admin_login_time', Date.now().toString())
+      setIsAdmin(true)
+      setShowAdminModal(false)
+      setAdminPassword('')
+    } else {
+      alert('Mot de passe incorrect')
+      setAdminPassword('')
+    }
   }
 
   const navLinks = [
@@ -70,11 +76,11 @@ export default function Header() {
         >
           <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
             <span className="text-accent font-medium flex items-center gap-2">
-              <Settings size={12} className="animate-spin-slow" />
+              <Shield size={12} />
               Mode Administrateur
             </span>
             <span className="text-gray-400">
-              Session: {sessionInfo?.expiresIn || 'Active'}
+              Session Active
             </span>
           </div>
         </motion.div>
@@ -140,78 +146,29 @@ export default function Header() {
 
           {/* Admin Controls */}
           {isAdmin ? (
-            <div className="relative ml-2">
+            <Link
+              href="/admin/dashboard"
+              className="ml-2"
+            >
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setShowAdminMenu(!showAdminMenu)}
                 className="flex items-center gap-2 px-4 py-2.5 bg-accent/10 hover:bg-accent/20 text-accent rounded-full transition-all duration-300 text-sm font-medium border border-accent/30 backdrop-blur-md"
               >
                 <LayoutDashboard size={16} />
                 <span className="hidden lg:inline">Admin</span>
               </motion.button>
-              
-              {/* Admin Dropdown Menu */}
-              <AnimatePresence>
-                {showAdminMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-3 w-64 bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden"
-                  >
-                    <div className="p-4 border-b border-white/10 bg-gradient-to-r from-accent/10 to-transparent">
-                      <p className="text-xs text-gray-400">Connecté en tant qu&apos;admin</p>
-                      <p className="text-sm text-accent font-medium mt-1">{sessionInfo?.expiresIn || 'Session active'}</p>
-                    </div>
-                    <div className="p-2">
-                      <Link
-                        href="/admin/dashboard"
-                        className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all duration-200"
-                        onClick={() => setShowAdminMenu(false)}
-                      >
-                        <LayoutDashboard size={18} className="text-accent" />
-                        Tableau de bord
-                      </Link>
-                      <Link
-                        href="/admin/dashboard"
-                        className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all duration-200"
-                        onClick={() => setShowAdminMenu(false)}
-                      >
-                        <Bell size={18} className="text-accent" />
-                        Réservations
-                      </Link>
-                      <Link
-                        href="/admin/dashboard"
-                        className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl transition-all duration-200"
-                        onClick={() => setShowAdminMenu(false)}
-                      >
-                        <Settings size={18} className="text-accent" />
-                        Paramètres
-                      </Link>
-                    </div>
-                    <div className="p-2 border-t border-white/10">
-                      <button
-                        onClick={handleAdminLogout}
-                        className="flex items-center gap-3 w-full px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200"
-                      >
-                        <LogOut size={18} />
-                        Déconnexion Admin
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ) : (
-            <Link
-              href="/admin"
-              className="ml-2 p-2.5 text-gray-500 hover:text-accent hover:bg-white/5 rounded-full transition-all duration-300 opacity-50 hover:opacity-100"
-              title="Administration"
-            >
-              <Settings size={18} />
             </Link>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowAdminModal(true)}
+              className="ml-2 p-2.5 text-gray-500 hover:text-accent hover:bg-white/5 rounded-full transition-all duration-300 opacity-50 hover:opacity-100"
+              title="Accès Administration"
+            >
+              <Shield size={18} />
+            </motion.button>
           )}
 
           <div className="ml-2">
@@ -301,7 +258,7 @@ export default function Header() {
                 </motion.div>
                 
                 {/* Mobile Admin Controls */}
-                {isAdmin && (
+                {isAdmin ? (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -316,20 +273,90 @@ export default function Header() {
                       <LayoutDashboard size={20} />
                       Admin Panel
                     </Link>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="pt-4 mt-4 border-t border-white/10"
+                  >
                     <button
                       onClick={() => {
-                        handleAdminLogout()
                         setIsOpen(false)
+                        setShowAdminModal(true)
                       }}
-                      className="flex items-center gap-3 w-full px-4 py-3.5 text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200"
+                      className="flex items-center gap-3 w-full px-4 py-3.5 text-gray-400 hover:text-accent hover:bg-white/5 rounded-xl transition-all duration-200"
                     >
-                      <LogOut size={20} />
-                      Déconnexion Admin
+                      <Shield size={20} />
+                      Accès Admin
                     </button>
                   </motion.div>
                 )}
               </div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Admin Authentication Modal */}
+      <AnimatePresence>
+        {showAdminModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowAdminModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className="bg-secondary rounded-2xl p-6 w-full max-w-md border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                  <Shield className="text-accent" size={24} />
+                  Accès Administration
+                </h3>
+                <button
+                  onClick={() => setShowAdminModal(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Mot de passe administrateur
+                  </label>
+                  <input
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Entrez le mot de passe"
+                    className="w-full px-4 py-3 bg-primary border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent transition-colors"
+                    onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
+                  />
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleAdminLogin}
+                  className="w-full py-3 bg-gradient-to-r from-accent to-yellow-500 text-black rounded-xl font-bold text-base shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all duration-300"
+                >
+                  Accéder au panneau admin
+                </motion.button>
+                <p className="text-xs text-gray-500 text-center">
+                  Contactez l&apos;administrateur pour obtenir le mot de passe
+                </p>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

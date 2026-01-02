@@ -37,7 +37,6 @@ async function sendPushNotification(booking: { name: string; service: string; da
       .select('*')
     
     if (!subscriptions || subscriptions.length === 0) {
-      console.log('⚠️ Aucune subscription push enregistrée')
       return
     }
 
@@ -53,7 +52,6 @@ async function sendPushNotification(booking: { name: string; service: string; da
     for (const sub of subscriptions) {
       try {
         await webpush.sendNotification(sub.subscription, payload)
-        console.log('✅ Notification push envoyée')
       } catch (err) {
         console.error('❌ Erreur envoi push:', err)
         // Si subscription expirée, la supprimer
@@ -112,8 +110,7 @@ export async function POST(request: NextRequest) {
     await sendPushNotification({ name, service, date, time })
 
     // Envoyer les emails de confirmation
-    const emailResults = await sendBookingEmails({ name, email, phone, date, time, service, message })
-    console.log('📧 Résultat envoi emails:', emailResults)
+    await sendBookingEmails({ name, email, phone, date, time, service, message })
 
     return NextResponse.json(
       {
@@ -131,9 +128,32 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
+    const url = new URL(request.url)
+    const date = url.searchParams.get('date')
+    
     const supabase = getSupabaseClient()
+    
+    // Si une date est spécifiée, retourner seulement les réservations de ce jour
+    if (date) {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('date, time, service')
+        .eq('date', date)
+        .eq('status', 'confirmed')
+
+      if (error) {
+        return NextResponse.json(
+          { error: 'Erreur lors de la récupération des créneaux' },
+          { status: 500 }
+        )
+      }
+
+      return NextResponse.json(data || [], { status: 200 })
+    }
+
+    // Sinon, retourner toutes les réservations (pour l'admin)
     const { data, error } = await supabase
       .from('bookings')
       .select('*')

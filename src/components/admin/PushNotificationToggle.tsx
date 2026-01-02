@@ -64,8 +64,6 @@ export default function PushNotificationToggle() {
         throw new Error('Clé VAPID non configurée')
       }
 
-      console.log('🔑 VAPID Key:', publicKey)
-
       // Vérifier si déjà abonné
       let subscription = await registration.pushManager.getSubscription()
       
@@ -79,8 +77,6 @@ export default function PushNotificationToggle() {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey)
       })
-
-      console.log('✅ Subscription créée:', subscription)
 
       // Enregistrer sur le serveur
       const saveResponse = await fetch('/api/push/subscribe', {

@@ -38,7 +38,6 @@ export default function AdminHours() {
 
   const loadHours = async () => {
     try {
-      console.log('📥 Chargement des horaires depuis API...')
       const response = await fetch('/api/hours')
       const data = await response.json()
 
@@ -50,7 +49,6 @@ export default function AdminHours() {
           setHours(JSON.parse(saved))
         }
       } else if (data.hours) {
-        console.log('✅ Horaires chargés:', data.hours)
         setHours(data.hours)
       }
     } catch (error) {
@@ -66,8 +64,6 @@ export default function AdminHours() {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      console.log('💾 Sauvegarde des horaires:', hours)
-
       const response = await fetch('/api/hours', {
         method: 'POST',
         headers: {
@@ -85,7 +81,6 @@ export default function AdminHours() {
         throw new Error(data.error || 'Erreur lors de la sauvegarde')
       }
 
-      console.log('✅ Horaires sauvegardés avec succès')
       // Also save to localStorage as backup
       localStorage.setItem('admin_opening_hours', JSON.stringify(hours))
       toast.success(t.hoursSaved)

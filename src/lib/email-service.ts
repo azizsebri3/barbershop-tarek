@@ -18,6 +18,7 @@ interface BookingDetails {
   time: string
   service: string
   message?: string
+  cancelNote?: string
 }
 
 // Email de confirmation au client
@@ -113,7 +114,6 @@ export async function sendClientConfirmation(booking: BookingDetails) {
       return { success: false, error: error.message }
     }
 
-    console.log('✅ Email de confirmation envoyé à:', booking.email)
     return { success: true, id: data?.id }
   } catch (error) {
     console.error('❌ Erreur envoi email:', error)
@@ -203,7 +203,6 @@ export async function sendAdminNotification(booking: BookingDetails) {
       return { success: false, error: error.message }
     }
 
-    console.log('✅ Notification envoyée à l\'admin:', adminEmail)
     return { success: true, id: data?.id }
   } catch (error) {
     console.error('❌ Erreur envoi notification:', error)
@@ -331,7 +330,6 @@ export async function sendBookingConfirmedEmail(booking: BookingDetails, lang: '
       return { success: false, error: error.message }
     }
 
-    console.log('✅ Email de confirmation RDV envoyé à:', booking.email)
     return { success: true, id: data?.id }
   } catch (error) {
     console.error('❌ Erreur envoi email:', error)
@@ -433,6 +431,13 @@ export async function sendBookingCancelledEmail(booking: BookingDetails, lang: '
                 ${t.reason}
               </p>
               
+              ${booking.cancelNote ? `
+              <div style="background-color: #1a1a1a; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                <h3 style="color: #f59e0b; margin: 0 0 10px 0; font-size: 16px;">💬 Note d'annulation</h3>
+                <p style="color: #cccccc; margin: 0; line-height: 1.6;">${booking.cancelNote}</p>
+              </div>
+              ` : ''}
+              
               <p style="color: #cccccc; line-height: 1.6;">
                 ${t.reschedule}
               </p>
@@ -469,7 +474,6 @@ export async function sendBookingCancelledEmail(booking: BookingDetails, lang: '
       return { success: false, error: error.message }
     }
 
-    console.log('✅ Email d\'annulation envoyé à:', booking.email)
     return { success: true, id: data?.id }
   } catch (error) {
     console.error('❌ Erreur envoi email:', error)

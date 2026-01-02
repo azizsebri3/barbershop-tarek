@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from 'next'
+import { Suspense, lazy } from 'react'
 import './globals.css'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import { LanguageProvider } from '@/lib/language-context'
+
+// Lazy load des composants lourds
+const Header = lazy(() => import('@/components/Header'))
+const Footer = lazy(() => import('@/components/Footer'))
 
 // SEO Metadata optimisé pour Namur, Belgique
 export const metadata: Metadata = {
@@ -281,11 +284,15 @@ export default function RootLayout({
       </head>
       <body className="bg-primary text-white">
         <LanguageProvider>
-          <Header />
+          <Suspense fallback={<div className="h-16 bg-primary" />}>
+            <Header />
+          </Suspense>
           <main className="pt-16">
             {children}
           </main>
-          <Footer />
+          <Suspense fallback={<div className="h-32 bg-primary" />}>
+            <Footer />
+          </Suspense>
         </LanguageProvider>
       </body>
     </html>

@@ -14,10 +14,8 @@ export default function AdminGeneral() {
 
   const handleSave = async () => {
     setIsSaving(true)
-    console.log('💾 Début de la sauvegarde, paramètres actuels:', settings)
     try {
       await updateSettings(settings)
-      console.log('✅ Sauvegarde terminée avec succès')
       toast.success(t_admin.settingsSaved)
     } catch (error) {
       console.error('❌ Erreur lors de la sauvegarde:', error)

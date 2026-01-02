@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import BookingForm from '@/components/BookingForm'
+import ModernBookingForm from '@/components/ModernBookingForm'
 import { useLanguage } from '@/lib/language-context'
 
 export default function BookingPageContent() {
@@ -9,7 +9,7 @@ export default function BookingPageContent() {
 
   return (
     <div className="min-h-screen py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -24,7 +24,7 @@ export default function BookingPageContent() {
           </p>
         </motion.div>
 
-        <BookingForm />
+        <ModernBookingForm />
       </div>
     </div>
   )

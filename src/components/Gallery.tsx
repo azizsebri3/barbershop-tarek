@@ -25,8 +25,6 @@ export default function Gallery() {
     try {
       const response = await fetch('/api/gallery')
       const data = await response.json()
-      console.log('📸 Données reçues de l\'API:', data)
-      console.log('📸 Nombre de photos:', data.photos?.length || 0)
       setPhotos(data.photos || [])
     } catch (error) {
       console.error('❌ Erreur chargement photos:', error)
@@ -42,8 +40,6 @@ export default function Gallery() {
       </div>
     )
   }
-
-  console.log('🖼️ Gallery render - photos:', photos.length)
 
   if (photos.length === 0) {
     return (

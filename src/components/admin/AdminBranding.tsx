@@ -24,9 +24,7 @@ export default function AdminBranding({}: AdminBrandingProps) {
       const response = await fetch('/api/settings')
       if (response.ok) {
         const data = await response.json()
-        console.log('📥 Settings API response:', data)
         if (data.logo_url) {
-          console.log('✅ Setting logo URL to:', data.logo_url)
           // Force component re-render by clearing state first
           setLogoUrl('')
           setTimeout(() => {
@@ -42,8 +40,6 @@ export default function AdminBranding({}: AdminBrandingProps) {
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-
-    console.log('📤 Logo sélectionné:', file.name, file.type, file.size)
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
@@ -67,8 +63,6 @@ export default function AdminBranding({}: AdminBrandingProps) {
       }
       reader.readAsDataURL(file)
 
-      console.log('📤 Envoi du logo vers /api/logo/upload...')
-
       // Upload to Supabase
       const formData = new FormData()
       formData.append('logo', file)
@@ -78,8 +72,6 @@ export default function AdminBranding({}: AdminBrandingProps) {
         body: formData,
       })
 
-      console.log('📥 Réponse:', response.status, response.statusText)
-
       if (!response.ok) {
         const error = await response.json()
         console.error('❌ Erreur API:', error)
@@ -87,7 +79,6 @@ export default function AdminBranding({}: AdminBrandingProps) {
       }
 
       const data = await response.json()
-      console.log('✅ Logo uploadé:', data)
       
       // Clear preview and force reload of logo
       setPreviewUrl(null)

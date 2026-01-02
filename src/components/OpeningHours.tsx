@@ -147,7 +147,7 @@ export default function OpeningHours() {
           </div>
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wider">Téléphone</p>
-            <p className="text-white font-medium text-sm">+32 2 123 45 67</p>
+            <p className="text-white font-medium text-sm">+32465632205</p>
           </div>
         </motion.a>
         

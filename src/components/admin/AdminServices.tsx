@@ -28,7 +28,6 @@ export default function AdminServices() {
 
   const loadServices = async () => {
     try {
-      console.log('📥 Loading services from API...')
       const response = await fetch('/api/services')
       const data = await response.json()
 
@@ -40,7 +39,6 @@ export default function AdminServices() {
           setServices(JSON.parse(saved))
         }
       } else if (data.services) {
-        console.log('✅ Services loaded:', data.services)
         setServices(data.services)
       }
     } catch (error) {
@@ -56,8 +54,6 @@ export default function AdminServices() {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      console.log('💾 Saving services:', services)
-
       // Remove id when sending (API generates UUIDs)
       const servicesToSave = services.map(({ id: _, ...service }) => service)
 
@@ -78,7 +74,6 @@ export default function AdminServices() {
         throw new Error(data.error || 'Error while saving')
       }
 
-      console.log('✅ Services saved successfully')
       // Also save to localStorage as backup
       localStorage.setItem('admin_services', JSON.stringify(services))
       toast.success(t.serviceAdded)

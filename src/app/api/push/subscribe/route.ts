@@ -45,8 +45,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('📱 Nouvelle subscription push:', subscription.endpoint)
-
     const supabase = getSupabaseClient()
 
     // Vérifier si cette subscription existe déjà
@@ -88,7 +86,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('✅ Subscription enregistrée avec succès')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('❌ Erreur subscription:', error)
@@ -124,7 +121,6 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    console.log('✅ Subscription supprimée')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('❌ Erreur suppression:', error)

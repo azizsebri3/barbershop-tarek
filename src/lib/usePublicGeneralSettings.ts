@@ -19,10 +19,10 @@ interface GeneralSettings {
 const defaultSettings: GeneralSettings = {
   salonName: 'Style & Coupe',
   description: 'Votre salon de coiffure et barbershop en Belgique. Coupes modernes, colorations tendance et rasage traditionnel premium.',
-  phone: '+32 2 123 45 67',
-  email: 'contact@stylecoupe.be',
+  phone: '+32465632205',
+  email: 'contact@tareksalon.be',
   address: 'Belgique',
-  website: 'stylecoupe.be',
+  website: 'tareksalon.be',
   facebook: '',
   instagram: '',
   tiktok: '',

@@ -21,7 +21,6 @@ export function useServices() {
 
   const loadServices = async () => {
     try {
-      console.log('📥 Chargement des services publics...')
       const response = await fetch('/api/services')
       const data = await response.json()
 
@@ -30,7 +29,6 @@ export function useServices() {
         // Fallback to default services
         setServices(defaultServices)
       } else if (data.services) {
-        console.log('✅ Services publics chargés:', data.services)
         setServices(data.services)
       }
     } catch (error) {

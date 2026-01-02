@@ -55,8 +55,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('📤 Envoi de notification push:', { title, message })
-
     const supabase = getSupabaseClient()
 
     // Récupérer toutes les subscriptions
@@ -70,7 +68,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (!subscriptions || subscriptions.length === 0) {
-      console.log('⚠️ Aucune subscription trouvée')
       return NextResponse.json({ 
         success: true, 
         sent: 0,
@@ -100,7 +97,6 @@ export async function POST(request: NextRequest) {
           JSON.stringify(payload)
         )
         successCount++
-        console.log('✅ Notification envoyée à:', sub.endpoint.substring(0, 50) + '...')
       } catch (err) {
         failCount++
         failedEndpoints.push(sub.endpoint)
@@ -113,12 +109,9 @@ export async function POST(request: NextRequest) {
             .from('push_subscriptions')
             .delete()
             .eq('endpoint', sub.endpoint)
-          console.log('🗑️ Subscription expirée supprimée')
         }
       }
     }
-
-    console.log(`📊 Résultat: ${successCount} envoyées, ${failCount} échouées`)
 
     return NextResponse.json({
       success: true,

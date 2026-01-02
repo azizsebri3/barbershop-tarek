@@ -23,7 +23,6 @@ export function useOpeningHours() {
 
   const loadHours = async () => {
     try {
-      console.log('📥 Chargement des horaires publics...')
       const response = await fetch('/api/hours')
       const data = await response.json()
 
@@ -32,7 +31,6 @@ export function useOpeningHours() {
         // Fallback to default hours
         setHours(defaultHours)
       } else if (data.hours) {
-        console.log('✅ Horaires publics chargés:', data.hours)
         setHours(data.hours)
       }
     } catch (error) {

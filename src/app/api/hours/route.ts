@@ -15,8 +15,6 @@ function getSupabaseClient() {
 // GET /api/hours - Récupérer les horaires d'ouverture
 export async function GET() {
   try {
-    console.log('📥 Chargement des horaires depuis DB...')
-
     const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('settings')
@@ -30,10 +28,8 @@ export async function GET() {
     }
 
     if (data) {
-      console.log('✅ Horaires chargés:', data.value)
       return NextResponse.json({ hours: data.value })
     } else {
-      console.log('⚠️ Aucun horaire trouvé, utilisation des valeurs par défaut')
       // Retourner les horaires par défaut
       const defaultHours = {
         monday: { open: '09:00', close: '18:00', closed: false },
@@ -68,8 +64,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('💾 Sauvegarde des horaires:', hours)
-
     const supabase = getSupabaseClient()
     const { error } = await supabase
       .from('settings')
@@ -86,7 +80,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    console.log('✅ Horaires sauvegardés avec succès')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('❌ Erreur lors de la sauvegarde:', error)

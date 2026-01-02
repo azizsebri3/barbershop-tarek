@@ -19,10 +19,10 @@ interface GeneralSettings {
 const defaultSettings: GeneralSettings = {
   salonName: 'Style & Coupe',
   description: 'Votre salon de coiffure et barbershop en Belgique. Coupes modernes, colorations tendance et rasage traditionnel premium.',
-  phone: '+32 2 123 45 67',
-  email: 'contact@stylecoupe.be',
+  phone: '+32465632205',
+  email: 'contact@tareksalon.be',
   address: 'Belgique',
-  website: 'stylecoupe.be',
+  website: 'tareksalon.be',
   facebook: '',
   instagram: '',
   tiktok: '',
@@ -50,7 +50,6 @@ export function useGeneralSettings() {
         return
       }
 
-      console.log('📥 Chargement des paramètres depuis API...')
       const response = await fetch('/api/settings')
       const data = await response.json()
 
@@ -63,7 +62,6 @@ export function useGeneralSettings() {
           setSettings({ ...defaultSettings, ...parsed })
         }
       } else if (data.settings) {
-        console.log('✅ Paramètres chargés:', data.settings)
         setSettings({ ...defaultSettings, ...data.settings })
       }
     } catch (error) {
@@ -76,17 +74,14 @@ export function useGeneralSettings() {
   const updateSettings = async (newSettings: Partial<GeneralSettings>) => {
     const updated = { ...settings, ...newSettings }
     setSettings(updated)
-    console.log('🔄 Mise à jour des paramètres:', updated)
 
     try {
       if (!supabase) {
-        console.log('⚠️ Supabase non disponible, sauvegarde en localStorage')
         // Fallback to localStorage
         localStorage.setItem('admin_general_settings', JSON.stringify(updated))
         return
       }
 
-      console.log('💾 Sauvegarde via API...')
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: {
@@ -102,8 +97,6 @@ export function useGeneralSettings() {
         // Fallback to localStorage
         localStorage.setItem('admin_general_settings', JSON.stringify(updated))
         throw new Error(data.error || 'Erreur lors de la sauvegarde')
-      } else {
-        console.log('✅ Sauvegarde réussie via API')
       }
     } catch (error) {
       console.error('❌ Erreur lors de la sauvegarde:', error)

@@ -19,6 +19,9 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<FilterType>('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
+  const [cancelBookingId, setCancelBookingId] = useState<string | null>(null)
+  const [cancelNote, setCancelNote] = useState('')
   const t = adminTranslations.bookings
 
   const fetchBookings = useCallback(async () => {
@@ -43,16 +46,19 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
     fetchBookings()
   }, [fetchBookings])
 
-  const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus) => {
+  const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus, cancelNote?: string) => {
     try {
-      console.log('🔄 Mise à jour du statut:', bookingId, '->', newStatus)
+      const requestBody: any = { status: newStatus }
+      if (newStatus === 'cancelled' && cancelNote) {
+        requestBody.cancel_note = cancelNote
+      }
 
       const response = await fetch(`/api/bookings/${bookingId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify(requestBody),
       })
 
       const data = await response.json()
@@ -62,7 +68,6 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         throw new Error(data.error || 'Erreur lors de la mise à jour')
       }
 
-      console.log('✅ Statut mis à jour avec succès')
       setBookings(bookings.map(booking =>
         booking.id === bookingId ? { ...booking, status: newStatus } : booking
       ))
@@ -82,12 +87,25 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
     }
   }
 
+  const handleCancelBooking = (bookingId: string) => {
+    setCancelBookingId(bookingId)
+    setCancelNote('')
+    setCancelModalOpen(true)
+  }
+
+  const confirmCancelBooking = async () => {
+    if (!cancelBookingId) return
+
+    await updateBookingStatus(cancelBookingId, 'cancelled', cancelNote)
+    setCancelModalOpen(false)
+    setCancelBookingId(null)
+    setCancelNote('')
+  }
+
   const deleteBooking = async (bookingId: string) => {
     if (!confirm(t.deleteMessage)) return
 
     try {
-      console.log('🗑️ Suppression de la réservation:', bookingId)
-
       const response = await fetch(`/api/bookings/${bookingId}`, {
         method: 'DELETE',
       })
@@ -99,7 +117,6 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         throw new Error(data.error || 'Erreur lors de la suppression')
       }
 
-      console.log('✅ Réservation supprimée avec succès')
       setBookings(bookings.filter(booking => booking.id !== bookingId))
       toast.success(t.bookingDeleted)
       
@@ -328,7 +345,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                         {t.confirmBooking}
                       </button>
                       <button
-                        onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                        onClick={() => handleCancelBooking(booking.id)}
                         className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                       >
                         <XCircle size={16} />
@@ -339,7 +356,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
 
                   {booking.status === 'confirmed' && (
                     <button
-                      onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                      onClick={() => handleCancelBooking(booking.id)}
                       className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                     >
                       <XCircle size={16} />
@@ -361,6 +378,63 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
           </AnimatePresence>
         </div>
       )}
+      
+      {/* Cancel Modal */}
+      <AnimatePresence>
+        {cancelModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setCancelModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-secondary/95 backdrop-blur-md border border-accent/20 rounded-xl p-6 w-full max-w-md"
+            >
+              <h3 className="text-xl font-semibold text-white mb-4">
+                {adminTranslations.bookings.cancelBooking}
+              </h3>
+              
+              <p className="text-gray-300 mb-4">
+                Êtes-vous sûr de vouloir annuler cette réservation ?
+              </p>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Note d&apos;annulation (optionnel)
+                </label>
+                <textarea
+                  value={cancelNote}
+                  onChange={(e) => setCancelNote(e.target.value)}
+                  placeholder="Raison de l'annulation..."
+                  className="w-full px-3 py-2 bg-primary/50 border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:border-accent focus:outline-none resize-none"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setCancelModalOpen(false)}
+                  className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={confirmCancelBooking}
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                >
+                  Confirmer l&apos;annulation
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
