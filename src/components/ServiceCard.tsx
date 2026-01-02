@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { useLanguage } from '@/lib/language-context'
 import { useRouter } from 'next/navigation'
@@ -13,7 +14,7 @@ interface ServiceCardProps {
   icon?: React.ReactNode
 }
 
-export default function ServiceCard({ title, description, price, duration, icon }: ServiceCardProps) {
+const ServiceCard = memo(function ServiceCard({ title, description, price, duration, icon }: ServiceCardProps) {
   const { t } = useLanguage()
   const router = useRouter()
 
@@ -83,4 +84,6 @@ export default function ServiceCard({ title, description, price, duration, icon 
       </div>
     </motion.div>
   )
-}
+})
+
+export default ServiceCard

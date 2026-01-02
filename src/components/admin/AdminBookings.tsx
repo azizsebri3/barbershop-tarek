@@ -22,6 +22,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [cancelBookingId, setCancelBookingId] = useState<string | null>(null)
   const [cancelNote, setCancelNote] = useState('')
+  const [cancelLoading, setCancelLoading] = useState(false)
   const t = adminTranslations.bookings
 
   const fetchBookings = useCallback(async () => {
@@ -96,10 +97,18 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const confirmCancelBooking = async () => {
     if (!cancelBookingId) return
 
-    await updateBookingStatus(cancelBookingId, 'cancelled', cancelNote)
-    setCancelModalOpen(false)
-    setCancelBookingId(null)
-    setCancelNote('')
+    setCancelLoading(true)
+    try {
+      await updateBookingStatus(cancelBookingId, 'cancelled', cancelNote)
+      setCancelModalOpen(false)
+      setCancelBookingId(null)
+      setCancelNote('')
+    } catch (error) {
+      console.error('Erreur lors de l\'annulation:', error)
+      toast.error('Erreur lors de l\'annulation')
+    } finally {
+      setCancelLoading(false)
+    }
   }
 
   const deleteBooking = async (bookingId: string) => {
@@ -412,7 +421,8 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                   value={cancelNote}
                   onChange={(e) => setCancelNote(e.target.value)}
                   placeholder="Raison de l'annulation..."
-                  className="w-full px-3 py-2 bg-primary/50 border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:border-accent focus:outline-none resize-none"
+                  disabled={cancelLoading}
+                  className="w-full px-3 py-2 bg-primary/50 border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:border-accent focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                   rows={3}
                 />
               </div>
@@ -420,15 +430,24 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
               <div className="flex gap-3">
                 <button
                   onClick={() => setCancelModalOpen(false)}
-                  className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                  disabled={cancelLoading}
+                  className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={confirmCancelBooking}
-                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                  disabled={cancelLoading}
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
-                  Confirmer l&apos;annulation
+                  {cancelLoading ? (
+                    <>
+                      <RefreshCw size={16} className="animate-spin" />
+                      Annulation...
+                    </>
+                  ) : (
+                    'Confirmer l\'annulation'
+                  )}
                 </button>
               </div>
             </motion.div>

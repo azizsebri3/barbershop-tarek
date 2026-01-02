@@ -5,14 +5,22 @@ import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { LayoutDashboard, Image, LogOut } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useAdminAuth } from '@/lib/useAdminAuth'
+import toast from 'react-hot-toast'
 
 export default function AdminNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const { logout } = useAdminAuth()
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminAuthenticated')
-    router.push('/admin')
+  const handleLogout = async () => {
+    try {
+      await logout()
+      toast.success('Déconnexion réussie')
+      router.push('/admin')
+    } catch (error) {
+      toast.error('Erreur lors de la déconnexion')
+    }
   }
 
   const navItems = [

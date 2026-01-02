@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { Lock, Eye, EyeOff, Smartphone } from 'lucide-react'
-import { createAdminSession, isAdminAuthenticated } from '@/lib/admin-auth'
+import { useAdminAuth } from '@/lib/useAdminAuth'
+import toast from 'react-hot-toast'
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('')
@@ -13,27 +14,39 @@ export default function AdminLogin() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const { isAdmin, login } = useAdminAuth()
 
   // Vérifier si déjà connecté
   useEffect(() => {
-    if (isAdminAuthenticated()) {
+    if (isAdmin) {
       router.push('/admin/dashboard')
     } else {
       setIsLoading(false)
     }
-  }, [router])
+  }, [isAdmin, router])
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
 
-    // Simple password check (in production, use proper authentication)
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+    if (!password.trim()) {
+      setError('Veuillez entrer un mot de passe')
+      return
+    }
 
-    if (password === adminPassword) {
-      createAdminSession(rememberMe)
-      router.push('/admin/dashboard')
-    } else {
-      setError('Mot de passe incorrect')
+    setIsLoading(true)
+    try {
+      const result = await login(password)
+      if (result.success) {
+        toast.success('Connexion admin réussie')
+        router.push('/admin/dashboard')
+      } else {
+        setError(result.error || 'Mot de passe incorrect')
+      }
+    } catch (error) {
+      setError('Erreur de connexion')
+    } finally {
+      setIsLoading(false)
     }
   }
 

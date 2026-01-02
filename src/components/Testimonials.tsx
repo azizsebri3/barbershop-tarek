@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo } from 'react'
 import { motion } from 'framer-motion'
 import { Star, Quote, Sparkles, RefreshCw } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
@@ -17,7 +17,7 @@ interface Testimonial {
   created_at: string
 }
 
-export default function Testimonials() {
+const Testimonials = memo(function Testimonials() {
   const { t } = useLanguage()
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -85,16 +85,8 @@ export default function Testimonials() {
       {/* Background */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent" />
-        <motion.div 
-          animate={{ opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 6, repeat: Infinity }}
-          className="absolute top-1/3 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[150px]" 
-        />
-        <motion.div 
-          animate={{ opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 8, repeat: Infinity, delay: 2 }}
-          className="absolute bottom-1/3 right-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px]" 
-        />
+        <div className="absolute top-1/3 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[150px] opacity-30" />
+        <div className="absolute bottom-1/3 right-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px] opacity-20" />
       </div>
 
       <div className="max-w-7xl mx-auto">
@@ -274,4 +266,6 @@ export default function Testimonials() {
       <TestimonialForm onSuccess={fetchTestimonials} />
     </section>
   )
-}
+})
+
+export default Testimonials

@@ -10,7 +10,6 @@ import Image from 'next/image'
 
 interface SiteImages {
   hero: string
-  logo: string
   portfolio: string[]
   testimonials: string[]
 }
@@ -19,7 +18,6 @@ export default function AdminImages() {
   const t = adminTranslations.images
   const [images, setImages] = useState<SiteImages>({
     hero: '/hero-bg.svg',
-    logo: '/logo.svg',
     portfolio: ['/portfolio1.svg', '/portfolio2.svg', '/portfolio3.svg'],
     testimonials: []
   })
@@ -69,43 +67,6 @@ export default function AdminImages() {
       toast.error(t.error)
     } finally {
       setIsSaving(false)
-    }
-  }
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: keyof SiteImages) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    // In a real app, you would upload to a cloud storage service
-    // For now, we'll just create a local URL
-    const url = URL.createObjectURL(file)
-
-    if (type === 'portfolio' || type === 'testimonials') {
-      setImages(prev => ({
-        ...prev,
-        [type]: [...(prev[type] as string[]), url]
-      }))
-    } else {
-      setImages(prev => ({
-        ...prev,
-        [type]: url
-      }))
-    }
-
-    toast.success(t.imageUploaded)
-  }
-
-  const removeImage = (type: keyof SiteImages, index?: number) => {
-    if (type === 'portfolio' || type === 'testimonials') {
-      setImages(prev => ({
-        ...prev,
-        [type]: (prev[type] as string[]).filter((_, i) => i !== index)
-      }))
-    } else {
-      setImages(prev => ({
-        ...prev,
-        [type]: ''
-      }))
     }
   }
 
@@ -272,48 +233,6 @@ export default function AdminImages() {
         </div>
 
 
-        {/* Logo */}
-        <div className="bg-primary/50 rounded-lg p-3 sm:p-6 border border-accent/20">
-          <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Logo du Salon</h3>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <div className="w-24 h-24 sm:w-20 sm:h-20 bg-secondary rounded-lg overflow-hidden flex-shrink-0 mx-auto sm:mx-0 relative">
-              {images.logo ? (
-                <Image src={images.logo} alt="Logo" fill sizes="80px" className="object-contain" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <ImageIcon size={24} />
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1">
-              <label className="block">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileUpload(e, 'logo')}
-                  className="hidden"
-                />
-                <div className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2 bg-accent/10 text-accent rounded-lg hover:bg-accent/20 cursor-pointer transition-colors text-sm sm:text-base">
-                  <Upload size={16} />
-                  Changer le logo
-                </div>
-              </label>
-              {images.logo && (
-                <button
-                  onClick={() => removeImage('logo')}
-                  className="mt-2 text-red-400 hover:text-red-300 text-sm flex items-center gap-1"
-                >
-                  <X size={14} />
-                  {t.deleteImage}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-    
       </div>
 
 

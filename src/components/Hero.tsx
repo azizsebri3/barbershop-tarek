@@ -1,12 +1,13 @@
 'use client'
 
+import { memo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useLanguage } from '@/lib/language-context'
 import { Sparkles, ArrowRight } from 'lucide-react'
 
-export default function Hero() {
+const Hero = memo(function Hero() {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -35,10 +36,12 @@ export default function Hero() {
       <div className="absolute inset-0 z-0">
         <Image
           src="/landing.png"
-          alt="Elite Services - Landing"
+          alt="Tarek Salon Namur - Coiffeur et Barbershop"
           fill
           priority
-          quality={90}
+          quality={75}
+          placeholder="blur"
+          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMwYTBhMGEiLz48L3N2Zz4="
           className="object-cover object-center"
           sizes="100vw"
         />
@@ -48,24 +51,8 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/50" />
         
         {/* Animated glassmorphism orbs */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 0.2, scale: 1 }}
-          transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse' }}
-          className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-accent/30 rounded-full blur-[120px]"
-        />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 0.15, scale: 1.1 }}
-          transition={{ duration: 4, delay: 1, repeat: Infinity, repeatType: 'reverse' }}
-          className="absolute bottom-1/3 left-1/4 w-[400px] h-[400px] bg-purple-500/20 rounded-full blur-[100px]"
-        />
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.1 }}
-          transition={{ duration: 2, delay: 0.5, repeat: Infinity, repeatType: 'reverse' }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[150px]"
-        />
+        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[120px] opacity-20" />
+        <div className="absolute bottom-1/3 left-1/4 w-[400px] h-[400px] bg-purple-500/15 rounded-full blur-[100px] opacity-15" />
       </div>
 
       {/* Content Container */}
@@ -158,4 +145,6 @@ export default function Hero() {
       </motion.div>
     </section>
   )
-}
+})
+
+export default Hero

@@ -3,36 +3,25 @@
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, LayoutDashboard, Sparkles, ChevronRight, Shield } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import toast from 'react-hot-toast'
 import LanguageSwitcher from './LanguageSwitcher'
 import { useLanguage } from '@/lib/language-context'
-import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettings'
-import { isAdminAuthenticated } from '@/lib/admin-auth'
+import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettingsCached'
+import { useAdminAuth } from '@/lib/useAdminAuth'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
   const [showAdminModal, setShowAdminModal] = useState(false)
   const [adminPassword, setAdminPassword] = useState('')
+  const [loadingLogin, setLoadingLogin] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { t } = useLanguage()
   const { settings } = usePublicGeneralSettings()
+  const { isAdmin, login } = useAdminAuth()
 
   useEffect(() => {
-    // Vérifier le statut admin
-    const checkAdmin = () => {
-      const authenticated = isAdminAuthenticated()
-      setIsAdmin(authenticated)
-    }
-    checkAdmin()
-    
-    // Revérifier périodiquement (pour détecter les changements de session)
-    const interval = setInterval(checkAdmin, 5000)
-    return () => clearInterval(interval)
-  }, [])
-
-  // Handle scroll effect
-  useEffect(() => {
+    // Handle scroll effect
     const handleScroll = () => {
       setScrolled(window.scrollY > 20)
     }
@@ -40,26 +29,34 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const handleAdminLogin = () => {
-    const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
-    if (adminPassword === ADMIN_PASSWORD) {
-      // Simuler l'authentification (vous pouvez remplacer par une vraie logique)
-      localStorage.setItem('admin_auth', 'true')
-      localStorage.setItem('admin_login_time', Date.now().toString())
-      setIsAdmin(true)
-      setShowAdminModal(false)
-      setAdminPassword('')
-    } else {
-      alert('Mot de passe incorrect')
-      setAdminPassword('')
+  const handleAdminLogin = useCallback(async () => {
+    if (!adminPassword.trim()) {
+      toast.error('Veuillez entrer un mot de passe')
+      return
     }
-  }
 
-  const navLinks = [
+    setLoadingLogin(true)
+    try {
+      const result = await login(adminPassword)
+      if (result.success) {
+        toast.success('Connexion admin réussie')
+        setShowAdminModal(false)
+        setAdminPassword('')
+      } else {
+        toast.error(result.error || 'Mot de passe incorrect')
+      }
+    } catch (error) {
+      toast.error('Erreur de connexion')
+    } finally {
+      setLoadingLogin(false)
+    }
+  }, [adminPassword, login])
+
+  const navLinks = useMemo(() => [
     { href: '/', label: t.nav.home },
     { href: '/#services', label: t.nav.services },
     { href: '/pricing', label: t.nav.pricing },
-  ]
+  ], [t.nav.home, t.nav.services, t.nav.pricing])
 
   return (
     <header className={`fixed top-0 w-full z-50 transition-all duration-500 ${
@@ -345,12 +342,13 @@ export default function Header() {
                   />
                 </div>
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: loadingLogin ? 1 : 1.02 }}
+                  whileTap={{ scale: loadingLogin ? 1 : 0.98 }}
                   onClick={handleAdminLogin}
-                  className="w-full py-3 bg-gradient-to-r from-accent to-yellow-500 text-black rounded-xl font-bold text-base shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all duration-300"
+                  disabled={loadingLogin}
+                  className="w-full py-3 bg-gradient-to-r from-accent to-yellow-500 text-black rounded-xl font-bold text-base shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Accéder au panneau admin
+                  {loadingLogin ? 'Connexion...' : 'Accéder au panneau admin'}
                 </motion.button>
                 <p className="text-xs text-gray-500 text-center">
                   Contactez l&apos;administrateur pour obtenir le mot de passe

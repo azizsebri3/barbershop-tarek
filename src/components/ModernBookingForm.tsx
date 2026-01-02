@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { format } from 'date-fns'
@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import CalendarBooking from './CalendarBooking'
-import { useServices } from '@/lib/useServices'
+import { useServices } from '@/lib/useServicesCached'
 
 interface BookingFormData {
   name: string
@@ -39,32 +39,39 @@ export default function ModernBookingForm() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<BookingFormData>()
 
-  const steps = [
+  const steps = useMemo(() => [
     { id: 'service', label: 'Service', icon: Sparkles },
     { id: 'datetime', label: 'Date & Heure', icon: Calendar },
     { id: 'details', label: 'Détails', icon: User },
     { id: 'confirm', label: 'Confirmation', icon: CheckCircle }
-  ]
+  ], [])
 
-  const handleServiceSelect = (serviceId: string) => {
+  const handleServiceSelect = useCallback((serviceId: string) => {
     setSelectedService(serviceId)
     setCurrentStep('datetime')
-  }
+  }, [])
 
-  const handleDateTimeSelect = (booking: { date: string; time: string; service: string }) => {
+  const handleDateTimeSelect = useCallback((booking: { date: string; time: string; service: string }) => {
     setSelectedDateTime({ date: booking.date, time: booking.time })
     setCurrentStep('details')
-  }
+  }, [])
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if (currentStep === 'datetime') setCurrentStep('service')
     else if (currentStep === 'details') setCurrentStep('datetime')
     else if (currentStep === 'confirm') setCurrentStep('details')
-  }
+  }, [currentStep])
 
   const onSubmit = async (data: BookingFormData) => {
     if (!selectedService || !selectedDateTime) {
       toast.error('Veuillez sélectionner un service et une date/heure')
+      return
+    }
+
+    // Validation email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(data.email)) {
+      toast.error('Adresse email invalide')
       return
     }
 

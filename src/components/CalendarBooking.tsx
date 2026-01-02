@@ -6,9 +6,11 @@ import Calendar from 'react-calendar'
 import { format, addDays, isSameDay, isToday, isBefore, startOfDay } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Clock, ChevronRight, Sparkles } from 'lucide-react'
-import { useOpeningHours } from '@/lib/useOpeningHours'
-import { useServices } from '@/lib/useServices'
+import { useOpeningHours } from '@/lib/useOpeningHoursCached'
+import { useServices } from '@/lib/useServicesCached'
 import '../styles/calendar.css'
+
+type CalendarValue = Date | Date[] | null | [Date | null, Date | null]
 
 interface CalendarBookingProps {
   onBookingSelect: (booking: { date: string; time: string; service: string }) => void
@@ -31,8 +33,33 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
   const [bookedSlots, setBookedSlots] = useState<string[]>([])
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
 
+  // Sync external selectedService prop into internal state so
+  // CalendarBooking shows the date/time UI when parent already selected a service.
+  useEffect(() => {
+    if (selectedService) {
+      setCurrentService(selectedService)
+      setStep('date')
+    } else {
+      // if parent clears selection, reset internal state
+      setCurrentService('')
+      setStep('service')
+    }
+  }, [selectedService])
+
+  // Obtenir le nom du service (au cas où currentService serait un ID)
+  const currentServiceName = useMemo(() => {
+    if (!currentService) return ''
+    
+    // Vérifier si c'est un ID (format UUID) ou un nom
+    const serviceById = services.find(s => s.id === currentService)
+    if (serviceById) return serviceById.name
+    
+    // Sinon c'est déjà un nom
+    return currentService
+  }, [currentService, services])
+
   // Générer les créneaux horaires disponibles
-  const generateTimeSlots = (date: Date, serviceDuration: number = 30) => {
+  const generateTimeSlots = useCallback((date: Date, serviceDuration: number = 30) => {
     const dayOfWeek = format(date, 'EEEE', { locale: fr }).toLowerCase()
     const dayKey = dayOfWeek === 'lundi' ? 'monday' :
                   dayOfWeek === 'mardi' ? 'tuesday' :
@@ -72,7 +99,7 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
     }
     
     return slots
-  }
+  }, [openingHours, bookedSlots])
 
   // Charger les créneaux réservés depuis l'API
   const loadBookedSlots = useCallback(async (date: Date) => {
@@ -81,8 +108,8 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
       const dateStr = format(date, 'yyyy-MM-dd')
       const response = await fetch(`/api/bookings?date=${dateStr}`)
       if (response.ok) {
-        const bookings = await response.json()
-        const booked = bookings.map((booking: any) => `${booking.date}_${booking.time}`)
+        const bookings: Array<{ date: string; time: string }> = await response.json()
+        const booked = bookings.map((booking) => `${booking.date}_${booking.time}`)
         setBookedSlots(booked)
       }
     } catch (error) {
@@ -96,9 +123,10 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
   const memoizedTimeSlots = useMemo(() => {
     if (!currentService || !selectedDate || services.length === 0) return []
     
-    const service = services.find(s => s.name === currentService)
+    // Rechercher le service par ID ou par nom
+    const service = services.find(s => s.id === currentService || s.name === currentService)
     return generateTimeSlots(selectedDate, service?.duration || 30)
-  }, [selectedDate, currentService, services, bookedSlots, generateTimeSlots])
+  }, [selectedDate, currentService, services, generateTimeSlots])
 
   // Effet pour charger les créneaux réservés uniquement quand nécessaire
   useEffect(() => {
@@ -107,11 +135,14 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
     }
   }, [selectedDate, step, loadBookedSlots])
 
-  const handleDateChange = (value: any) => {
-    const date = value instanceof Date ? value : new Date(value)
-    setSelectedDate(date)
-    setSelectedTime('')
-    setStep('time')
+  const handleDateChange = (value: CalendarValue) => {
+    if (!value) return
+    const date = Array.isArray(value) ? value[0] : value
+    if (date instanceof Date) {
+      setSelectedDate(date)
+      setSelectedTime('')
+      setStep('time')
+    }
   }
 
   const handleTimeSelect = (time: string) => {
@@ -271,7 +302,7 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
               <p className="text-accent font-medium">
                 {format(selectedDate, 'EEEE d MMMM yyyy', { locale: fr })}
               </p>
-              <p className="text-gray-400 text-sm">{currentService}</p>
+              <p className="text-gray-400 text-sm">{currentServiceName}</p>
             </div>
           </div>
 

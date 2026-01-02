@@ -1,16 +1,17 @@
 'use client'
 
+import { memo } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay, Navigation, Pagination } from 'swiper/modules'
+import { Navigation, Pagination } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import ServiceCard from './ServiceCard'
-import { useServices } from '@/lib/useServices'
+import { useServices } from '@/lib/useServicesCached'
 import { motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 
-export default function ServiceCarousel() {
+const ServiceCarousel = memo(function ServiceCarousel() {
   const { services, loading } = useServices()
 
   if (loading) {
@@ -38,16 +39,8 @@ export default function ServiceCarousel() {
       {/* Background decorative elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
-        <motion.div 
-          animate={{ opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 5, repeat: Infinity }}
-          className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px]" 
-        />
-        <motion.div 
-          animate={{ opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 7, repeat: Infinity, delay: 1 }}
-          className="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px]" 
-        />
+        <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] opacity-30" />
+        <div className="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px] opacity-20" />
       </div>
 
       <div className="max-w-7xl mx-auto">
@@ -90,14 +83,9 @@ export default function ServiceCarousel() {
           viewport={{ once: true }}
         >
           <Swiper
-            modules={[Autoplay, Navigation, Pagination]}
+            modules={[Navigation, Pagination]}
             spaceBetween={20}
             slidesPerView={1}
-            autoplay={{
-              delay: 5000,
-              disableOnInteraction: false,
-              pauseOnMouseEnter: true,
-            }}
             navigation
             pagination={{ clickable: true, dynamicBullets: true }}
             breakpoints={{
@@ -212,4 +200,6 @@ export default function ServiceCarousel() {
       `}</style>
     </section>
   )
-}
+})
+
+export default ServiceCarousel

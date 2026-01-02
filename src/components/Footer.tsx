@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { MapPin, Phone, Mail, Globe, ArrowRight, Sparkles, Clock, Instagram, Facebook } from 'lucide-react'
-import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettings'
+import { MapPin, Phone, Mail, ArrowRight, Sparkles, Clock, Instagram, Facebook } from 'lucide-react'
+import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettingsCached'
 
 // TikTok icon component
 const TikTokIcon = ({ size = 18 }: { size?: number }) => (
@@ -189,12 +189,7 @@ export default function Footer() {
                     <span className="text-sm">{settings.email || 'contact@tareksalon.be'}</span>
                   </a>
                 </li>
-                <li>
-                  <a href={`https://${settings.website || 'tareksalon.be'}`} className="flex items-center gap-3 text-gray-400 hover:text-accent transition-colors duration-300">
-                    <Globe size={18} className="text-accent flex-shrink-0" />
-                    <span className="text-sm">{settings.website || 'tareksalon.be'}</span>
-                  </a>
-                </li>
+      
               </ul>
               
               {/* CTA Button */}

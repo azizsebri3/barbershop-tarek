@@ -24,16 +24,20 @@ export default function AdminBranding({}: AdminBrandingProps) {
       const response = await fetch('/api/settings')
       if (response.ok) {
         const data = await response.json()
-        if (data.logo_url) {
+        if (data.logo_url && data.logo_url.trim()) {
           // Force component re-render by clearing state first
           setLogoUrl('')
           setTimeout(() => {
             setLogoUrl(data.logo_url)
           }, 10)
+        } else {
+          // No logo set, keep default placeholder
+          setLogoUrl('https://via.placeholder.com/200?text=Logo')
         }
       }
     } catch (error) {
       console.error('Error fetching logo:', error)
+      setLogoUrl('https://via.placeholder.com/200?text=Logo')
     }
   }
 
@@ -80,18 +84,22 @@ export default function AdminBranding({}: AdminBrandingProps) {
 
       const data = await response.json()
       
-      // Clear preview and force reload of logo
-      setPreviewUrl(null)
-      setLogoUrl('')
-      setTimeout(() => {
-        setLogoUrl(data.url)
-        toast.success('✅ Logo uploadé sur Supabase avec succès!')
-      }, 10)
+      if (data.url && data.url.trim()) {
+        // Clear preview and force reload of logo
+        setPreviewUrl(null)
+        setLogoUrl('')
+        setTimeout(() => {
+          setLogoUrl(data.url)
+          toast.success('✅ Logo uploadé sur Supabase avec succès!')
+        }, 10)
 
-      // Reload page to reflect changes in header
-      setTimeout(() => {
-        window.location.reload()
-      }, 1500)
+        // Reload page to reflect changes in header
+        setTimeout(() => {
+          window.location.reload()
+        }, 1500)
+      } else {
+        throw new Error('URL du logo manquante dans la réponse')
+      }
     } catch (error: any) {
       console.error('Error uploading logo:', error)
       toast.error(`❌ Erreur: ${error.message}`)
@@ -121,7 +129,7 @@ export default function AdminBranding({}: AdminBrandingProps) {
           <div className="inline-flex items-center justify-center w-32 h-32 bg-white/10 rounded-2xl overflow-hidden">
             <img
               key={`${logoUrl}-${Date.now()}`}
-              src={previewUrl || logoUrl}
+              src={previewUrl || logoUrl || 'https://via.placeholder.com/200?text=Logo'}
               alt="Logo actuel"
               className="w-full h-full object-contain"
               onError={(e) => {

@@ -1,11 +1,12 @@
 'use client'
 
+import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { Clock, MapPin, Phone, CheckCircle, XCircle } from 'lucide-react'
-import { useOpeningHours } from '@/lib/useOpeningHours'
+import { useOpeningHours } from '@/lib/useOpeningHoursCached'
 import { useLanguage } from '@/lib/language-context'
 
-export default function OpeningHours() {
+const OpeningHours = memo(function OpeningHours() {
   const { t } = useLanguage()
   const { hours, loading } = useOpeningHours()
 
@@ -166,4 +167,6 @@ export default function OpeningHours() {
       </div>
     </motion.div>
   )
-}
+})
+
+export default OpeningHours

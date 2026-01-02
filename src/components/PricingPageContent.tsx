@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import ServiceCard from '@/components/ServiceCard'
-import { useServices } from '@/lib/useServices'
+import { useServices } from '@/lib/useServicesCached'
 import { Check, Sparkles, HelpCircle, ArrowRight } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import ClientPortfolio from '@/components/ClientPortfolio'

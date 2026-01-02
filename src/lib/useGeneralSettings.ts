@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from './supabase'
 
 interface GeneralSettings {
   salonName: string
@@ -39,72 +38,52 @@ export function useGeneralSettings() {
 
   const loadSettings = async () => {
     try {
-      if (!supabase) {
-        // Fallback to localStorage
-        const saved = localStorage.getItem('admin_general_settings')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          setSettings({ ...defaultSettings, ...parsed })
-        }
-        setLoading(false)
-        return
-      }
-
       const response = await fetch('/api/settings')
       const data = await response.json()
 
-      if (data.error) {
-        console.error('❌ Erreur API:', data.error)
-        // Fallback to localStorage
-        const saved = localStorage.getItem('admin_general_settings')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          setSettings({ ...defaultSettings, ...parsed })
-        }
-      } else if (data.settings) {
-        setSettings({ ...defaultSettings, ...data.settings })
+      if (response.ok) {
+        setSettings({
+          ...defaultSettings,
+          ...(data.settings || {}),
+          logo_url: data.logo_url
+        })
+      } else {
+        console.error('Erreur chargement settings:', data.error)
       }
     } catch (error) {
-      console.error('❌ Erreur lors du chargement des paramètres:', error)
+      console.error('Erreur chargement settings:', error)
     } finally {
       setLoading(false)
     }
   }
 
   const updateSettings = async (newSettings: Partial<GeneralSettings>) => {
-    const updated = { ...settings, ...newSettings }
-    setSettings(updated)
-
     try {
-      if (!supabase) {
-        // Fallback to localStorage
-        localStorage.setItem('admin_general_settings', JSON.stringify(updated))
-        return
-      }
-
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ settings: updated }),
+        body: JSON.stringify({ settings: newSettings }),
       })
 
       const data = await response.json()
 
-      if (!response.ok) {
-        console.error('❌ Erreur API:', data.error)
-        // Fallback to localStorage
-        localStorage.setItem('admin_general_settings', JSON.stringify(updated))
+      if (response.ok) {
+        setSettings({ ...settings, ...newSettings })
+        return { success: true }
+      } else {
         throw new Error(data.error || 'Erreur lors de la sauvegarde')
       }
     } catch (error) {
-      console.error('❌ Erreur lors de la sauvegarde:', error)
-      // Fallback to localStorage
-      localStorage.setItem('admin_general_settings', JSON.stringify(updated))
+      console.error('Erreur sauvegarde settings:', error)
       throw error
     }
   }
 
-  return { settings, updateSettings, loading }
+  return {
+    settings,
+    loading,
+    updateSettings,
+  }
 }

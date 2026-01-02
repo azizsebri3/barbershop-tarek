@@ -1,14 +1,16 @@
 import type { Metadata, Viewport } from 'next'
-import { Suspense, lazy } from 'react'
+import dynamic from 'next/dynamic'
 import './globals.css'
 import { LanguageProvider } from '@/lib/language-context'
 
 // Lazy load des composants lourds
-const Header = lazy(() => import('@/components/Header'))
-const Footer = lazy(() => import('@/components/Footer'))
+const Header = dynamic(() => import('@/components/Header'), { ssr: true })
+const Footer = dynamic(() => import('@/components/Footer'), { ssr: true })
 
 // SEO Metadata optimisé pour Namur, Belgique
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'),
+  
   // Titre optimisé avec mots-clés locaux
   title: {
     default: 'Tarek Salon | Coiffeur & Barbershop à Namur, Belgique',
@@ -284,15 +286,11 @@ export default function RootLayout({
       </head>
       <body className="bg-primary text-white">
         <LanguageProvider>
-          <Suspense fallback={<div className="h-16 bg-primary" />}>
-            <Header />
-          </Suspense>
+          <Header />
           <main className="pt-16">
             {children}
           </main>
-          <Suspense fallback={<div className="h-32 bg-primary" />}>
-            <Footer />
-          </Suspense>
+          <Footer />
         </LanguageProvider>
       </body>
     </html>

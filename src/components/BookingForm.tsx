@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { motion } from 'framer-motion'
 import toast, { Toaster } from 'react-hot-toast'
-import { useServices } from '@/lib/useServices'
-import { useOpeningHours } from '@/lib/useOpeningHours'
+import { useServices } from '@/lib/useServicesCached'
+import { useOpeningHours } from '@/lib/useOpeningHoursCached'
 import { useLanguage } from '@/lib/language-context'
 
 interface BookingFormData {

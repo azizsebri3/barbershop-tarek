@@ -1,13 +1,16 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Hero from '@/components/Hero'
-import ServiceCarousel from '@/components/ServiceCarousel'
-import ClientPortfolio from '@/components/ClientPortfolio'
-import Testimonials from '@/components/Testimonials'
-import OpeningHours from '@/components/OpeningHours'
+import dynamic from 'next/dynamic'
 import { Star, Zap, Shield, MapPin, Phone, Clock, Scissors } from 'lucide-react'
 import Link from 'next/link'
+
+// Lazy load des composants lourds
+const Hero = dynamic(() => import('@/components/Hero'), { ssr: true })
+const ServiceCarousel = dynamic(() => import('@/components/ServiceCarousel'), { ssr: false })
+const ClientPortfolio = dynamic(() => import('@/components/ClientPortfolio'), { ssr: false })
+const Testimonials = dynamic(() => import('@/components/Testimonials'), { ssr: false })
+const OpeningHours = dynamic(() => import('@/components/OpeningHours'), { ssr: false })
 
 export default function Home() {
   const containerVariants = {
@@ -206,11 +209,7 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-accent/20 to-accent/10 relative overflow-hidden">
-        <motion.div
-          animate={{ y: [0, 50, 0] }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className="absolute top-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl"
-        />
+        <div className="absolute top-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl opacity-50" />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

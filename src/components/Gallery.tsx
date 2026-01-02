@@ -1,37 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ZoomIn } from 'lucide-react'
 import Image from 'next/image'
-
-interface Photo {
-  id: string
-  name: string
-  url: string
-  createdAt: string
-}
+import { useGallery } from '../lib/useGallery'
 
 export default function Gallery() {
-  const [photos, setPhotos] = useState<Photo[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
-
-  useEffect(() => {
-    fetchPhotos()
-  }, [])
-
-  const fetchPhotos = async () => {
-    try {
-      const response = await fetch('/api/gallery')
-      const data = await response.json()
-      setPhotos(data.photos || [])
-    } catch (error) {
-      console.error('❌ Erreur chargement photos:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { photos, loading } = useGallery()
+  const [selectedPhoto, setSelectedPhoto] = useState<null | { id: string; url: string; name?: string }>(null)
 
   if (loading) {
     return (
@@ -41,7 +18,7 @@ export default function Gallery() {
     )
   }
 
-  if (photos.length === 0) {
+  if (!photos || photos.length === 0) {
     return (
       <div className="text-center py-20">
         <p className="text-gray-400">Aucune photo pour le moment</p>
@@ -63,7 +40,7 @@ export default function Gallery() {
           >
             <Image
               src={photo.url}
-              alt="Photo salon"
+              alt={photo.name || 'Photo salon'}
               fill
               sizes="(max-width: 768px) 50vw, 25vw"
               className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -101,7 +78,7 @@ export default function Gallery() {
             >
               <Image
                 src={selectedPhoto.url}
-                alt="Photo salon"
+                alt={selectedPhoto.name || 'Photo salon'}
                 width={1200}
                 height={800}
                 className="max-w-full max-h-[90vh] object-contain rounded-lg"

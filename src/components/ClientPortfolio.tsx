@@ -1,13 +1,14 @@
-'use client'
+ 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay, EffectCoverflow } from 'swiper/modules'
+import { EffectCoverflow } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/effect-coverflow'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import Image from 'next/image'
+import { useGallery } from '../lib/useGallery'
 
 interface Photo {
   id: string
@@ -17,25 +18,8 @@ interface Photo {
 }
 
 export default function ClientPortfolio() {
-  const [photos, setPhotos] = useState<Photo[]>([])
-  const [loading, setLoading] = useState(true)
+  const { photos, loading } = useGallery()
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
-
-  useEffect(() => {
-    fetchPhotos()
-  }, [])
-
-  const fetchPhotos = async () => {
-    try {
-      const response = await fetch('/api/gallery')
-      const data = await response.json()
-      setPhotos(data.photos || [])
-    } catch (error) {
-      console.error('❌ Portfolio - Erreur chargement:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   if (loading) {
     return (
@@ -47,7 +31,7 @@ export default function ClientPortfolio() {
     )
   }
 
-  if (photos.length === 0) {
+  if (!photos || photos.length === 0) {
     return null // Ne rien afficher si pas de photos
   }
   return (
@@ -69,7 +53,7 @@ export default function ClientPortfolio() {
 
         <div className="relative px-2 sm:px-0">
           <Swiper
-            modules={[Autoplay, EffectCoverflow]}
+            modules={[EffectCoverflow]}
             effect="coverflow"
             grabCursor={true}
             centeredSlides={true}
@@ -80,10 +64,6 @@ export default function ClientPortfolio() {
               depth: 100,
               modifier: 1,
               slideShadows: true,
-            }}
-            autoplay={{
-              delay: 5000,
-              disableOnInteraction: false,
             }}
             loop={photos.length > 2}
             className="!w-full !pb-8"
