@@ -97,7 +97,7 @@ export async function sendClientConfirmation(booking: BookingDetails) {
                   Vous pourrez ajouter une note expliquant la raison de l'annulation.
                 </p>
                 <div style="text-align: center;">
-                  <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://votre-site.vercel.app'}/fr/booking/cancel/${booking.id}" 
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'}/fr/booking/cancel/${booking.id}" 
                      style="display: inline-block; background-color: #ef4444; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 14px; transition: background-color 0.3s;">
                     Annuler mon rendez-vous
                   </a>
