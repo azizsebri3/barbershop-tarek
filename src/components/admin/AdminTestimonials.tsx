@@ -21,6 +21,7 @@ export default function AdminTestimonials() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'approved' | 'pending'>('all')
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
 
   useEffect(() => {
     fetchTestimonials()
@@ -75,6 +76,7 @@ export default function AdminTestimonials() {
       return
     }
 
+    setDeleteLoading(id)
     try {
       const response = await fetch(`/api/testimonials/${id}`, {
         method: 'DELETE',
@@ -88,8 +90,10 @@ export default function AdminTestimonials() {
       toast.success('Avis supprimé')
       fetchTestimonials()
     } catch (error) {
-      console.error('Error deleting testimonial:', error)
+      console.error('Erreur lors de la suppression:', error)
       toast.error('Erreur lors de la suppression')
+    } finally {
+      setDeleteLoading(null)
     }
   }
 
@@ -291,10 +295,17 @@ export default function AdminTestimonials() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleDelete(testimonial.id)}
-                      className="flex-1 lg:flex-initial flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 border border-red-500/30 font-medium transition-all"
+                      disabled={deleteLoading === testimonial.id}
+                      className="flex-1 lg:flex-initial flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 disabled:bg-red-500/10 disabled:text-red-600 disabled:cursor-not-allowed border border-red-500/30 font-medium transition-all"
                     >
-                      <Trash2 size={16} />
-                      <span className="hidden sm:inline">Supprimer</span>
+                      {deleteLoading === testimonial.id ? (
+                        <RefreshCw size={16} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                      <span className="hidden sm:inline">
+                        {deleteLoading === testimonial.id ? 'Suppression...' : 'Supprimer'}
+                      </span>
                     </motion.button>
                   </div>
                 </div>

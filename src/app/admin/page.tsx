@@ -14,16 +14,18 @@ export default function AdminLogin() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
-  const { isAdmin, login } = useAdminAuth()
+  const { isAdmin, login, loading } = useAdminAuth()
 
   // Vérifier si déjà connecté
   useEffect(() => {
-    if (isAdmin) {
-      router.push('/admin/dashboard')
-    } else {
-      setIsLoading(false)
+    if (!loading) {
+      if (isAdmin) {
+        router.push('/admin/dashboard')
+      } else {
+        setIsLoading(false)
+      }
     }
-  }, [isAdmin, router])
+  }, [isAdmin, loading, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,7 +52,7 @@ export default function AdminLogin() {
     }
   }
 
-  if (isLoading) {
+  if (isLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
@@ -132,12 +134,6 @@ export default function AdminLogin() {
             <span>
               <strong>Astuce PWA :</strong> Cochez &quot;Rester connecté&quot; pour recevoir les notifications push sans vous reconnecter à chaque ouverture de l&apos;app.
             </span>
-          </p>
-        </div>
-
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-500">
-            Mot de passe par défaut : admin123
           </p>
         </div>
       </motion.div>

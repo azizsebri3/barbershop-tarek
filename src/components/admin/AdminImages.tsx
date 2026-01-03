@@ -25,6 +25,7 @@ export default function AdminImages() {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [loadingGallery, setLoadingGallery] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [deletingPhoto, setDeletingPhoto] = useState<string | null>(null)
 
   interface Photo {
     id?: string
@@ -115,6 +116,7 @@ export default function AdminImages() {
   const deletePhoto = async (fileName: string, path?: string) => {
     if (!confirm(t.deleteMessage)) return
 
+    setDeletingPhoto(fileName)
     try {
       const response = await fetch('/api/gallery/remove', {
         method: 'POST',
@@ -134,6 +136,8 @@ export default function AdminImages() {
     } catch (error) {
       console.error('Erreur suppression:', error)
       toast.error(t.error)
+    } finally {
+      setDeletingPhoto(null)
     }
   }
 
@@ -212,9 +216,14 @@ export default function AdminImages() {
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <button
                         onClick={() => deletePhoto(photo.name, photo.path)}
-                        className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg transition-colors"
+                        disabled={deletingPhoto === photo.name}
+                        className="bg-red-500 hover:bg-red-600 disabled:bg-red-700 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-colors flex items-center justify-center"
                       >
-                        <X size={18} />
+                        {deletingPhoto === photo.name ? (
+                          <RefreshCw size={18} className="animate-spin" />
+                        ) : (
+                          <X size={18} />
+                        )}
                       </button>
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">

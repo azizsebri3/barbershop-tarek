@@ -166,7 +166,7 @@ export default function Home() {
             className="rounded-2xl overflow-hidden shadow-2xl border border-primary/50 hover:border-accent/50 transition-colors mb-12"
           >
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2543.0826844788233!2d4.424165!3d50.468686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c23c1d0c0c0c0d%3A0x0!2zVGFyZWsgU2Fsb24!5e0!3m2!1sfr!2sbe!4v1702828800000"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5125.421648937018!2d4.860792076398837!3d50.46784768611116!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c199676d2eb1d5%3A0x560fefdeeb40e96e!2sGolden%20Salon!5e1!3m2!1sen!2sbe!4v1767402185853!5m2!1sen!2sbe"
               width="100%"
               height="500"
               style={{ border: 0 }}

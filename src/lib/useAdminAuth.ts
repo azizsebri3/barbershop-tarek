@@ -1,16 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 export function useAdminAuth() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [checkedOnce, setCheckedOnce] = useState(false)
 
-  useEffect(() => {
-    checkAdminStatus()
-  }, [])
-
-  const checkAdminStatus = async () => {
+  const checkAdminStatus = useCallback(async () => {
+    if (checkedOnce && !loading) return
+    
     try {
       const response = await fetch('/api/admin/check')
       const data = await response.json()
@@ -20,8 +19,15 @@ export function useAdminAuth() {
       setIsAdmin(false)
     } finally {
       setLoading(false)
+      setCheckedOnce(true)
     }
-  }
+  }, [checkedOnce, loading])
+
+  useEffect(() => {
+    checkAdminStatus()
+  }, [checkAdminStatus])
+
+
 
   const login = async (password: string) => {
     try {

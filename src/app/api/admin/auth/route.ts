@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SignJWT } from 'jose'
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change_this_password_immediately'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'SecureAdminP@ss2025!'
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here'
 
 export async function POST(request: NextRequest) {

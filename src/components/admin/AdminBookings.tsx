@@ -23,6 +23,8 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const [cancelBookingId, setCancelBookingId] = useState<string | null>(null)
   const [cancelNote, setCancelNote] = useState('')
   const [cancelLoading, setCancelLoading] = useState(false)
+  const [confirmLoading, setConfirmLoading] = useState(false)
+  const [singleDeleteLoading, setSingleDeleteLoading] = useState<string | null>(null)
   const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set())
   const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -51,8 +53,10 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
     fetchBookings()
   }, [fetchBookings])
 
-  const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus, cancelNote?: string) => {
+  const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus, cancelNote?: string, onLoading?: (loading: boolean) => void) => {
     try {
+      if (onLoading) onLoading(true)
+
       const requestBody: any = { status: newStatus }
       if (newStatus === 'cancelled' && cancelNote) {
         requestBody.cancel_note = cancelNote
@@ -89,6 +93,43 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
     } catch (error) {
       console.error('❌ Erreur lors de la mise à jour:', error)
       toast.error(t.error)
+    } finally {
+      if (onLoading) onLoading(false)
+    }
+  }
+
+  const confirmBooking = async (bookingId: string) => {
+    await updateBookingStatus(bookingId, 'confirmed', undefined, setConfirmLoading)
+  }
+
+  const cancelBooking = async (bookingId: string, cancelNote?: string) => {
+    await updateBookingStatus(bookingId, 'cancelled', cancelNote, setCancelLoading)
+  }
+
+  const deleteSingleBooking = async (bookingId: string) => {
+    setSingleDeleteLoading(bookingId)
+    try {
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Erreur lors de la suppression')
+      }
+
+      setBookings(bookings.filter(booking => booking.id !== bookingId))
+      toast.success(t.bookingDeleted)
+      
+      // Notify parent to update pending count
+      if (onStatusChange) {
+        onStatusChange()
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error)
+      toast.error(t.error)
+    } finally {
+      setSingleDeleteLoading(null)
     }
   }
 
@@ -101,23 +142,19 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const confirmCancelBooking = async () => {
     if (!cancelBookingId) return
 
-    setCancelLoading(true)
     try {
-      await updateBookingStatus(cancelBookingId, 'cancelled', cancelNote)
+      await cancelBooking(cancelBookingId, cancelNote)
       setCancelModalOpen(false)
       setCancelBookingId(null)
       setCancelNote('')
     } catch (error) {
       console.error('Erreur lors de l\'annulation:', error)
       toast.error('Erreur lors de l\'annulation')
-    } finally {
-      setCancelLoading(false)
     }
   }
 
   const deleteBooking = async (bookingId: string) => {
-    setDeleteTarget({ type: 'single', ids: [bookingId] })
-    setDeleteModalOpen(true)
+    await deleteSingleBooking(bookingId)
   }
 
   const deleteSelectedBookings = async () => {
@@ -443,11 +480,16 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                   {booking.status === 'pending' && (
                     <>
                       <button
-                        onClick={() => updateBookingStatus(booking.id, 'confirmed')}
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                        onClick={() => confirmBooking(booking.id)}
+                        disabled={confirmLoading}
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                       >
-                        <CheckCircle size={16} />
-                        {t.confirmBooking}
+                        {confirmLoading ? (
+                          <RefreshCw size={16} className="animate-spin" />
+                        ) : (
+                          <CheckCircle size={16} />
+                        )}
+                        {confirmLoading ? t.common?.loading || 'Loading...' : t.confirmBooking}
                       </button>
                       <button
                         onClick={() => handleCancelBooking(booking.id)}
@@ -471,10 +513,15 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
 
                   <button
                     onClick={() => deleteBooking(booking.id)}
-                    className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                    disabled={singleDeleteLoading === booking.id}
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                   >
-                    <Trash2 size={16} />
-                    {t.deleteBooking}
+                    {singleDeleteLoading === booking.id ? (
+                      <RefreshCw size={16} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                    {singleDeleteLoading === booking.id ? t.common?.loading || 'Loading...' : t.deleteBooking}
                   </button>
                 </div>
               </div>
