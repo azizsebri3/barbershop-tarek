@@ -489,7 +489,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                         ) : (
                           <CheckCircle size={16} />
                         )}
-                        {confirmLoading ? t.common?.loading || 'Loading...' : t.confirmBooking}
+                        {confirmLoading ? 'Loading...' : t.confirmBooking}
                       </button>
                       <button
                         onClick={() => handleCancelBooking(booking.id)}
@@ -521,7 +521,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                     ) : (
                       <Trash2 size={16} />
                     )}
-                    {singleDeleteLoading === booking.id ? t.common?.loading || 'Loading...' : t.deleteBooking}
+                    {singleDeleteLoading === booking.id ? 'Loading...' : t.deleteBooking}
                   </button>
                 </div>
               </div>
