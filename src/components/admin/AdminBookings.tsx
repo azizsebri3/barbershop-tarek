@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock, User, Mail, Phone, MessageSquare, CheckCircle, XCircle, AlertCircle, Trash2, RefreshCw, Search } from 'lucide-react'
+import { Calendar, Clock, User, Mail, Phone, MessageSquare, CheckCircle, XCircle, AlertCircle, Trash2, RefreshCw, Search, CheckSquare, Square } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { supabase, Booking } from '@/lib/supabase'
 import { adminTranslations } from '@/lib/admin-translations'
@@ -23,6 +23,10 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const [cancelBookingId, setCancelBookingId] = useState<string | null>(null)
   const [cancelNote, setCancelNote] = useState('')
   const [cancelLoading, setCancelLoading] = useState(false)
+  const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set())
+  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'single' | 'bulk', ids: string[] } | null>(null)
   const t = adminTranslations.bookings
 
   const fetchBookings = useCallback(async () => {
@@ -112,22 +116,63 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   }
 
   const deleteBooking = async (bookingId: string) => {
-    if (!confirm(t.deleteMessage)) return
+    setDeleteTarget({ type: 'single', ids: [bookingId] })
+    setDeleteModalOpen(true)
+  }
+
+  const deleteSelectedBookings = async () => {
+    if (selectedBookings.size === 0) return
+    setDeleteTarget({ type: 'bulk', ids: Array.from(selectedBookings) })
+    setDeleteModalOpen(true)
+  }
+
+  const toggleBookingSelection = (bookingId: string) => {
+    const newSelected = new Set(selectedBookings)
+    if (newSelected.has(bookingId)) {
+      newSelected.delete(bookingId)
+    } else {
+      newSelected.add(bookingId)
+    }
+    setSelectedBookings(newSelected)
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedBookings.size === filteredBookings.length) {
+      setSelectedBookings(new Set())
+    } else {
+      setSelectedBookings(new Set(filteredBookings.map(booking => booking.id)))
+    }
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+
+    const { type, ids } = deleteTarget
+    setBulkDeleteLoading(true)
 
     try {
-      const response = await fetch(`/api/bookings/${bookingId}`, {
-        method: 'DELETE',
+      const deletePromises = ids.map(async (bookingId) => {
+        const response = await fetch(`/api/bookings/${bookingId}`, {
+          method: 'DELETE',
+        })
+
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || 'Erreur lors de la suppression')
+        }
+
+        return bookingId
       })
 
-      const data = await response.json()
+      await Promise.all(deletePromises)
 
-      if (!response.ok) {
-        console.error('❌ Erreur API:', data.error)
-        throw new Error(data.error || 'Erreur lors de la suppression')
-      }
-
-      setBookings(bookings.filter(booking => booking.id !== bookingId))
-      toast.success(t.bookingDeleted)
+      setBookings(bookings.filter(booking => !ids.includes(booking.id)))
+      setSelectedBookings(new Set())
+      
+      const successMessage = type === 'single' 
+        ? t.bookingDeleted 
+        : `${ids.length} réservation(s) supprimée(s)`
+      toast.success(successMessage)
       
       // Notify parent to update pending count
       if (onStatusChange) {
@@ -135,7 +180,11 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       }
     } catch (error) {
       console.error('❌ Erreur lors de la suppression:', error)
-      toast.error(t.error)
+      toast.error('Erreur lors de la suppression')
+    } finally {
+      setBulkDeleteLoading(false)
+      setDeleteModalOpen(false)
+      setDeleteTarget(null)
     }
   }
 
@@ -270,6 +319,44 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         />
       </div>
 
+      {/* Bulk Actions */}
+      {filteredBookings.length > 0 && (
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 bg-secondary/30 border border-accent/20 rounded-xl">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={toggleSelectAll}
+              className="flex items-center gap-2 px-4 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors"
+            >
+              {selectedBookings.size === filteredBookings.length ? (
+                <CheckSquare size={16} />
+              ) : (
+                <Square size={16} />
+              )}
+              {selectedBookings.size === filteredBookings.length ? 'Tout désélectionner' : 'Tout sélectionner'}
+            </button>
+            {selectedBookings.size > 0 && (
+              <span className="text-gray-300 text-sm">
+                {selectedBookings.size} sélectionnée(s)
+              </span>
+            )}
+          </div>
+          {selectedBookings.size > 0 && (
+            <button
+              onClick={deleteSelectedBookings}
+              disabled={bulkDeleteLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+            >
+              {bulkDeleteLoading ? (
+                <RefreshCw size={16} className="animate-spin" />
+              ) : (
+                <Trash2 size={16} />
+              )}
+              Supprimer ({selectedBookings.size})
+            </button>
+          )}
+        </div>
+      )}
+
       {filteredBookings.length === 0 ? (
         <div className="text-center py-12">
           <Calendar className="mx-auto text-gray-500 mb-4" size={48} />
@@ -300,15 +387,23 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                 className="bg-secondary/50 backdrop-blur-md border border-accent/20 rounded-lg p-6"
               >
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <User className="text-accent" size={20} />
-                    <h3 className="text-lg font-semibold text-white">{booking.name}</h3>
-                    <div className={`flex items-center gap-1 px-2 py-1 rounded-full border text-xs ${getStatusColor(booking.status)}`}>
-                      {getStatusIcon(booking.status)}
-                      {booking.status === 'confirmed' ? t.statusConfirmed : booking.status === 'cancelled' ? t.statusCancelled : t.statusPending}
+                {/* Checkbox for selection */}
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedBookings.has(booking.id)}
+                    onChange={() => toggleBookingSelection(booking.id)}
+                    className="w-4 h-4 text-accent bg-secondary/50 border-accent/20 rounded focus:ring-accent focus:ring-2"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <User className="text-accent" size={20} />
+                      <h3 className="text-lg font-semibold text-white">{booking.name}</h3>
+                      <div className={`flex items-center gap-1 px-2 py-1 rounded-full border text-xs ${getStatusColor(booking.status)}`}>
+                        {getStatusIcon(booking.status)}
+                        {booking.status === 'confirmed' ? t.statusConfirmed : booking.status === 'cancelled' ? t.statusCancelled : t.statusPending}
+                      </div>
                     </div>
-                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                     <div className="flex items-center gap-2">
@@ -341,6 +436,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                       <p className="text-gray-300 text-sm">{booking.message}</p>
                     </div>
                   )}
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-2 lg:min-w-[200px]">
@@ -447,6 +543,70 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                     </>
                   ) : (
                     'Confirmer l\'annulation'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteModalOpen && deleteTarget && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setDeleteModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-secondary/95 backdrop-blur-md border border-accent/20 rounded-xl p-6 w-full max-w-md"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-red-500/20 rounded-full">
+                  <Trash2 className="text-red-400" size={24} />
+                </div>
+                <h3 className="text-xl font-semibold text-white">
+                  {deleteTarget.type === 'single' ? 'Supprimer la réservation' : 'Supprimer les réservations'}
+                </h3>
+              </div>
+
+              <p className="text-gray-300 mb-6">
+                {deleteTarget.type === 'single'
+                  ? 'Êtes-vous sûr de vouloir supprimer cette réservation ? Cette action est irréversible.'
+                  : `Êtes-vous sûr de vouloir supprimer ${deleteTarget.ids.length} réservation(s) ? Cette action est irréversible.`
+                }
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteModalOpen(false)}
+                  disabled={bulkDeleteLoading}
+                  className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={bulkDeleteLoading}
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  {bulkDeleteLoading ? (
+                    <>
+                      <RefreshCw size={16} className="animate-spin" />
+                      Suppression...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={16} />
+                      Supprimer
+                    </>
                   )}
                 </button>
               </div>
