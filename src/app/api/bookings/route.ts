@@ -82,8 +82,60 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Insert booking into Supabase
     const supabase = getSupabaseClient()
+
+    // Vérifier la disponibilité en tenant compte de la durée du service
+    const services = [
+      { name: 'Coupe Homme', duration: 30 },
+      { name: 'Barbe + Coupe', duration: 60 },
+      { name: 'Barbe', duration: 30 }
+    ]
+    
+    const selectedService = services.find(s => s.name === service)
+    const serviceDuration = selectedService?.duration || 30
+    
+    // Calculer les créneaux que cette réservation occuperait
+    const [startHour, startMin] = time.split(':').map(Number)
+    const startMinutes = startHour * 60 + startMin
+    const endMinutes = startMinutes + serviceDuration
+    
+    // Récupérer les réservations existantes pour cette date
+    const { data: existingBookings, error: fetchError } = await supabase
+      .from('bookings')
+      .select('time, service, status')
+      .eq('date', date)
+      .in('status', ['confirmed', 'pending'])
+    
+    if (fetchError) {
+      console.error('Error fetching existing bookings:', fetchError)
+      return NextResponse.json(
+        { error: 'Erreur lors de la vérification des disponibilités' },
+        { status: 500 }
+      )
+    }
+    
+    // Vérifier les conflits
+    for (const booking of existingBookings || []) {
+      // Ne vérifier les conflits qu'avec les réservations confirmées
+      if (booking.status !== 'confirmed') continue
+      
+      const existingService = services.find(s => s.name === booking.service)
+      const existingDuration = existingService?.duration || 30
+      
+      const [existingHour, existingMin] = booking.time.split(':').map(Number)
+      const existingStartMinutes = existingHour * 60 + existingMin
+      const existingEndMinutes = existingStartMinutes + existingDuration
+      
+      // Vérifier si les créneaux se chevauchent
+      if (startMinutes < existingEndMinutes && endMinutes > existingStartMinutes) {
+        return NextResponse.json(
+          { error: 'Ce créneau n\'est pas disponible. Veuillez choisir un autre horaire.' },
+          { status: 409 }
+        )
+      }
+    }
+
+    // Insert booking into Supabase
     const { data, error } = await supabase
       .from('bookings')
       .insert({
@@ -110,7 +162,16 @@ export async function POST(request: NextRequest) {
     await sendPushNotification({ name, service, date, time })
 
     // Envoyer les emails de confirmation
-    await sendBookingEmails({ name, email, phone, date, time, service, message })
+    await sendBookingEmails({ 
+      id: data?.[0]?.id,
+      name, 
+      email, 
+      phone, 
+      date, 
+      time, 
+      service, 
+      message 
+    })
 
     return NextResponse.json(
       {
@@ -139,9 +200,9 @@ export async function GET(request: NextRequest) {
     if (date) {
       const { data, error } = await supabase
         .from('bookings')
-        .select('date, time, service')
+        .select('date, time, service, status')
         .eq('date', date)
-        .eq('status', 'confirmed')
+        .in('status', ['confirmed', 'pending'])
 
       if (error) {
         return NextResponse.json(

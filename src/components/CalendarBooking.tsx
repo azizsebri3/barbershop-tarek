@@ -108,16 +108,43 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
       const dateStr = format(date, 'yyyy-MM-dd')
       const response = await fetch(`/api/bookings?date=${dateStr}`)
       if (response.ok) {
-        const bookings: Array<{ date: string; time: string }> = await response.json()
-        const booked = bookings.map((booking) => `${booking.date}_${booking.time}`)
-        setBookedSlots(booked)
+        const bookings: Array<{ date: string; time: string; service: string; status: string }> = await response.json()
+        
+        // Calculer les créneaux bloqués en tenant compte de la durée des services
+        const blockedSlots: string[] = []
+        
+        bookings.forEach(booking => {
+          // Ne bloquer que les réservations confirmées
+          if (booking.status !== 'confirmed') return
+          
+          // Trouver la durée du service
+          const service = services.find(s => s.name === booking.service)
+          const duration = service?.duration || 30 // durée par défaut de 30 minutes
+          
+          // Convertir l'heure de début en minutes depuis minuit
+          const [startHour, startMin] = booking.time.split(':').map(Number)
+          const startMinutes = startHour * 60 + startMin
+          
+          // Calculer l'heure de fin
+          const endMinutes = startMinutes + duration
+          
+          // Générer tous les créneaux de 15 minutes qui sont occupés par ce service
+          for (let time = startMinutes; time < endMinutes; time += 15) {
+            const hour = Math.floor(time / 60)
+            const min = time % 60
+            const timeString = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`
+            blockedSlots.push(`${booking.date}_${timeString}`)
+          }
+        })
+        
+        setBookedSlots(blockedSlots)
       }
     } catch (error) {
       console.error('Error loading booked slots:', error)
     } finally {
       setIsLoadingSlots(false)
     }
-  }, [])
+  }, [services])
 
   // Memoiser les créneaux pour éviter les recalculs inutiles
   const memoizedTimeSlots = useMemo(() => {

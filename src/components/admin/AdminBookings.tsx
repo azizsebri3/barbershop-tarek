@@ -473,6 +473,14 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                       <p className="text-gray-300 text-sm">{booking.message}</p>
                     </div>
                   )}
+
+                  {booking.cancel_note && (
+                    <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                      <p className="text-red-300 text-sm">
+                        <strong>Note d&apos;annulation:</strong> {booking.cancel_note}
+                      </p>
+                    </div>
+                  )}
                   </div>
                 </div>
 

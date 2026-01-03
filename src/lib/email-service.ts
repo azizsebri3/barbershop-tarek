@@ -11,6 +11,7 @@ function getResend() {
 }
 
 interface BookingDetails {
+  id?: string
   name: string
   email: string
   phone: string
@@ -87,10 +88,25 @@ export async function sendClientConfirmation(booking: BookingDetails) {
               </div>
               ` : ''}
               
-              <p style="color: #cccccc; line-height: 1.6;">
-                <strong style="color: #d4af37;">Important :</strong> Si vous devez annuler ou modifier votre rendez-vous, 
-                merci de nous contacter au moins 24h à l'avance.
-              </p>
+              ${booking.id ? `
+              <!-- Cancellation Section -->
+              <div style="background-color: #2a2a3e; border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid #444;">
+                <h3 style="color: #d4af37; margin: 0 0 15px 0; font-size: 16px;">❌ Besoin d'annuler ?</h3>
+                <p style="color: #cccccc; margin: 0 0 15px 0; font-size: 14px; line-height: 1.5;">
+                  Si vous devez annuler votre rendez-vous, cliquez sur le bouton ci-dessous. 
+                  Vous pourrez ajouter une note expliquant la raison de l'annulation.
+                </p>
+                <div style="text-align: center;">
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://votre-site.vercel.app'}/fr/booking/cancel/${booking.id}" 
+                     style="display: inline-block; background-color: #ef4444; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 14px; transition: background-color 0.3s;">
+                    Annuler mon rendez-vous
+                  </a>
+                </div>
+                <p style="color: #888888; margin: 15px 0 0 0; font-size: 12px;">
+                  ⚠️ Nous vous recommandons d'annuler au moins 24h à l'avance.
+                </p>
+              </div>
+              ` : ''}
               
               <p style="color: #cccccc; line-height: 1.6;">
                 À très bientôt ! 🙌

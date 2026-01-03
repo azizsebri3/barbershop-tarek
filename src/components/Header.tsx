@@ -55,15 +55,17 @@ export default function Header() {
   const navLinks = useMemo(() => [
     { href: '/', label: t.nav.home },
     { href: '/#services', label: t.nav.services },
-    { href: '/pricing', label: t.nav.pricing },
-  ], [t.nav.home, t.nav.services, t.nav.pricing])
+  ], [t.nav.home, t.nav.services])
 
   return (
-    <header className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-      scrolled 
-        ? 'bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20' 
-        : 'bg-transparent'
-    } ${isAdmin ? 'border-accent/30' : ''}`}>
+    <header 
+      className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+        scrolled 
+          ? 'bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20' 
+          : 'bg-transparent'
+      } ${isAdmin ? 'border-accent/30' : ''}`}
+      role="banner"
+    >
       {/* Admin Banner */}
       {isAdmin && (
         <motion.div 
@@ -126,6 +128,7 @@ export default function Header() {
                 key={index}
                 href={link.href}
                 className="relative px-4 py-2 text-sm font-medium text-gray-300 hover:text-white rounded-full transition-all duration-300 hover:bg-white/10"
+                aria-label={`Aller à ${link.label}`}
               >
                 {link.label}
               </Link>
@@ -133,6 +136,7 @@ export default function Header() {
             <Link
               href="/booking"
               className="group relative px-5 py-2 bg-gradient-to-r from-accent to-yellow-500 text-black rounded-full font-bold text-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-accent/30"
+              aria-label="Réserver un rendez-vous"
             >
               <span className="relative z-10 flex items-center gap-1">
                 {t.nav.booking}

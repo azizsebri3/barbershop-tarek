@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
-import { Star, Zap, Shield, MapPin, Phone, Clock, Scissors } from 'lucide-react'
+import { Star, Zap, Shield, MapPin, Phone, Clock } from 'lucide-react'
 import Link from 'next/link'
 
 // Lazy load des composants lourds
@@ -47,30 +47,13 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Local Info Banner - SEO + UX */}
-      <section className="py-6 bg-accent/10 border-y border-accent/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-12 text-sm md:text-base">
-            <div className="flex items-center gap-2 text-gray-300">
-              <MapPin className="w-5 h-5 text-accent" />
-              <span>Passage de la Gare 5, Namur</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-300">
-              <Phone className="w-5 h-5 text-accent" />
-              <a href="tel:+32465632205" className="hover:text-accent transition-colors">
-                +32 465 63 22 05
-              </a>
-            </div>
-            <div className="flex items-center gap-2 text-gray-300">
-              <Clock className="w-5 h-5 text-accent" />
-              <span>Lun-Sam: 9h-18h</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-300">
-              <Scissors className="w-5 h-5 text-accent" />
-              <span>Coupe • Dégradé • Barbe soignée</span>
-            </div>
-          </div>
-        </div>
+      {/* SEO Content Section - Invisible mais indexé */}
+      <section className="sr-only">
+        <h1>Tarek Salon — Coiffure & Barbershop à Namur</h1>
+        <p>
+          Salon de coiffure moderne à Namur. Coupes tendance, dégradés professionnels, soins barbe.
+          Réservation en ligne simple et rapide. Équipe passionnée, produits premium.
+        </p>
       </section>
 
       {/* Services Carousel */}
@@ -81,45 +64,40 @@ export default function Home() {
       {/* Client Portfolio */}
       <ClientPortfolio />
 
-      {/* Features Section - SEO optimisé */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
+      {/* Why Choose Us - Concis */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-secondary/50">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-12"
+            className="text-3xl md:text-4xl font-bold text-white mb-6"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Pourquoi Choisir <span className="text-accent">Tarek Salon</span> à Namur ?
-            </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Une équipe passionnée, des looks taillés pour vous et une ambiance chaleureuse.
-            </p>
-          </motion.div>
+            Pourquoi <span className="text-accent">Tarek Salon</span> ?
+          </motion.h2>
 
           <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
             {[
-              { icon: Star, title: 'Signature sur-mesure', description: 'Looks personnalisés, conseils dédiés et finitions couture.' },
-              { icon: Zap, title: 'Expérience fluide', description: 'Rendez-vous rapides, gestes précis, zéro minute perdue.' },
-              { icon: Shield, title: 'Soins haute qualité', description: 'Produits pros, rituels barbe & cheveux pensés pour durer.' },
+              { icon: Star, title: 'Expertise', description: 'Plus de 10 ans d\'expérience en coiffure moderne' },
+              { icon: Zap, title: 'Rapidité', description: 'Service efficace sans compromettre la qualité' },
+              { icon: Shield, title: 'Qualité', description: 'Produits professionnels et techniques éprouvées' },
             ].map((feature, index) => {
               const Icon = feature.icon
               return (
                 <motion.div
                   key={index}
                   variants={itemVariants}
-                  whileHover={{ y: -10 }}
-                  className="text-center p-8 rounded-xl bg-primary border border-primary hover:border-accent transition-colors"
+                  whileHover={{ y: -5 }}
+                  className="text-center p-6 rounded-xl bg-primary border border-primary hover:border-accent transition-colors"
                 >
-                  <Icon className="text-accent text-4xl mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-                  <p className="text-gray-400">{feature.description}</p>
+                  <Icon className="text-accent text-3xl mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
+                  <p className="text-gray-400 text-sm">{feature.description}</p>
                 </motion.div>
               )
             })}
@@ -127,21 +105,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Opening Hours Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Horaires <span className="text-accent">d&apos;Ouverture</span>
-          </h2>
-          <p className="text-gray-400 text-lg">Votre coiffeur à Namur vous accueille du lundi au samedi</p>
-        </motion.div>
+      {/* Opening Hours - Intégré avec contact */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary/30">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-8"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Horaires & <span className="text-accent">Contact</span>
+            </h2>
+          </motion.div>
 
-        <OpeningHours />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <OpeningHours />
+
+            {/* Contact Info */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="text-center lg:text-left">
+                <h3 className="text-xl font-bold text-white mb-4">Nous Trouver</h3>
+                <div className="space-y-3 text-gray-300">
+                  <div className="flex items-center justify-center lg:justify-start gap-3">
+                    <MapPin className="w-5 h-5 text-accent flex-shrink-0" />
+                    <span>Passage de la Gare 5, Namur</span>
+                  </div>
+                  <div className="flex items-center justify-center lg:justify-start gap-3">
+                    <Phone className="w-5 h-5 text-accent flex-shrink-0" />
+                    <a href="tel:+32465632205" className="hover:text-accent transition-colors">
+                      +32 465 63 22 05
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* Location Section with Maps */}

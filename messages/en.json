@@ -63,5 +63,20 @@
     "rights": "All rights reserved",
     "contact": "Contact Us"
   },
-  "language": "Language"
-}
+  "cancel": {
+    "title": "Cancel your appointment",
+    "confirmQuestion": "Are you sure you want to cancel this appointment?",
+    "reasonLabel": "Cancellation reason (optional)",
+    "reasonPlaceholder": "Briefly explain why you're canceling...",
+    "cancelButton": "Cancel",
+    "confirmButton": "Confirm cancellation",
+    "cancelling": "Cancelling...",
+    "successTitle": "Successfully cancelled",
+    "successMessage": "Your appointment has been cancelled. We hope to see you again soon!",
+    "backButton": "Back to home",
+    "alreadyCancelled": "Already cancelled",
+    "alreadyCancelledMessage": "This appointment has already been cancelled.",
+    "notFound": "Booking not found",
+    "notFoundMessage": "This booking doesn't exist or has already been cancelled.",
+    "recommendation": "We recommend cancelling at least 24 hours in advance."
+  },

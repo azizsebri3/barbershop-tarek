@@ -35,7 +35,10 @@ export default function ClientPortfolio() {
     return null // Ne rien afficher si pas de photos
   }
   return (
-    <section className="py-12 sm:py-20 px-3 sm:px-4 md:px-6 lg:px-8 bg-gradient-to-b from-transparent via-secondary/30 to-transparent">
+    <section 
+      className="py-12 sm:py-20 px-3 sm:px-4 md:px-6 lg:px-8 bg-gradient-to-b from-transparent via-secondary/30 to-transparent"
+      aria-labelledby="portfolio-title"
+    >
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -43,7 +46,10 @@ export default function ClientPortfolio() {
           transition={{ duration: 0.5 }}
           className="text-center mb-10 sm:mb-16"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-4">
+          <h2 
+            id="portfolio-title"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-4"
+          >
             Portfolio <span className="text-accent">Clients</span>
           </h2>
           <p className="text-gray-400 text-xs sm:text-base md:text-lg max-w-2xl mx-auto">
@@ -86,11 +92,12 @@ export default function ClientPortfolio() {
                   {/* Image */}
                   <Image
                     src={photo.url}
-                    alt={photo.name}
+                    alt={`Photo de portfolio client - ${photo.name}`}
                     fill
-                    sizes="(max-width: 768px) 80vw, 50vw"
+                    sizes="(max-width: 768px) 80vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover"
-                    unoptimized
+                    loading="lazy"
+                    quality={75}
                   />
 
                   {/* Gradient Overlay */}

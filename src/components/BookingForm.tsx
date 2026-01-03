@@ -48,6 +48,46 @@ export default function BookingForm() {
     try {
       setIsSubmitting(true)
 
+      // Vérifier la disponibilité avant de soumettre
+      const availabilityResponse = await fetch(`/api/bookings?date=${data.date}`)
+      if (availabilityResponse.ok) {
+        const existingBookings: Array<{ date: string; time: string; service: string; status: string }> = await availabilityResponse.json()
+        
+        // Trouver la durée du service sélectionné
+        const selectedService = services.find(s => s.name === data.service)
+        const serviceDuration = selectedService?.duration || 30
+        
+        // Calculer les créneaux que cette réservation occuperait
+        const [startHour, startMin] = data.time.split(':').map(Number)
+        const startMinutes = startHour * 60 + startMin
+        const endMinutes = startMinutes + serviceDuration
+        
+        // Vérifier les conflits avec les réservations existantes
+        const servicesData = [
+          { name: 'Coupe Homme', duration: 30 },
+          { name: 'Barbe + Coupe', duration: 60 },
+          { name: 'Barbe', duration: 30 }
+        ]
+        
+        for (const booking of existingBookings) {
+          // Ne vérifier les conflits qu'avec les réservations confirmées
+          if (booking.status !== 'confirmed') continue
+          
+          const existingService = servicesData.find(s => s.name === booking.service)
+          const existingDuration = existingService?.duration || 30
+          
+          const [existingHour, existingMin] = booking.time.split(':').map(Number)
+          const existingStartMinutes = existingHour * 60 + existingMin
+          const existingEndMinutes = existingStartMinutes + existingDuration
+          
+          // Vérifier si les créneaux se chevauchent
+          if (startMinutes < existingEndMinutes && endMinutes > existingStartMinutes) {
+            toast.error('Ce créneau n\'est pas disponible. Veuillez choisir un autre horaire.')
+            return
+          }
+        }
+      }
+
       // Send to API route for booking
       const response = await fetch('/api/bookings', {
         method: 'POST',

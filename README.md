@@ -27,6 +27,7 @@ Features a complete appointment booking system with Supabase database, admin pan
 - ✅ **Notifications**: User feedback with React Hot Toast
 - ✅ **REST API**: Full CRUD operations for bookings
 - ✅ **Real-time Updates**: Instant booking confirmations
+- ✅ **Client Cancellation**: Clients can cancel appointments with notes via email link
 
 ### 👨‍💼 Admin Panel
 - ✅ **Dashboard**: Comprehensive booking overview
@@ -36,6 +37,7 @@ Features a complete appointment booking system with Supabase database, admin pan
 - ✅ **Opening Hours**: Manage schedule for each day
 - ✅ **General Settings**: Salon information configuration
 - ✅ **Image Gallery**: Upload and manage salon photos
+- ✅ **Cancellation Notes**: View client cancellation reasons
 - ✅ **English Interface**: Admin panel fully translated to English
 
 ### 🌍 Multilanguage Support

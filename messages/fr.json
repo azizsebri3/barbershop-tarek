@@ -63,5 +63,20 @@
     "rights": "Tous droits réservés",
     "contact": "Nous Contacter"
   },
-  "language": "Langue"
-}
+  "cancel": {
+    "title": "Annuler votre rendez-vous",
+    "confirmQuestion": "Êtes-vous sûr de vouloir annuler ce rendez-vous ?",
+    "reasonLabel": "Raison de l'annulation (optionnel)",
+    "reasonPlaceholder": "Expliquez brièvement pourquoi vous annulez...",
+    "cancelButton": "Annuler",
+    "confirmButton": "Confirmer l'annulation",
+    "cancelling": "Annulation...",
+    "successTitle": "Annulé avec succès",
+    "successMessage": "Votre rendez-vous a été annulé. Nous espérons vous revoir bientôt !",
+    "backButton": "Retour à l'accueil",
+    "alreadyCancelled": "Déjà annulé",
+    "alreadyCancelledMessage": "Ce rendez-vous a déjà été annulé.",
+    "notFound": "Réservation introuvable",
+    "notFoundMessage": "Cette réservation n'existe pas ou a déjà été annulée.",
+    "recommendation": "Nous vous recommandons d'annuler au moins 24h à l'avance."
+  },
