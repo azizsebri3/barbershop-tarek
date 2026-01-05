@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, LayoutDashboard, Sparkles, ChevronRight, Shield, Bell, LogOut } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Shield, Bell, LogOut } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import LanguageSwitcher from './LanguageSwitcher'
@@ -84,9 +84,10 @@ export default function Header() {
     try {
       const result = await login(adminPassword)
       if (result.success) {
-        toast.success('Connexion admin réussie')
         setShowAdminModal(false)
         setAdminPassword('')
+        // Rediriger vers /admin pour afficher la modale de succès
+        window.location.href = '/admin'
       } else {
         toast.error(result.error || 'Mot de passe incorrect')
       }
@@ -104,186 +105,116 @@ export default function Header() {
 
   return (
     <header 
-      className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled 
-          ? 'bg-black/80 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20' 
-          : 'bg-transparent'
-      } ${isAdmin ? 'border-accent/30' : ''}`}
+          ? 'bg-black/95 backdrop-blur-2xl shadow-2xl shadow-black/40' 
+          : 'bg-black/80 backdrop-blur-md'
+      }`}
       role="banner"
       suppressHydrationWarning
     >
-      {/* Admin Banner */}
-      {isAdmin && (
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-accent/20 via-accent/10 to-accent/20 border-b border-accent/20 px-4 py-1.5"
-        >
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
-            <span className="text-accent font-medium flex items-center gap-2">
-              <Shield size={12} />
-              Mode Administrateur
-            </span>
-            <span className="text-gray-400">
-              Session Active
-            </span>
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+        {/* Logo - Clean & Aligned */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative w-10 h-10">
+            <div className="absolute inset-0 bg-accent/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative w-full h-full bg-white/5 rounded-xl flex items-center justify-center border border-white/10 group-hover:border-accent/50 transition-all duration-300">
+              <img 
+                src={settings.logo_url || '/logo.png'} 
+                alt={settings.salonName}
+                className="w-full h-full object-contain p-2"
+              />
+            </div>
           </div>
-        </motion.div>
-      )}
-      
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Link href="/" className="group flex items-center gap-3">
-            <div className="relative">
-              <div className="absolute inset-0 bg-accent/30 rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-accent/20 to-yellow-500/20 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-accent/20 border border-accent/20">
-                <img 
-                  src={settings.logo_url || '/logo.png'} 
-                  alt={settings.salonName}
-                  className="w-full h-full object-contain p-1"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg sm:text-xl font-bold text-white group-hover:text-accent transition-colors">
-                {settings.salonName}
-              </span>
-              {isAdmin && (
-                <span className="text-[10px] bg-gradient-to-r from-accent to-yellow-500 text-black px-2 py-0.5 rounded-full font-bold w-fit">
-                  ADMIN
-                </span>
-              )}
-            </div>
-          </Link>
-        </motion.div>
+          <div className="hidden sm:block">
+            <h1 className="text-base font-bold text-white group-hover:text-accent transition-colors duration-300">
+              {settings.salonName}
+            </h1>
+            <p className="text-[10px] text-gray-500">Premium Barbershop</p>
+          </div>
+        </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-2">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="flex items-center gap-1 p-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10"
-          >
-            {navLinks.map((link, index) => (
-              <Link
-                key={index}
-                href={link.href}
-                className="relative px-4 py-2 text-sm font-medium text-gray-300 hover:text-white rounded-full transition-all duration-300 hover:bg-white/10"
-                aria-label={`Aller à ${link.label}`}
-                suppressHydrationWarning
-              >
-                {link.label}
-              </Link>
-            ))}
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-6">
+          {navLinks.map((link, index) => (
             <Link
-              href="/booking"
-              className="group relative px-5 py-2 bg-gradient-to-r from-accent to-yellow-500 text-black rounded-full font-bold text-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-accent/30"
-              aria-label="Réserver un rendez-vous"
+              key={index}
+              href={link.href}
+              className="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200"
               suppressHydrationWarning
             >
-              <span className="relative z-10 flex items-center gap-1">
-                {t.nav.booking}
-                <ChevronRight size={14} className="transition-transform group-hover:translate-x-0.5" />
-              </span>
+              {link.label}
             </Link>
-          </motion.div>
+          ))}
 
-          {/* Admin Controls */}
-          {isAdmin ? (
-            <div className="flex items-center gap-2 ml-2">
-              {/* Notification Bell */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/admin/dashboard')}
-                className="relative p-2.5 text-gray-400 hover:text-accent hover:bg-white/5 rounded-full transition-all duration-300"
-                title={`${pendingCount} réservation(s) en attente`}
-              >
-                <Bell size={18} />
-                {pendingCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
-                    {pendingCount > 9 ? '9+' : pendingCount}
-                  </span>
-                )}
-              </motion.button>
+          {/* CTA Button */}
+          <Link
+            href="/booking"
+            className="px-5 py-2 bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-black rounded-lg font-bold text-sm transition-all duration-300 hover:shadow-lg hover:shadow-accent/30"
+            suppressHydrationWarning
+          >
+            {t.nav.booking}
+          </Link>
 
-              {/* Admin Dashboard */}
-              <Link href="/admin/dashboard">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-accent/10 hover:bg-accent/20 text-accent rounded-full transition-all duration-300 text-sm font-medium border border-accent/30 backdrop-blur-md"
+          {/* Language & Admin Controls */}
+          <div className="flex items-center gap-3 ml-3 pl-3 border-l border-white/10">
+            <LanguageSwitcher />
+            {isAdmin ? (
+              <>
+                {/* Notification Bell */}
+                <button
+                  onClick={() => router.push('/admin/dashboard')}
+                  className="relative p-2 text-gray-300 hover:text-accent rounded-lg hover:bg-white/5 transition-colors duration-200"
+                  title={`${pendingCount} réservation(s) en attente`}
+                >
+                  <Bell size={18} />
+                  {pendingCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {pendingCount > 9 ? '9+' : pendingCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Admin Dashboard */}
+                <Link
+                  href="/admin/dashboard"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
                 >
                   <LayoutDashboard size={16} />
                   <span className="hidden lg:inline">Admin</span>
-                </motion.button>
-              </Link>
+                </Link>
 
-              {/* Logout Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowLogoutModal(true)}
-                className="p-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300 border border-red-500/20"
-                title="Déconnexion"
+                {/* Logout */}
+                <button
+                  onClick={() => setShowLogoutModal(true)}
+                  className="p-2 text-gray-300 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors duration-200"
+                  title="Déconnexion"
+                >
+                  <LogOut size={18} />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setShowAdminModal(true)}
+                className="p-2 text-gray-400 hover:text-accent rounded-lg hover:bg-white/5 transition-colors duration-200"
+                title="Accès Administration"
               >
-                <LogOut size={18} />
-              </motion.button>
-            </div>
-          ) : (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowAdminModal(true)}
-              className="ml-2 p-2.5 text-gray-500 hover:text-accent hover:bg-white/5 rounded-full transition-all duration-300 opacity-50 hover:opacity-100"
-              title="Accès Administration"
-            >
-              <Shield size={18} />
-            </motion.button>
-          )}
-
-          <div className="ml-2">
-            <LanguageSwitcher />
+                <Shield size={18} />
+              </button>
+            )}
           </div>
         </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-3">
           <LanguageSwitcher />
-          <motion.button
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={() => setIsOpen(!isOpen)}
-            className="relative p-2.5 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 transition-all duration-300"
+            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors duration-200"
+            aria-label={isOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
           >
-            <AnimatePresence mode="wait">
-              {isOpen ? (
-                <motion.div
-                  key="close"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <X size={22} className="text-accent" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="menu"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Menu size={22} className="text-white" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.button>
+            {isOpen ? <X size={20} className="text-white" /> : <Menu size={20} className="text-white" />}
+          </button>
         </div>
       </nav>
 
@@ -294,80 +225,54 @@ export default function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="md:hidden overflow-hidden"
+            transition={{ duration: 0.2 }}
+            className="md:hidden overflow-hidden border-t border-white/10"
           >
-            <div className="bg-black/95 backdrop-blur-xl border-t border-white/10">
-              <div className="px-4 py-6 space-y-2">
+            <div className="bg-black/95 backdrop-blur-xl">
+              <div className="px-4 py-4 space-y-1">
                 {navLinks.map((link, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Link
-                      href={link.href}
-                      className="flex items-center justify-between px-4 py-3.5 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <span className="font-medium">{link.label}</span>
-                      <ChevronRight size={18} className="text-gray-500" />
-                    </Link>
-                  </motion.div>
-                ))}
-                
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="pt-2"
-                >
                   <Link
-                    href="/booking"
-                    className="flex items-center justify-center gap-2 w-full px-6 py-4 bg-gradient-to-r from-accent to-yellow-500 text-black rounded-xl font-bold text-base shadow-lg shadow-accent/20"
+                    key={index}
+                    href={link.href}
+                    className="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors duration-200 font-medium"
                     onClick={() => setIsOpen(false)}
                   >
-                    <Sparkles size={18} />
-                    {t.nav.booking}
+                    {link.label}
                   </Link>
-                </motion.div>
+                ))}
                 
-                {/* Mobile Admin Controls */}
-                {isAdmin ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="pt-4 mt-4 border-t border-white/10 space-y-2"
+                {/* Mobile CTA */}
+                <Link
+                  href="/booking"
+                  className="flex items-center justify-center gap-2 w-full px-6 py-3 mt-3 bg-gradient-to-r from-accent to-yellow-500 text-black rounded-lg font-bold shadow-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {t.nav.booking}
+                </Link>
+                
+                {/* Mobile Admin */}
+                {isAdmin && (
+                  <Link
+                    href="/admin/dashboard"
+                    className="flex items-center gap-2 w-full px-4 py-3 mt-3 bg-white/5 text-white rounded-lg font-medium border border-white/10"
+                    onClick={() => setIsOpen(false)}
                   >
-                    <Link
-                      href="/admin/dashboard"
-                      className="flex items-center gap-3 px-4 py-3.5 bg-accent/10 text-accent rounded-xl font-medium border border-accent/20"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <LayoutDashboard size={20} />
-                      Admin Panel
-                    </Link>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="pt-4 mt-4 border-t border-white/10"
+                    <LayoutDashboard size={20} />
+                    Admin Panel
+                  </Link>
+                )}
+                
+                {!isAdmin && (
+                  <button
+                    onClick={() => {
+                      setIsOpen(false)
+                      setShowAdminModal(true)
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-3 mt-2 text-gray-400 hover:text-accent hover:bg-white/5 rounded-lg transition-colors duration-200 border border-white/10"
                   >
-                    <button
-                      onClick={() => {
-                        setIsOpen(false)
-                        setShowAdminModal(true)
-                      }}
-                      className="flex items-center gap-3 w-full px-4 py-3.5 text-gray-400 hover:text-accent hover:bg-white/5 rounded-xl transition-all duration-200"
-                    >
-                      <Shield size={20} />
-                      Accès Admin
-                    </button>
-                  </motion.div>
+                    <Shield size={20} />
+                    Accès Admin
+                  </button>
                 )}
               </div>
             </div>

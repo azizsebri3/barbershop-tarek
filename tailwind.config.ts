@@ -22,6 +22,13 @@ const config: Config = {
         bounce: 'bounce 1s infinite',
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
+      backgroundSize: {
+        'size-200': '200% 200%',
+      },
+      backgroundPosition: {
+        'pos-0': '0% 0%',
+        'pos-100': '100% 100%',
+      },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },

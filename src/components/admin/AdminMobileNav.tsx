@@ -8,7 +8,8 @@ import {
   Clock,
   Scissors,
   LogOut,
-  X
+  X,
+  CheckCircle
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAdminAuth } from '@/lib/useAdminAuth'
@@ -20,18 +21,21 @@ export default function AdminMobileNav() {
   const router = useRouter()
   const { logout } = useAdminAuth()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      logout()
-      toast.success('Logout successful')
-      router.push('/admin')
+      await logout()
+      setShowLogoutModal(false)
+      setShowSuccessModal(true)
+      // Redirect after showing success message
+      setTimeout(() => {
+        window.location.href = '/'
+      }, 2000)
     } catch (error) {
       toast.error('Error during logout')
-    } finally {
       setIsLoggingOut(false)
       setShowLogoutModal(false)
     }
@@ -203,6 +207,50 @@ export default function AdminMobileNav() {
                   >
                     Cancel
                   </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="relative bg-gradient-to-br from-secondary to-primary border-2 border-green-500/30 rounded-3xl p-8 max-w-sm w-full shadow-2xl shadow-black/50 z-10"
+            >
+              <div className="text-center">
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                  className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-500/30"
+                >
+                  <CheckCircle className="text-green-400" size={36} />
+                </motion.div>
+                <h3 className="text-2xl font-bold text-white mb-3">Logout successful!</h3>
+                <p className="text-gray-300 mb-6 text-base">
+                  You have been logged out successfully. Redirecting...
+                </p>
+                <div className="flex justify-center">
+                  <div className="w-8 h-8 border-3 border-green-400/30 border-t-green-400 rounded-full animate-spin" />
                 </div>
               </div>
             </motion.div>

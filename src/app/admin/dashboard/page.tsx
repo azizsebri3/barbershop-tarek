@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Settings,
   Clock,
@@ -13,7 +13,10 @@ import {
   Bell,
   History,
   Star,
-  Palette
+  Palette,
+  LogOut,
+  X,
+  CheckCircle
 } from 'lucide-react'
 import AdminHours from '@/components/admin/AdminHours'
 import AdminServices from '@/components/admin/AdminServices'
@@ -36,9 +39,12 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('general')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [sessionInfo, setSessionInfo] = useState<{ expiresIn: string; rememberMe: boolean } | null>(null)
   const router = useRouter()
-  const { isAdmin, loading } = useAdminAuth()
+  const { isAdmin, loading, logout } = useAdminAuth()
 
   const tabs = [
     { id: 'general' as TabType, label: t.admin.general, icon: Building },
@@ -107,6 +113,21 @@ export default function AdminDashboard() {
     window.history.replaceState({}, '', url.toString())
   }
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await logout()
+      setShowLogoutModal(false)
+      setShowSuccessModal(true)
+      setTimeout(() => {
+        window.location.href = '/'
+      }, 2000)
+    } catch (error) {
+      setIsLoggingOut(false)
+      setShowLogoutModal(false)
+    }
+  }
+
   // Handle hash navigation for mobile nav
   useEffect(() => {
     const handleTabChangeEvent = (event: CustomEvent) => {
@@ -151,6 +172,13 @@ export default function AdminDashboard() {
                   <Settings className="text-accent" size={24} />
                   <h1 className="text-xl font-bold text-white">Administration</h1>
                 </div>
+                <button
+                  onClick={() => setShowLogoutModal(true)}
+                  className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                  title="Déconnexion"
+                >
+                  <LogOut size={20} />
+                </button>
               </div>
 
               {/* Quick Stats */}
@@ -285,6 +313,120 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={() => !isLoggingOut && setShowLogoutModal(false)}
+            />
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="relative bg-gradient-to-br from-secondary to-primary border-2 border-accent/30 rounded-3xl p-8 max-w-sm w-full shadow-2xl shadow-black/50 z-10"
+            >
+              <button
+                onClick={() => !isLoggingOut && setShowLogoutModal(false)}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                disabled={isLoggingOut}
+              >
+                <X size={20} />
+              </button>
+              <div className="text-center">
+                <div className="w-20 h-20 mx-auto mb-6 bg-red-500/20 rounded-full flex items-center justify-center border-2 border-red-500/30">
+                  <LogOut className="text-red-400" size={36} />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3">Confirmer la déconnexion</h3>
+                <p className="text-gray-300 mb-8 text-base">
+                  Êtes-vous sûr de vouloir vous déconnecter de votre session admin?
+                </p>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="w-full px-6 py-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-300 font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-red-500/20"
+                  >
+                    {isLoggingOut ? (
+                      <>
+                        <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Déconnexion...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogOut size={20} />
+                        <span>Oui, me déconnecter</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setShowLogoutModal(false)}
+                    disabled={isLoggingOut}
+                    className="w-full px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="relative bg-gradient-to-br from-secondary to-primary border-2 border-green-500/30 rounded-3xl p-8 max-w-sm w-full shadow-2xl shadow-black/50 z-10"
+            >
+              <div className="text-center">
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                  className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-2 border-green-500/30"
+                >
+                  <CheckCircle className="text-green-400" size={36} />
+                </motion.div>
+                <h3 className="text-2xl font-bold text-white mb-3">Déconnexion réussie!</h3>
+                <p className="text-gray-300 mb-6 text-base">
+                  Vous avez été déconnecté avec succès. Redirection en cours...
+                </p>
+                <div className="flex justify-center">
+                  <div className="w-8 h-8 border-3 border-green-400/30 border-t-green-400 rounded-full animate-spin" />
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
