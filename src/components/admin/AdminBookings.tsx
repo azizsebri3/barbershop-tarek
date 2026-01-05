@@ -42,7 +42,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       if (error) throw error
       setBookings(data || [])
     } catch (error) {
-      console.error('Erreur lors du chargement des réservations:', error)
+      console.error('Error loading bookings:', error)
       toast.error(t.error)
     } finally {
       setLoading(false)
@@ -58,8 +58,9 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       if (onLoading) onLoading(true)
 
       const requestBody: any = { status: newStatus }
-      if (newStatus === 'cancelled' && cancelNote) {
-        requestBody.cancel_note = cancelNote
+      if (newStatus === 'cancelled') {
+        requestBody.cancel_note = cancelNote || ''
+        requestBody.cancelled_by = 'admin'
       }
 
       const response = await fetch(`/api/bookings/${bookingId}`, {
@@ -73,12 +74,12 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       const data = await response.json()
 
       if (!response.ok) {
-        console.error('❌ Erreur API:', data.error)
-        throw new Error(data.error || 'Erreur lors de la mise à jour')
+        console.error('❌ API Error:', data.error)
+        throw new Error(data.error || 'Error updating booking')
       }
 
       setBookings(bookings.map(booking =>
-        booking.id === bookingId ? { ...booking, status: newStatus } : booking
+        booking.id === bookingId ? { ...booking, status: newStatus, cancelled_by: newStatus === 'cancelled' ? 'admin' : booking.cancelled_by } : booking
       ))
 
       const successMessage = newStatus === 'confirmed' ? t.bookingConfirmed : 
@@ -91,7 +92,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         onStatusChange()
       }
     } catch (error) {
-      console.error('❌ Erreur lors de la mise à jour:', error)
+      console.error('❌ Error updating:', error)
       toast.error(t.error)
     } finally {
       if (onLoading) onLoading(false)
@@ -208,7 +209,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       
       const successMessage = type === 'single' 
         ? t.bookingDeleted 
-        : `${ids.length} réservation(s) supprimée(s)`
+        : `${ids.length} booking(s) deleted`
       toast.success(successMessage)
       
       // Notify parent to update pending count
@@ -216,8 +217,8 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         onStatusChange()
       }
     } catch (error) {
-      console.error('❌ Erreur lors de la suppression:', error)
-      toast.error('Erreur lors de la suppression')
+      console.error('❌ Error deleting:', error)
+      toast.error('Error deleting bookings')
     } finally {
       setBulkDeleteLoading(false)
       setDeleteModalOpen(false)
@@ -477,7 +478,10 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                   {booking.cancel_note && (
                     <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                       <p className="text-red-300 text-sm">
-                        <strong>Note d&apos;annulation:</strong> {booking.cancel_note}
+                        <strong>Cancellation note:</strong> {booking.cancel_note}
+                      </p>
+                      <p className="text-red-300 text-xs mt-1">
+                        <strong>Cancelled by:</strong> {booking.cancelled_by === 'admin' ? '🔴 Admin' : '👤 Client'}
                       </p>
                     </div>
                   )}
@@ -561,17 +565,17 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
               </h3>
               
               <p className="text-gray-300 mb-4">
-                Êtes-vous sûr de vouloir annuler cette réservation ?
+                Are you sure you want to cancel this booking?
               </p>
               
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Note d&apos;annulation (optionnel)
+                  Cancellation note (optional)
                 </label>
                 <textarea
                   value={cancelNote}
                   onChange={(e) => setCancelNote(e.target.value)}
-                  placeholder="Raison de l'annulation..."
+                  placeholder="Reason for cancellation..."
                   disabled={cancelLoading}
                   className="w-full px-3 py-2 bg-primary/50 border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:border-accent focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                   rows={3}
@@ -584,7 +588,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                   disabled={cancelLoading}
                   className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                 >
-                  Annuler
+                  Cancel
                 </button>
                 <button
                   onClick={confirmCancelBooking}
@@ -594,10 +598,10 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                   {cancelLoading ? (
                     <>
                       <RefreshCw size={16} className="animate-spin" />
-                      Annulation...
+                      Cancelling...
                     </>
                   ) : (
-                    'Confirmer l\'annulation'
+                    'Confirm Cancellation'
                   )}
                 </button>
               </div>
@@ -628,14 +632,14 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                   <Trash2 className="text-red-400" size={24} />
                 </div>
                 <h3 className="text-xl font-semibold text-white">
-                  {deleteTarget.type === 'single' ? 'Supprimer la réservation' : 'Supprimer les réservations'}
+                  {deleteTarget.type === 'single' ? 'Delete Booking' : 'Delete Bookings'}
                 </h3>
               </div>
 
               <p className="text-gray-300 mb-6">
                 {deleteTarget.type === 'single'
-                  ? 'Êtes-vous sûr de vouloir supprimer cette réservation ? Cette action est irréversible.'
-                  : `Êtes-vous sûr de vouloir supprimer ${deleteTarget.ids.length} réservation(s) ? Cette action est irréversible.`
+                  ? 'Are you sure you want to delete this booking? This action is irreversible.'
+                  : `Are you sure you want to delete ${deleteTarget.ids.length} booking(s)? This action is irreversible.`
                 }
               </p>
 
@@ -645,7 +649,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                   disabled={bulkDeleteLoading}
                   className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
                 >
-                  Annuler
+                  Cancel
                 </button>
                 <button
                   onClick={confirmDelete}
@@ -655,12 +659,12 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                   {bulkDeleteLoading ? (
                     <>
                       <RefreshCw size={16} className="animate-spin" />
-                      Suppression...
+                      Deleting...
                     </>
                   ) : (
                     <>
                       <Trash2 size={16} />
-                      Supprimer
+                      Delete
                     </>
                   )}
                 </button>

@@ -42,7 +42,7 @@ export default function AdminTestimonials() {
       setTestimonials(data)
     } catch (error) {
       console.error('Error fetching testimonials:', error)
-      toast.error('Erreur lors du chargement des avis')
+      toast.error('Error loading reviews')
     } finally {
       setLoading(false)
     }
@@ -63,16 +63,16 @@ export default function AdminTestimonials() {
         throw new Error('Failed to update testimonial')
       }
 
-      toast.success(currentStatus ? 'Avis masqué' : 'Avis approuvé !')
+      toast.success(currentStatus ? 'Review hidden' : 'Review approved!')
       fetchTestimonials()
     } catch (error) {
       console.error('Error updating testimonial:', error)
-      toast.error('Erreur lors de la mise à jour')
+      toast.error('Error updating review')
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet avis ?')) {
+    if (!confirm('Are you sure you want to delete this review?')) {
       return
     }
 
@@ -87,7 +87,7 @@ export default function AdminTestimonials() {
         throw new Error('Failed to delete testimonial')
       }
 
-      toast.success('Avis supprimé')
+      toast.success('Review deleted')
       fetchTestimonials()
     } catch (error) {
       console.error('Erreur lors de la suppression:', error)
@@ -119,9 +119,9 @@ export default function AdminTestimonials() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white mb-2">Gestion des Avis Clients</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">Customer Reviews Management</h2>
           <p className="text-gray-400 text-sm">
-            Approuvez ou supprimez les feedbacks clients
+            Approve or delete customer feedback
           </p>
         </div>
         <motion.button
@@ -132,7 +132,7 @@ export default function AdminTestimonials() {
           className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-white rounded-lg hover:bg-white/10 transition-all"
         >
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-          Actualiser
+          Refresh
         </motion.button>
       </div>
 
@@ -143,15 +143,15 @@ export default function AdminTestimonials() {
           <p className="text-2xl font-bold text-white">{stats.total}</p>
         </div>
         <div className="p-4 bg-gradient-to-br from-green-500/10 to-transparent rounded-xl border border-green-500/20">
-          <p className="text-gray-400 text-sm mb-1">Approuvés</p>
+          <p className="text-gray-400 text-sm mb-1">Approved</p>
           <p className="text-2xl font-bold text-green-400">{stats.approved}</p>
         </div>
         <div className="p-4 bg-gradient-to-br from-yellow-500/10 to-transparent rounded-xl border border-yellow-500/20">
-          <p className="text-gray-400 text-sm mb-1">En attente</p>
+          <p className="text-gray-400 text-sm mb-1">Pending</p>
           <p className="text-2xl font-bold text-yellow-400">{stats.pending}</p>
         </div>
         <div className="p-4 bg-gradient-to-br from-accent/10 to-transparent rounded-xl border border-accent/20">
-          <p className="text-gray-400 text-sm mb-1">Note moyenne</p>
+          <p className="text-gray-400 text-sm mb-1">Average Rating</p>
           <p className="text-2xl font-bold text-accent">{stats.avgRating}/5</p>
         </div>
       </div>
@@ -168,7 +168,7 @@ export default function AdminTestimonials() {
                 : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
           >
-            {f === 'all' ? 'Tous' : f === 'approved' ? 'Approuvés' : 'En attente'}
+            {f === 'all' ? 'All' : f === 'approved' ? 'Approved' : 'Pending'}
           </button>
         ))}
       </div>
@@ -181,7 +181,7 @@ export default function AdminTestimonials() {
       ) : filteredTestimonials.length === 0 ? (
         <div className="text-center py-20">
           <MessageSquare className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400">Aucun avis {filter === 'approved' ? 'approuvé' : filter === 'pending' ? 'en attente' : 'trouvé'}</p>
+          <p className="text-gray-400">No reviews {filter === 'approved' ? 'approved' : filter === 'pending' ? 'pending' : 'found'}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -304,7 +304,7 @@ export default function AdminTestimonials() {
                         <Trash2 size={16} />
                       )}
                       <span className="hidden sm:inline">
-                        {deleteLoading === testimonial.id ? 'Suppression...' : 'Supprimer'}
+                        {deleteLoading === testimonial.id ? 'Deleting...' : 'Delete'}
                       </span>
                     </motion.button>
                   </div>

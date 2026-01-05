@@ -173,7 +173,7 @@ export default function AdminCalendar() {
   const [modalType, setModalType] = useState<'booking' | 'availability'>('booking')
   const [selectedEvent, setSelectedEvent] = useState<any>(null)
 
-  // Charger les réservations
+  // Load bookings
   const loadBookings = async () => {
     try {
       const response = await fetch('/api/bookings')
@@ -182,12 +182,12 @@ export default function AdminCalendar() {
         setBookings(data.bookings || [])
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des réservations:', error)
-      toast.error('Erreur lors du chargement des réservations')
+      console.error('Error loading bookings:', error)
+      toast.error('Error loading bookings')
     }
   }
 
-  // Charger les disponibilités
+  // Load availabilities
   const loadAvailability = async () => {
     try {
       // Charger les 60 prochains jours
@@ -273,11 +273,11 @@ export default function AdminCalendar() {
         const newSlot = { ...slot, id: Date.now().toString() }
         setAvailability(prev => [...prev, newSlot])
       }
-      toast.success('Disponibilité sauvegardée (local)')
+      toast.success('Availability saved (local)')
     }
   }
 
-  // Supprimer une disponibilité
+  // Delete an availability
   const deleteAvailability = async (slotId: string) => {
     try {
       const response = await fetch(`/api/availability/${slotId}`, {
@@ -286,15 +286,15 @@ export default function AdminCalendar() {
 
       if (response.ok) {
         await loadAvailability()
-        toast.success('Disponibilité supprimée')
+        toast.success('Availability deleted')
       } else {
-        throw new Error('Erreur lors de la suppression')
+        throw new Error('Error deleting availability')
       }
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error)
+      console.error('Error deleting:', error)
       // Fallback local
       setAvailability(prev => prev.filter(s => s.id !== slotId))
-      toast.success('Disponibilité supprimée (local)')
+      toast.success('Availability deleted (local)')
     }
   }
 
@@ -303,9 +303,9 @@ export default function AdminCalendar() {
     loadAvailability()
   }, [])
 
-  // Convertir les données en événements pour FullCalendar
+  // Convert data to events for FullCalendar
   const events = [
-    // Réservations
+    // Bookings
     ...bookings.map(booking => ({
       id: `booking-${booking.id}`,
       title: `${booking.service} - ${booking.name}`,
@@ -359,7 +359,7 @@ export default function AdminCalendar() {
     setShowModal(true)
   }
 
-  // Changer le statut d'une réservation
+  // Change booking status
   const updateBookingStatus = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
     try {
       const response = await fetch(`/api/bookings/${bookingId}`, {
@@ -369,15 +369,15 @@ export default function AdminCalendar() {
       })
 
       if (response.ok) {
-        toast.success(`Réservation ${status === 'confirmed' ? 'confirmée' : 'annulée'}`)
+        toast.success(`Booking ${status === 'confirmed' ? 'confirmed' : 'cancelled'}`)
         loadBookings()
         setShowModal(false)
       } else {
-        throw new Error('Erreur lors de la mise à jour')
+        throw new Error('Error updating booking')
       }
     } catch (error) {
-      console.error('Erreur:', error)
-      toast.error('Erreur lors de la mise à jour du statut')
+      console.error('Error:', error)
+      toast.error('Error updating booking status')
     }
   }
 
@@ -576,14 +576,14 @@ export default function AdminCalendar() {
                       )}
                       
                       <div>
-                        <p className="text-gray-400 text-sm">Statut</p>
+                        <p className="text-gray-400 text-sm">Status</p>
                         <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
                           booking.status === 'confirmed' ? 'bg-green-600 text-white' :
                           booking.status === 'cancelled' ? 'bg-red-600 text-white' :
                           'bg-yellow-600 text-black'
                         }`}>
-                          {booking.status === 'confirmed' ? 'Confirmé' :
-                           booking.status === 'cancelled' ? 'Annulé' : 'En attente'}
+                          {booking.status === 'confirmed' ? 'Confirmed' :
+                           booking.status === 'cancelled' ? 'Cancelled' : 'Pending'}
                         </span>
                       </div>
                       
@@ -593,13 +593,13 @@ export default function AdminCalendar() {
                             onClick={() => updateBookingStatus(booking.id, 'confirmed')}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                           >
-                            Confirmer
+                            Confirm
                           </button>
                           <button
                             onClick={() => updateBookingStatus(booking.id, 'cancelled')}
                             className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                           >
-                            Annuler
+                            Cancel
                           </button>
                         </div>
                       )}
@@ -609,7 +609,7 @@ export default function AdminCalendar() {
               </div>
             )}
             
-            {/* Modal pour les disponibilités */}
+            {/* Modal for availabilities */}
             {modalType === 'availability' && selectedDate && (
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">

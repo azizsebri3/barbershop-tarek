@@ -23,6 +23,7 @@ export interface Booking {
   service: string
   message?: string
   cancel_note?: string
+  cancelled_by?: 'client' | 'admin'
   created_at: string
   status: 'pending' | 'confirmed' | 'cancelled'
 }

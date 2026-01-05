@@ -47,13 +47,13 @@ export default function AdminBranding({}: AdminBrandingProps) {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error('Veuillez sélectionner une image')
+      toast.error('Please select an image')
       return
     }
 
     // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('L\'image ne doit pas dépasser 2MB')
+      toast.error('Image must not exceed 2MB')
       return
     }
 
@@ -78,7 +78,7 @@ export default function AdminBranding({}: AdminBrandingProps) {
 
       if (!response.ok) {
         const error = await response.json()
-        console.error('❌ Erreur API:', error)
+        console.error('❌ API Error:', error)
         throw new Error(error.error || 'Upload failed')
       }
 
@@ -90,7 +90,7 @@ export default function AdminBranding({}: AdminBrandingProps) {
         setLogoUrl('')
         setTimeout(() => {
           setLogoUrl(data.url)
-          toast.success('✅ Logo uploadé sur Supabase avec succès!')
+          toast.success('✅ Logo uploaded to Supabase successfully!')
         }, 10)
 
         // Reload page to reflect changes in header

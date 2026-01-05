@@ -7,6 +7,8 @@ import { useLanguage } from '@/lib/language-context'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+// Mobile bottom navigation component
+
 export default function MobileBottomNav() {
   const { t } = useLanguage()
   const pathname = usePathname()
@@ -19,30 +21,35 @@ export default function MobileBottomNav() {
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
 
+  // Masquer sur les pages admin
+  if (pathname.startsWith('/admin')) {
+    return null
+  }
+
   const navItems = [
     {
       href: '/',
       label: t.nav.home,
       icon: Home,
-      active: pathname === '/' && hash === ''
+      active: (pathname === '/' || pathname === '/fr' || pathname === '/en' || pathname === '/fr/' || pathname === '/en/') && hash === ''
     },
     {
       href: '/#services',
       label: t.nav.services,
       icon: Scissors,
-      active: pathname === '/' && hash === '#services'
+      active: (pathname === '/' || pathname === '/fr' || pathname === '/en' || pathname === '/fr/' || pathname === '/en/') && hash === '#services'
     },
     {
       href: '/booking',
       label: t.nav.booking,
       icon: Calendar,
-      active: pathname === '/booking'
+      active: pathname.includes('/booking')
     },
     {
       href: '/#contact',
       label: 'Contact',
       icon: Phone,
-      active: pathname === '/' && hash === '#contact'
+      active: (pathname === '/' || pathname === '/fr' || pathname === '/en' || pathname === '/fr/' || pathname === '/en/') && hash === '#contact'
     }
   ]
 

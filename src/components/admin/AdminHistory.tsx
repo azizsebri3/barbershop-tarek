@@ -84,8 +84,8 @@ export default function AdminHistory() {
 
       setHistory(clientsList)
     } catch (error) {
-      console.error('Erreur lors du chargement de l\'historique:', error)
-      toast.error('Erreur lors du chargement')
+      console.error('Error loading history:', error)
+      toast.error('Error loading history')
     } finally {
       setLoading(false)
     }

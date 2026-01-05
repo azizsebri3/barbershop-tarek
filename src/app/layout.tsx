@@ -6,7 +6,6 @@ import { LanguageProvider } from '@/lib/language-context'
 // Lazy load des composants lourds
 const Header = dynamic(() => import('@/components/Header'), { ssr: true })
 const Footer = dynamic(() => import('@/components/Footer'), { ssr: true })
-const MobileBottomNav = dynamic(() => import('@/components/MobileBottomNav'))
 
 // SEO Metadata optimisé pour Namur, Belgique
 export const metadata: Metadata = {
@@ -288,11 +287,10 @@ export default function RootLayout({
       <body className="bg-primary text-white">
         <LanguageProvider>
           <Header />
-          <main className="pt-16 pb-20 md:pb-0">
+          <main className="pt-16">
             {children}
           </main>
           <Footer />
-          <MobileBottomNav />
         </LanguageProvider>
       </body>
     </html>

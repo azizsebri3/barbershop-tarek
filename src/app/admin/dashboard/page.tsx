@@ -9,7 +9,6 @@ import {
   Scissors,
   Image,
   Building,
-  LogOut,
   Calendar,
   Bell,
   History,
@@ -27,7 +26,8 @@ import AdminBranding from '@/components/admin/AdminBranding'
 import PushNotificationToggle from '@/components/admin/PushNotificationToggle'
 import { useLanguage } from '@/lib/language-context'
 import { supabase } from '@/lib/supabase'
-import { isAdminAuthenticated, clearAdminSession, renewAdminSession, getSessionInfo } from '@/lib/admin-auth'
+import { renewAdminSession, getSessionInfo } from '@/lib/admin-auth'
+import { useAdminAuth } from '@/lib/useAdminAuth'
 
 type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'history' | 'testimonials' | 'branding' | 'notifications'
 
@@ -36,9 +36,21 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('general')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
-  const [showNotifDropdown, setShowNotifDropdown] = useState(false)
   const [sessionInfo, setSessionInfo] = useState<{ expiresIn: string; rememberMe: boolean } | null>(null)
   const router = useRouter()
+  const { isAdmin, loading } = useAdminAuth()
+
+  const tabs = [
+    { id: 'general' as TabType, label: t.admin.general, icon: Building },
+    { id: 'hours' as TabType, label: t.admin.hours, icon: Clock },
+    { id: 'services' as TabType, label: t.admin.services, icon: Scissors },
+    { id: 'images' as TabType, label: t.admin.images, icon: Image },
+    { id: 'branding' as TabType, label: 'Logo & Branding', icon: Palette },
+    { id: 'bookings' as TabType, label: t.admin.bookings, icon: Calendar, badge: pendingCount },
+    { id: 'history' as TabType, label: 'History', icon: History },
+    { id: 'testimonials' as TabType, label: 'Customer Reviews', icon: Star },
+    { id: 'notifications' as TabType, label: 'Notifications', icon: Bell },
+  ]
 
   const fetchPendingCount = useCallback(async () => {
     try {
@@ -51,29 +63,60 @@ export default function AdminDashboard() {
         setPendingCount(count)
       }
     } catch (error) {
-      console.error('Erreur comptage réservations:', error)
+      console.error('Error counting bookings:', error)
     }
   }, [])
 
   useEffect(() => {
-    if (!isAdminAuthenticated()) {
+    if (loading) return
+    
+    if (!isAdmin) {
       router.push('/admin')
     } else {
       setIsAuthenticated(true)
-      renewAdminSession() // Renouveler la session à chaque visite
+      renewAdminSession() // Renew session on each visit
       setSessionInfo(getSessionInfo())
       fetchPendingCount()
-      // Actualiser toutes les 30 secondes
+      // Refresh every 30 seconds
       const interval = setInterval(fetchPendingCount, 30000)
       return () => clearInterval(interval)
     }
     return undefined
-  }, [router, fetchPendingCount])
+  }, [isAdmin, loading, router, fetchPendingCount])
 
-  const handleLogout = () => {
-    clearAdminSession()
-    router.push('/admin')
+  // Handle URL parameters for tab navigation
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    const urlParams = new URLSearchParams(window.location.search)
+    const tabParam = urlParams.get('tab') as TabType
+    if (tabParam && tabs.some(tab => tab.id === tabParam)) {
+      setActiveTab(tabParam)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated])
+
+  // Update URL when tab changes
+  const handleTabChange = (tabId: TabType) => {
+    setActiveTab(tabId)
+    // Scroll to top
+    window.scrollTo(0, 0)
+    // Update URL without causing a page reload
+    const url = new URL(window.location.href)
+    url.searchParams.set('tab', tabId)
+    window.history.replaceState({}, '', url.toString())
   }
+
+  // Handle hash navigation for mobile nav
+  useEffect(() => {
+    const handleTabChangeEvent = (event: CustomEvent) => {
+      const tabId = event.detail as TabType
+      setActiveTab(tabId)
+    }
+
+    window.addEventListener('changeAdminTab', handleTabChangeEvent as EventListener)
+    return () => window.removeEventListener('changeAdminTab', handleTabChangeEvent as EventListener)
+  }, [])
 
   if (!isAuthenticated) {
     return (
@@ -82,18 +125,6 @@ export default function AdminDashboard() {
       </div>
     )
   }
-
-  const tabs = [
-    { id: 'general' as TabType, label: t.admin.general, icon: Building },
-    { id: 'hours' as TabType, label: t.admin.hours, icon: Clock },
-    { id: 'services' as TabType, label: t.admin.services, icon: Scissors },
-    { id: 'images' as TabType, label: t.admin.images, icon: Image },
-    { id: 'branding' as TabType, label: 'Logo & Identité', icon: Palette },
-    { id: 'bookings' as TabType, label: t.admin.bookings, icon: Calendar, badge: pendingCount },
-    { id: 'history' as TabType, label: 'Historique', icon: History },
-    { id: 'testimonials' as TabType, label: 'Avis Clients', icon: Star },
-    { id: 'notifications' as TabType, label: 'Notifications', icon: Bell },
-  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-primary">
@@ -105,64 +136,13 @@ export default function AdminDashboard() {
               <Settings className="text-accent" size={20} />
               <h1 className="text-lg font-bold text-white">Admin</h1>
             </div>
-            <div className="flex items-center gap-3">
-              {/* Notification Bell Mobile */}
-              <button
-                onClick={() => {
-                  setShowNotifDropdown(!showNotifDropdown)
-                  if (pendingCount > 0) setActiveTab('bookings')
-                }}
-                className="relative p-2 text-gray-400 hover:text-accent transition-colors"
-              >
-                <Bell size={20} />
-                {pendingCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
-                    {pendingCount > 9 ? '9+' : pendingCount}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={handleLogout}
-                className="p-2 text-accent hover:bg-accent/10 rounded-lg transition-colors"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
           </div>
         </div>
       </header>
 
       <div className="flex flex-col lg:flex-row min-h-screen">
-        {/* Sidebar - Mobile Bottom Navigation */}
+        {/* Sidebar */}
         <div className="lg:w-80 lg:flex-shrink-0">
-          {/* Mobile Bottom Navigation */}
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-secondary/95 backdrop-blur-md border-t border-accent/20 z-50 overflow-x-auto">
-            <div className="flex gap-1 py-2 px-2 min-w-max">
-              {tabs.map((tab) => {
-                const Icon = tab.icon
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-[70px] relative ${
-                      activeTab === tab.id
-                        ? 'bg-accent text-primary'
-                        : 'text-gray-400 hover:text-accent'
-                    }`}
-                  >
-                    <Icon size={18} />
-                    <span className="text-xs mt-1 truncate max-w-[60px]">{tab.label}</span>
-                    {tab.badge && tab.badge > 0 && (
-                      <span className="absolute top-0 right-2 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                        {tab.badge > 9 ? '9+' : tab.badge}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
           {/* Desktop Sidebar */}
           <div className="hidden lg:block h-full bg-secondary/50 backdrop-blur-md border-r border-accent/20">
             <div className="p-6">
@@ -170,29 +150,6 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-3">
                   <Settings className="text-accent" size={24} />
                   <h1 className="text-xl font-bold text-white">Administration</h1>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* Notification Bell Desktop */}
-                  <button
-                    onClick={() => {
-                      if (pendingCount > 0) setActiveTab('bookings')
-                    }}
-                    className="relative p-2 text-gray-400 hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
-                    title={`${pendingCount} réservation(s) en attente`}
-                  >
-                    <Bell size={20} />
-                    {pendingCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
-                        {pendingCount > 9 ? '9+' : pendingCount}
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="p-2 text-accent hover:bg-accent/10 rounded-lg transition-colors"
-                  >
-                    <LogOut size={20} />
-                  </button>
                 </div>
               </div>
 
@@ -202,11 +159,11 @@ export default function AdminDashboard() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg cursor-pointer hover:bg-amber-500/20 transition-colors"
-                  onClick={() => setActiveTab('bookings')}
+                  onClick={() => handleTabChange('bookings')}
                 >
                   <div className="flex items-center gap-2 text-amber-400">
                     <Calendar size={18} />
-                    <span className="font-semibold">{pendingCount} réservation(s) en attente</span>
+                    <span className="font-semibold">{pendingCount} pending booking(s)</span>
                   </div>
                 </motion.div>
               )}
@@ -226,7 +183,7 @@ export default function AdminDashboard() {
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => handleTabChange(tab.id)}
                       className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
                         activeTab === tab.id
                           ? 'bg-accent text-primary'
@@ -255,13 +212,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 pb-20 lg:pb-0">
+        <div className="flex-1">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="p-4 lg:p-8"
+            className="p-4 lg:p-8 pb-20 lg:pb-8"
           >
             {activeTab === 'general' && <AdminGeneral />}
             {activeTab === 'hours' && <AdminHours />}
@@ -273,24 +230,59 @@ export default function AdminDashboard() {
             {activeTab === 'testimonials' && <AdminTestimonials />}
             {activeTab === 'notifications' && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-accent">Notifications Push</h2>
+                <h2 className="text-2xl font-bold text-accent">Push Notifications</h2>
                 <p className="text-gray-400">
-                  Activez les notifications pour recevoir une alerte sur votre téléphone 
-                  à chaque nouvelle réservation, même quand le site est fermé.
+                  Enable notifications to receive an alert on your phone 
+                  for each new booking, even when the site is closed.
                 </p>
                 <PushNotificationToggle />
                 
                 <div className="mt-8 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                  <h3 className="font-semibold text-blue-400 mb-2">📱 Comment installer l&apos;app PWA ?</h3>
+                  <h3 className="font-semibold text-blue-400 mb-2">📱 How to install the PWA app?</h3>
                   <ul className="text-sm text-gray-300 space-y-2">
-                    <li><strong>Sur iPhone/iPad:</strong> Safari → Partager → &quot;Sur l&apos;écran d&apos;accueil&quot;</li>
-                    <li><strong>Sur Android:</strong> Chrome → Menu ⋮ → &quot;Installer l&apos;application&quot;</li>
-                    <li><strong>Sur Desktop:</strong> Chrome → Barre d&apos;adresse → Icône d&apos;installation</li>
+                    <li><strong>On iPhone/iPad:</strong> Safari → Share → &quot;Add to Home Screen&quot;</li>
+                    <li><strong>On Android:</strong> Chrome → Menu ⋮ → &quot;Install app&quot;</li>
+                    <li><strong>On Desktop:</strong> Chrome → Address bar → Install icon</li>
                   </ul>
                 </div>
               </div>
             )}
           </motion.div>
+        </div>
+
+        {/* Mobile Bottom Navigation */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-secondary/95 backdrop-blur-md border-t border-accent/20 z-40">
+          <div className="flex items-center justify-around px-2 py-2">
+            {tabs.slice(0, 5).map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 min-w-0 flex-1 ${
+                    isActive
+                      ? 'bg-accent/20 text-accent'
+                      : 'text-gray-400 hover:text-white hover:bg-accent/5'
+                  }`}
+                >
+                  <div className="relative">
+                    <Icon size={18} />
+                    {tab.badge && tab.badge > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                        {tab.badge > 9 ? '9+' : tab.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className={`text-xs mt-1 font-medium truncate ${
+                    isActive ? 'text-accent' : 'text-gray-400'
+                  }`}>
+                    {tab.label.length > 8 ? tab.label.substring(0, 8) + '...' : tab.label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>

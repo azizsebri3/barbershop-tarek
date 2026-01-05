@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { sendBookingCancelledEmail } from '@/lib/email-service'
+import { sendClientCancellationConfirmation, sendAdminCancellationNotification } from '@/lib/email-service'
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -60,8 +60,9 @@ export async function POST(
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Envoyer l'email d'annulation au client
-    await sendBookingCancelledEmail({
+    // Envoyer les emails appropriés
+    // 1. Confirmation au client que son annulation a été prise en compte
+    await sendClientCancellationConfirmation({
       id: booking.id,
       name: booking.name,
       email: booking.email,
@@ -72,6 +73,19 @@ export async function POST(
       message: booking.message,
       cancelNote: cancelNote
     })
+
+    // 2. Notification à l'admin qu'un client a annulé (toujours en anglais)
+    await sendAdminCancellationNotification({
+      id: booking.id,
+      name: booking.name,
+      email: booking.email,
+      phone: booking.phone,
+      date: booking.date,
+      time: booking.time,
+      service: booking.service,
+      message: booking.message,
+      cancelNote: cancelNote
+    }, 'en')
 
     return NextResponse.json({ success: true })
   } catch (error) {

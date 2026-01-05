@@ -2,23 +2,29 @@
 
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, LayoutDashboard, Sparkles, ChevronRight, Shield } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Sparkles, ChevronRight, Shield, Bell, LogOut } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import LanguageSwitcher from './LanguageSwitcher'
 import { useLanguage } from '@/lib/language-context'
 import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettingsCached'
 import { useAdminAuth } from '@/lib/useAdminAuth'
+import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const [showAdminModal, setShowAdminModal] = useState(false)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [adminPassword, setAdminPassword] = useState('')
   const [loadingLogin, setLoadingLogin] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
   const { t } = useLanguage()
   const { settings } = usePublicGeneralSettings()
-  const { isAdmin, login } = useAdminAuth()
+  const { isAdmin, login, logout } = useAdminAuth()
+  const router = useRouter()
 
   useEffect(() => {
     // Handle scroll effect
@@ -28,6 +34,45 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Fetch pending bookings count for admin
+  useEffect(() => {
+    if (!isAdmin) return
+
+    const fetchPendingCount = async () => {
+      try {
+        const { count, error } = await supabase!
+          .from('bookings')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending')
+
+        if (!error && count !== null) {
+          setPendingCount(count)
+        }
+      } catch (error) {
+        console.error('Erreur comptage réservations:', error)
+      }
+    }
+
+    fetchPendingCount()
+    const interval = setInterval(fetchPendingCount, 30000)
+    return () => clearInterval(interval)
+  }, [isAdmin])
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      logout()
+      toast.success('Déconnexion réussie')
+      router.push('/')
+    } catch (error) {
+      toast.error('Erreur lors de la déconnexion')
+    } finally {
+      setIsLoggingOut(false)
+      setShowLogoutModal(false)
+    }
+  }
 
   const handleAdminLogin = useCallback(async () => {
     if (!adminPassword.trim()) {
@@ -65,6 +110,7 @@ export default function Header() {
           : 'bg-transparent'
       } ${isAdmin ? 'border-accent/30' : ''}`}
       role="banner"
+      suppressHydrationWarning
     >
       {/* Admin Banner */}
       {isAdmin && (
@@ -129,6 +175,7 @@ export default function Header() {
                 href={link.href}
                 className="relative px-4 py-2 text-sm font-medium text-gray-300 hover:text-white rounded-full transition-all duration-300 hover:bg-white/10"
                 aria-label={`Aller à ${link.label}`}
+                suppressHydrationWarning
               >
                 {link.label}
               </Link>
@@ -137,6 +184,7 @@ export default function Header() {
               href="/booking"
               className="group relative px-5 py-2 bg-gradient-to-r from-accent to-yellow-500 text-black rounded-full font-bold text-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-accent/30"
               aria-label="Réserver un rendez-vous"
+              suppressHydrationWarning
             >
               <span className="relative z-10 flex items-center gap-1">
                 {t.nav.booking}
@@ -147,19 +195,46 @@ export default function Header() {
 
           {/* Admin Controls */}
           {isAdmin ? (
-            <Link
-              href="/admin/dashboard"
-              className="ml-2"
-            >
+            <div className="flex items-center gap-2 ml-2">
+              {/* Notification Bell */}
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 px-4 py-2.5 bg-accent/10 hover:bg-accent/20 text-accent rounded-full transition-all duration-300 text-sm font-medium border border-accent/30 backdrop-blur-md"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/admin/dashboard')}
+                className="relative p-2.5 text-gray-400 hover:text-accent hover:bg-white/5 rounded-full transition-all duration-300"
+                title={`${pendingCount} réservation(s) en attente`}
               >
-                <LayoutDashboard size={16} />
-                <span className="hidden lg:inline">Admin</span>
+                <Bell size={18} />
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                    {pendingCount > 9 ? '9+' : pendingCount}
+                  </span>
+                )}
               </motion.button>
-            </Link>
+
+              {/* Admin Dashboard */}
+              <Link href="/admin/dashboard">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-accent/10 hover:bg-accent/20 text-accent rounded-full transition-all duration-300 text-sm font-medium border border-accent/30 backdrop-blur-md"
+                >
+                  <LayoutDashboard size={16} />
+                  <span className="hidden lg:inline">Admin</span>
+                </motion.button>
+              </Link>
+
+              {/* Logout Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowLogoutModal(true)}
+                className="p-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300 border border-red-500/20"
+                title="Déconnexion"
+              >
+                <LogOut size={18} />
+              </motion.button>
+            </div>
           ) : (
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -357,6 +432,67 @@ export default function Header() {
                 <p className="text-xs text-gray-500 text-center">
                   Contactez l&apos;administrateur pour obtenir le mot de passe
                 </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          >
+            <div
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => !isLoggingOut && setShowLogoutModal(false)}
+            />
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="relative bg-gradient-to-br from-secondary to-primary border-2 border-accent/30 rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-black/50 z-10"
+            >
+              <div className="text-center">
+                <div className="w-24 h-24 mx-auto mb-6 bg-red-500/20 rounded-full flex items-center justify-center border-2 border-red-500/30">
+                  <LogOut className="text-red-400" size={48} />
+                </div>
+                <h3 className="text-3xl font-bold text-white mb-4">Confirmer la déconnexion</h3>
+                <p className="text-gray-300 mb-8 text-lg">
+                  Voulez-vous vraiment vous déconnecter de votre session administrateur ?
+                </p>
+
+                <div className="flex flex-col gap-4">
+                  <button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="w-full px-8 py-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-300 font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg shadow-red-500/20"
+                  >
+                    {isLoggingOut ? (
+                      <>
+                        <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Déconnexion en cours...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogOut size={24} />
+                        <span>Oui, me déconnecter</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setShowLogoutModal(false)}
+                    disabled={isLoggingOut}
+                    className="w-full px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 font-semibold text-xl disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
+                  >
+                    Annuler
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

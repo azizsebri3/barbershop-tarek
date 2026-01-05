@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import '../globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import MobileBottomNav from '@/components/MobileBottomNav'
 import { LanguageProvider } from '@/lib/language-context'
 
 const locales = ['en', 'fr']
@@ -33,19 +34,14 @@ export default function LocaleLayout({
     notFound()
   }
 
-  const isRTL = locale === 'ar'
-
   return (
-    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'}>
-      <body className="bg-primary text-white">
-        <LanguageProvider initialLocale={locale}>
-          <Header />
-          <main className="pt-16">
-            {children}
-          </main>
-          <Footer />
-        </LanguageProvider>
-      </body>
-    </html>
+    <LanguageProvider initialLocale={locale}>
+      <Header />
+      <main className="pt-16">
+        {children}
+      </main>
+      <Footer />
+      <MobileBottomNav />
+    </LanguageProvider>
   )
 }

@@ -262,7 +262,11 @@ export async function sendBookingConfirmedEmail(booking: BookingDetails, lang: '
       service: 'Service',
       reminder: 'N\'oubliez pas de venir quelques minutes en avance.',
       seeYou: 'À très bientôt !',
-      footer: 'Votre salon de coiffure premium'
+      footer: 'Votre salon de coiffure premium',
+      cancelTitle: 'Besoin d\'annuler ?',
+      cancelDescription: 'Si vous devez annuler votre rendez-vous confirmé, cliquez sur le bouton ci-dessous. Vous pourrez ajouter une note expliquant la raison de l\'annulation.',
+      cancelButton: 'Annuler mon rendez-vous',
+      cancelWarning: '⚠️ Nous vous recommandons d\'annuler au moins 24h à l\'avance.'
     },
     en: {
       subject: `✅ Appointment Confirmed - ${salonName}`,
@@ -274,7 +278,11 @@ export async function sendBookingConfirmedEmail(booking: BookingDetails, lang: '
       service: 'Service',
       reminder: 'Please arrive a few minutes early.',
       seeYou: 'See you soon!',
-      footer: 'Your premium barbershop'
+      footer: 'Your premium barbershop',
+      cancelTitle: 'Need to cancel?',
+      cancelDescription: 'If you need to cancel your confirmed appointment, click the button below. You can add a note explaining the reason for cancellation.',
+      cancelButton: 'Cancel my appointment',
+      cancelWarning: '⚠️ We recommend cancelling at least 24 hours in advance.'
     }
   }
 
@@ -325,6 +333,25 @@ export async function sendBookingConfirmedEmail(booking: BookingDetails, lang: '
                 💡 ${t.reminder}
               </p>
               
+              ${booking.id ? `
+              <!-- Cancellation Section -->
+              <div style="background-color: #2a2a3e; border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid #444;">
+                <h3 style="color: #d4af37; margin: 0 0 15px 0; font-size: 16px;">❌ ${t.cancelTitle}</h3>
+                <p style="color: #cccccc; margin: 0 0 15px 0; font-size: 14px; line-height: 1.5;">
+                  ${t.cancelDescription}
+                </p>
+                <div style="text-align: center;">
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'}/${lang}/booking/cancel/${booking.id}" 
+                     style="display: inline-block; background-color: #ef4444; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 14px; transition: background-color 0.3s;">
+                    ${t.cancelButton}
+                  </a>
+                </div>
+                <p style="color: #888888; margin: 15px 0 0 0; font-size: 12px;">
+                  ${t.cancelWarning}
+                </p>
+              </div>
+              ` : ''}
+              
               <p style="color: #cccccc; line-height: 1.6;">
                 ${t.seeYou} 🙌
               </p>
@@ -353,6 +380,270 @@ export async function sendBookingConfirmedEmail(booking: BookingDetails, lang: '
   }
 }
 
+// Email de confirmation d'annulation au client (quand client annule lui-même)
+export async function sendClientCancellationConfirmation(booking: BookingDetails, lang: 'fr' | 'en' = 'fr') {
+  const resendClient = getResend()
+
+  if (!resendClient) {
+    console.log('⚠️ RESEND_API_KEY non configurée')
+    return { success: false, error: 'Email non configuré' }
+  }
+
+  const salonName = process.env.NEXT_PUBLIC_SALON_NAME || 'Elite Barbershop'
+  const salonEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'
+
+  const texts = {
+    fr: {
+      subject: `✅ Annulation confirmée - ${salonName}`,
+      greeting: `Bonjour ${booking.name},`,
+      message: 'Votre annulation de rendez-vous a bien été prise en compte.',
+      details: 'Détails de votre rendez-vous annulé :',
+      date: 'Date',
+      time: 'Heure',
+      service: 'Service',
+      note: 'Note d\'annulation',
+      reschedule: 'Vous pouvez reprendre un nouveau rendez-vous à tout moment sur notre site.',
+      button: 'Prendre un nouveau rendez-vous',
+      contact: 'Pour toute question, n\'hésitez pas à nous contacter.',
+      team: `L'équipe ${salonName}`,
+      footer: 'Votre salon de coiffure premium'
+    },
+    en: {
+      subject: `✅ Cancellation Confirmed - ${salonName}`,
+      greeting: `Hello ${booking.name},`,
+      message: 'Your appointment cancellation has been confirmed.',
+      details: 'Cancelled appointment details:',
+      date: 'Date',
+      time: 'Time',
+      service: 'Service',
+      note: 'Cancellation note',
+      reschedule: 'You can book a new appointment anytime on our website.',
+      button: 'Book a new appointment',
+      contact: 'For any questions, please contact us.',
+      team: `${salonName} Team`,
+      footer: 'Your premium barbershop'
+    }
+  }
+
+  const t = texts[lang]
+
+  try {
+    const { data, error } = await resendClient.emails.send({
+      from: `${salonName} <${salonEmail}>`,
+      to: booking.email,
+      subject: t.subject,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"></head>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #ffffff; padding: 20px; margin: 0;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #1a1a2e; border-radius: 16px; overflow: hidden; border: 1px solid #f59e0b;">
+
+            <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 30px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px;">✅ ${lang === 'fr' ? 'Annulation Confirmée' : 'Cancellation Confirmed'}</h1>
+            </div>
+
+            <div style="padding: 30px;">
+              <h2 style="color: #f59e0b; margin-top: 0;">${t.greeting} 👋</h2>
+
+              <p style="color: #cccccc; line-height: 1.6; font-size: 16px;">
+                ${t.message}
+              </p>
+
+              <div style="background-color: #0a0a0a; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                <h3 style="color: #f59e0b; margin-top: 0;">${t.details}</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 10px 0; color: #888888;">📅 ${t.date}</td>
+                    <td style="padding: 10px 0; color: #888888; text-align: right; text-decoration: line-through;">${booking.date}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; color: #888888; border-top: 1px solid #333;">⏰ ${t.time}</td>
+                    <td style="padding: 10px 0; color: #888888; text-align: right; text-decoration: line-through; border-top: 1px solid #333;">${booking.time}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px 0; color: #888888; border-top: 1px solid #333;">✂️ ${t.service}</td>
+                    <td style="padding: 10px 0; color: #888888; text-align: right; text-decoration: line-through; border-top: 1px solid #333;">${booking.service}</td>
+                  </tr>
+                </table>
+              </div>
+
+              ${booking.cancelNote ? `
+              <div style="background-color: #1a1a1a; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #6b7280;">
+                <h3 style="color: #6b7280; margin: 0 0 10px 0; font-size: 16px;">💬 ${t.note}</h3>
+                <p style="color: #cccccc; margin: 0; line-height: 1.6;">${booking.cancelNote}</p>
+              </div>
+              ` : ''}
+
+              <p style="color: #cccccc; line-height: 1.6;">
+                ${t.reschedule}
+              </p>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${siteUrl}/booking" style="display: inline-block; background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); color: #0a0a0a; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                  📅 ${t.button}
+                </a>
+              </div>
+
+              <p style="color: #cccccc; line-height: 1.6;">
+                ${t.contact}
+              </p>
+            </div>
+
+            <div style="background-color: #0a0a0a; padding: 20px; text-align: center; border-top: 1px solid #333;">
+              <p style="color: #666666; margin: 0; font-size: 12px;">
+                ${salonName} - ${t.footer}
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    })
+
+    if (error) {
+      console.error('❌ Erreur envoi email confirmation annulation client:', error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, id: data?.id }
+  } catch (error) {
+    console.error('❌ Erreur envoi email confirmation annulation:', error)
+    return { success: false, error: String(error) }
+  }
+}
+
+// Email de notification d'annulation à l'admin (quand client annule)
+export async function sendAdminCancellationNotification(booking: BookingDetails, lang: 'fr' | 'en' = 'fr') {
+  const resendClient = getResend()
+
+  if (!resendClient) {
+    console.log('⚠️ RESEND_API_KEY non configurée')
+    return { success: false, error: 'Email non configuré' }
+  }
+
+  const salonName = process.env.NEXT_PUBLIC_SALON_NAME || 'Elite Barbershop'
+  const salonEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@tareksalon.be'
+
+  const texts = {
+    fr: {
+      subject: `❌ Rendez-vous annulé par le client - ${salonName}`,
+      greeting: 'Un client a annulé son rendez-vous :',
+      details: 'Détails du rendez-vous annulé :',
+      date: 'Date',
+      time: 'Heure',
+      service: 'Service',
+      client: 'Client',
+      email: 'Email',
+      phone: 'Téléphone',
+      note: 'Note d\'annulation',
+      action: 'Vous pouvez maintenant libérer ce créneau pour d\'autres clients.',
+      team: `L'équipe ${salonName}`
+    },
+    en: {
+      subject: `❌ Appointment Cancelled by Client - ${salonName}`,
+      greeting: 'A client has cancelled their appointment:',
+      details: 'Cancelled appointment details:',
+      date: 'Date',
+      time: 'Time',
+      service: 'Service',
+      client: 'Client',
+      email: 'Email',
+      phone: 'Phone',
+      note: 'Cancellation note',
+      action: 'You can now free up this time slot for other clients.',
+      team: `${salonName} Team`
+    }
+  }
+
+  const t = texts[lang]
+
+  try {
+    const { data, error } = await resendClient.emails.send({
+      from: `${salonName} <${salonEmail}>`,
+      to: adminEmail,
+      subject: t.subject,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"></head>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #ffffff; padding: 20px; margin: 0;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #1a1a2e; border-radius: 16px; overflow: hidden; border: 1px solid #ef4444;">
+
+            <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 30px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px;">❌ ${lang === 'fr' ? 'Rendez-vous Annulé' : 'Appointment Cancelled'}</h1>
+            </div>
+
+            <div style="padding: 30px;">
+              <h2 style="color: #ef4444; margin-top: 0;">${t.greeting}</h2>
+
+              <div style="background-color: #0a0a0a; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #ef4444;">
+                <h3 style="color: #ef4444; margin-top: 0;">${t.details}</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #888888;">👤 ${t.client}</td>
+                    <td style="padding: 8px 0; color: #ffffff; text-align: right; font-weight: bold;">${booking.name}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #888888; border-top: 1px solid #333;">📧 ${t.email}</td>
+                    <td style="padding: 8px 0; color: #ffffff; text-align: right; border-top: 1px solid #333;">${booking.email}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #888888; border-top: 1px solid #333;">📞 ${t.phone}</td>
+                    <td style="padding: 8px 0; color: #ffffff; text-align: right; border-top: 1px solid #333;">${booking.phone}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #888888; border-top: 1px solid #333;">📅 ${t.date}</td>
+                    <td style="padding: 8px 0; color: #888888; text-align: right; text-decoration: line-through; border-top: 1px solid #333;">${booking.date}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #888888; border-top: 1px solid #333;">⏰ ${t.time}</td>
+                    <td style="padding: 8px 0; color: #888888; text-align: right; text-decoration: line-through; border-top: 1px solid #333;">${booking.time}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #888888; border-top: 1px solid #333;">✂️ ${t.service}</td>
+                    <td style="padding: 8px 0; color: #888888; text-align: right; text-decoration: line-through; border-top: 1px solid #333;">${booking.service}</td>
+                  </tr>
+                </table>
+              </div>
+
+              ${booking.cancelNote ? `
+              <div style="background-color: #1a1a1a; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                <h3 style="color: #f59e0b; margin: 0 0 10px 0; font-size: 16px;">💬 ${t.note}</h3>
+                <p style="color: #cccccc; margin: 0; line-height: 1.6;">${booking.cancelNote}</p>
+              </div>
+              ` : ''}
+
+              <p style="color: #cccccc; line-height: 1.6;">
+                ${t.action}
+              </p>
+            </div>
+
+            <div style="background-color: #0a0a0a; padding: 20px; text-align: center; border-top: 1px solid #333;">
+              <p style="color: #666666; margin: 0; font-size: 12px;">
+                ${t.team}
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    })
+
+    if (error) {
+      console.error('❌ Erreur envoi email notification annulation admin:', error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, id: data?.id }
+  } catch (error) {
+    console.error('❌ Erreur envoi email notification annulation:', error)
+    return { success: false, error: String(error) }
+  }
+}
+
 // Email d'annulation de rendez-vous (quand admin annule)
 export async function sendBookingCancelledEmail(booking: BookingDetails, lang: 'fr' | 'en' = 'fr') {
   const resendClient = getResend()
@@ -362,8 +653,8 @@ export async function sendBookingCancelledEmail(booking: BookingDetails, lang: '
     return { success: false, error: 'Email non configuré' }
   }
 
-  const salonName = process.env.NEXT_PUBLIC_SALON_NAME || 'Elite Barbershop'
-  const salonEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+  const salonName = process.env.NEXT_PUBLIC_SALON_NAME || 'Tarek Salon'
+  const salonEmail = process.env.RESEND_FROM_EMAIL || 'contact@tareksalon.be'
 
   const texts = {
     fr: {
@@ -401,7 +692,7 @@ export async function sendBookingCancelledEmail(booking: BookingDetails, lang: '
   }
 
   const t = texts[lang]
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://votre-site.vercel.app'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'
 
   try {
     const { data, error } = await resendClient.emails.send({

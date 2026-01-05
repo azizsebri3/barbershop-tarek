@@ -1,6 +1,5 @@
-'use client'
-
 import { useState, useEffect, useCallback } from 'react'
+import { createAdminSession, clearAdminSession } from '@/lib/admin-auth'
 
 export function useAdminAuth() {
   const [isAdmin, setIsAdmin] = useState(false)
@@ -43,6 +42,7 @@ export function useAdminAuth() {
 
       if (response.ok) {
         setIsAdmin(true)
+        createAdminSession(true) // Créer la session localStorage aussi
         return { success: true }
       } else {
         return { success: false, error: data.error }
@@ -57,6 +57,7 @@ export function useAdminAuth() {
     try {
       await fetch('/api/admin/auth', { method: 'DELETE' })
       setIsAdmin(false)
+      clearAdminSession() // Effacer la session localStorage aussi
     } catch (error) {
       console.error('Erreur déconnexion admin:', error)
     }

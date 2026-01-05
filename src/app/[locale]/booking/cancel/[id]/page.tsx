@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, User, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
-import { useTranslations } from 'next-intl'
+import { useLanguage } from '@/lib/language-context'
+import { supabase } from '@/lib/supabase'
 
 interface Booking {
   id: string
@@ -23,7 +24,7 @@ export default function CancelBookingPage() {
   const params = useParams()
   const router = useRouter()
   const bookingId = params.id as string
-  const t = useTranslations('cancel')
+  const { t } = useLanguage()
 
   const [booking, setBooking] = useState<Booking | null>(null)
   const [loading, setLoading] = useState(true)
@@ -34,15 +35,23 @@ export default function CancelBookingPage() {
   useEffect(() => {
     const fetchBooking = async () => {
       try {
-        const response = await fetch(`/api/bookings/${bookingId}`)
-        if (!response.ok) {
-          throw new Error(t('notFound'))
+        if (!supabase) {
+          throw new Error('Database not available')
         }
-        const data = await response.json()
-        setBooking(data.booking)
+
+        const { data, error } = await supabase
+          .from('bookings')
+          .select('*')
+          .eq('id', bookingId)
+          .single()
+
+        if (error || !data) {
+          throw new Error(t.cancel.notFound)
+        }
+        setBooking(data)
       } catch (error) {
-        console.error('Erreur lors du chargement:', error)
-        toast.error(t('notFoundMessage'))
+        console.error('Error loading booking:', error)
+        toast.error(t.cancel.notFoundMessage || 'Booking not found')
         router.push('/')
       } finally {
         setLoading(false)
@@ -69,14 +78,14 @@ export default function CancelBookingPage() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || t('error'))
+        throw new Error(data.error || t.cancel.error)
       }
 
       setCancelled(true)
-      toast.success(t('successMessage'))
+      toast.success(t.cancel.successMessage)
     } catch (error) {
       console.error('Erreur lors de l\'annulation:', error)
-      toast.error(error instanceof Error ? error.message : t('error'))
+      toast.error(error instanceof Error ? error.message : t.cancel.error)
     } finally {
       setCancelling(false)
     }
@@ -95,8 +104,8 @@ export default function CancelBookingPage() {
       <div className="min-h-screen bg-primary flex items-center justify-center">
         <div className="text-center">
           <XCircle size={64} className="text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">{t('notFound')}</h1>
-          <p className="text-gray-300">{t('notFoundMessage')}</p>
+          <h1 className="text-2xl font-bold text-white mb-2">{t.cancel.notFound}</h1>
+          <p className="text-gray-300">{t.cancel.notFoundMessage}</p>
         </div>
       </div>
     )
@@ -111,15 +120,15 @@ export default function CancelBookingPage() {
           className="bg-secondary/95 backdrop-blur-md border border-accent/20 rounded-xl p-8 w-full max-w-md text-center"
         >
           <XCircle size={64} className="text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">{t('alreadyCancelled')}</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">{t.cancel.alreadyCancelled}</h1>
           <p className="text-gray-300 mb-6">
-            {t('alreadyCancelledMessage')}
+            {t.cancel.alreadyCancelledMessage}
           </p>
           <button
             onClick={() => router.push('/')}
             className="w-full bg-accent hover:bg-accent/80 text-primary font-semibold py-3 px-6 rounded-lg transition-colors"
           >
-            {t('backButton')}
+            {t.cancel.backButton}
           </button>
         </motion.div>
       </div>
@@ -135,15 +144,15 @@ export default function CancelBookingPage() {
           className="bg-secondary/95 backdrop-blur-md border border-accent/20 rounded-xl p-8 w-full max-w-md text-center"
         >
           <CheckCircle size={64} className="text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">{t('successTitle')}</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">{t.cancel.successTitle}</h1>
           <p className="text-gray-300 mb-6">
-            {t('successMessage')}
+            {t.cancel.successMessage}
           </p>
           <button
             onClick={() => router.push('/')}
             className="w-full bg-accent hover:bg-accent/80 text-primary font-semibold py-3 px-6 rounded-lg transition-colors"
           >
-            {t('backButton')}
+            {t.cancel.backButton}
           </button>
         </motion.div>
       </div>
@@ -160,9 +169,9 @@ export default function CancelBookingPage() {
       >
         <div className="text-center mb-6">
           <AlertTriangle size={48} className="text-yellow-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">{t('title')}</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">{t.cancel.title}</h1>
           <p className="text-gray-300">
-            {t('confirmQuestion')}
+            {t.cancel.confirmQuestion}
           </p>
         </div>
 
@@ -197,12 +206,12 @@ export default function CancelBookingPage() {
         {/* Cancellation Note */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            {t('reasonLabel')}
+            {t.cancel.reasonLabel}
           </label>
           <textarea
             value={cancelNote}
             onChange={(e) => setCancelNote(e.target.value)}
-            placeholder={t('reasonPlaceholder')}
+            placeholder={t.cancel.reasonPlaceholder}
             disabled={cancelling}
             className="w-full px-3 py-2 bg-primary/50 border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:border-accent focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             rows={3}
@@ -216,7 +225,7 @@ export default function CancelBookingPage() {
             disabled={cancelling}
             className="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
           >
-            {t('cancelButton')}
+            {t.cancel.cancelButton}
           </button>
           <button
             onClick={handleCancel}
@@ -226,16 +235,16 @@ export default function CancelBookingPage() {
             {cancelling ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                {t('cancelling')}
+                {t.cancel.cancelling}
               </>
             ) : (
-              t('confirmButton')
+              t.cancel.confirmButton
             )}
           </button>
         </div>
 
         <p className="text-gray-400 text-sm text-center mt-4">
-          {t('recommendation')}
+          {t.cancel.recommendation}
         </p>
       </motion.div>
     </div>

@@ -50,7 +50,7 @@ export async function PUT(
   const { id } = await params
   try {
     const body = await request.json()
-    const { status, lang = 'fr', cancel_note } = body
+    const { status, lang = 'fr', cancel_note, cancelled_by } = body
 
     if (!status || !['pending', 'confirmed', 'cancelled'].includes(status)) {
       return NextResponse.json(
@@ -75,8 +75,13 @@ export async function PUT(
 
     // Mettre à jour le statut
     const updateData: any = { status, updated_at: new Date().toISOString() }
-    if (status === 'cancelled' && cancel_note) {
-      updateData.cancel_note = cancel_note
+    if (status === 'cancelled') {
+      if (cancel_note) {
+        updateData.cancel_note = cancel_note
+      }
+      if (cancelled_by) {
+        updateData.cancelled_by = cancelled_by
+      }
     }
 
     const { error } = await supabase
