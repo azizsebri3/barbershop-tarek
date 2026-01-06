@@ -1,6 +1,6 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
@@ -8,6 +8,12 @@ import { useLanguage } from '@/lib/language-context'
 import { Sparkles, ArrowRight } from 'lucide-react'
 
 const Hero = memo(function Hero() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    setIsMobile(typeof window !== 'undefined' && window.innerWidth < 768)
+  }, [])
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -39,20 +45,25 @@ const Hero = memo(function Hero() {
           alt="Tarek Salon Namur - Coiffeur et Barbershop"
           fill
           priority
-          quality={75}
+          quality={isMobile ? 50 : 75}
           placeholder="blur"
           blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMwYTBhMGEiLz48L3N2Zz4="
           className="object-cover object-center"
-          sizes="100vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
+          loading="eager"
         />
         
         {/* Multi-layer gradient overlays for depth */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/50" />
         
-        {/* Animated glassmorphism orbs */}
-        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[120px] opacity-20" />
-        <div className="absolute bottom-1/3 left-1/4 w-[400px] h-[400px] bg-purple-500/15 rounded-full blur-[100px] opacity-15" />
+        {/* Animated glassmorphism orbs - disabled on mobile for perf */}
+        {!isMobile && (
+          <>
+            <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[120px] opacity-20" />
+            <div className="absolute bottom-1/3 left-1/4 w-[400px] h-[400px] bg-purple-500/15 rounded-full blur-[100px] opacity-15" />
+          </>
+        )}
       </div>
 
       {/* Content Container */}

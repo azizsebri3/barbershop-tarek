@@ -6,6 +6,7 @@ import { Calendar, Clock, User, Mail, Phone, MessageSquare, CheckCircle, XCircle
 import toast, { Toaster } from 'react-hot-toast'
 import { supabase, Booking } from '@/lib/supabase'
 import { adminTranslations } from '@/lib/admin-translations'
+import { useRealtimeBookings } from '@/lib/useRealtimeBookings'
 
 type BookingStatus = 'pending' | 'confirmed' | 'cancelled'
 type FilterType = 'all' | 'pending' | 'confirmed' | 'cancelled'
@@ -15,8 +16,24 @@ interface AdminBookingsProps {
 }
 
 export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [loading, setLoading] = useState(true)
+  // Utilisation du hook Realtime pour les réservations
+  const { 
+    bookings, 
+    loading, 
+    isRealtimeConnected, 
+    refetch 
+  } = useRealtimeBookings({
+    enableNotifications: true,
+    onInsert: () => {
+      if (onStatusChange) onStatusChange()
+    },
+    onUpdate: () => {
+      if (onStatusChange) onStatusChange()
+    },
+    onDelete: () => {
+      if (onStatusChange) onStatusChange()
+    }
+  })
   const [filter, setFilter] = useState<FilterType>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
@@ -31,27 +48,11 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'single' | 'bulk', ids: string[] } | null>(null)
   const t = adminTranslations.bookings
 
-  const fetchBookings = useCallback(async () => {
-    try {
-      setLoading(true)
-      const { data, error } = await supabase!
-        .from('bookings')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setBookings(data || [])
-    } catch (error) {
-      console.error('Error loading bookings:', error)
-      toast.error(t.error)
-    } finally {
-      setLoading(false)
-    }
-  }, [t.error])
-
-  useEffect(() => {
-    fetchBookings()
-  }, [fetchBookings])
+  // Plus besoin de fetchBookings - géré par le hook Realtime
+  const handleManualRefresh = () => {
+    refetch()
+    toast.success('Bookings refreshed')
+  }
 
   const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus, cancelNote?: string, onLoading?: (loading: boolean) => void) => {
     try {
@@ -78,9 +79,10 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         throw new Error(data.error || 'Error updating booking')
       }
 
-      setBookings(bookings.map(booking =>
-        booking.id === bookingId ? { ...booking, status: newStatus, cancelled_by: newStatus === 'cancelled' ? 'admin' : booking.cancelled_by } : booking
-      ))
+      // Pas besoin de mettre à jour manuellement - Realtime le fait automatiquement
+      // setBookings(bookings.map(booking =>
+      //   booking.id === bookingId ? { ...booking, status: newStatus, cancelled_by: newStatus === 'cancelled' ? 'admin' : booking.cancelled_by } : booking
+      // ))
 
       const successMessage = newStatus === 'confirmed' ? t.bookingConfirmed : 
                             newStatus === 'cancelled' ? t.bookingCancelled : 
@@ -119,7 +121,8 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         throw new Error(data.error || 'Erreur lors de la suppression')
       }
 
-      setBookings(bookings.filter(booking => booking.id !== bookingId))
+      // Pas besoin de mettre à jour manuellement - Realtime le fait automatiquement
+      // setBookings(bookings.filter(booking => booking.id !== bookingId))
       toast.success(t.bookingDeleted)
       
       // Notify parent to update pending count
@@ -204,7 +207,8 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
 
       await Promise.all(deletePromises)
 
-      setBookings(bookings.filter(booking => !ids.includes(booking.id)))
+      // Pas besoin de mettre à jour manuellement - Realtime le fait automatiquement
+      // setBookings(bookings.filter(booking => !ids.includes(booking.id)))
       setSelectedBookings(new Set())
       
       const successMessage = type === 'single' 
@@ -283,12 +287,26 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       <Toaster position="top-right" />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-white">{t.title}</h2>
+        <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+          {t.title}
+          {/* Indicateur de connexion Realtime */}
+          <span className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
+            isRealtimeConnected 
+              ? 'bg-green-500/20 text-green-400' 
+              : 'bg-orange-500/20 text-orange-400'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              isRealtimeConnected ? 'bg-green-400 animate-pulse' : 'bg-orange-400'
+            }`}></span>
+            {isRealtimeConnected ? 'Live' : 'Offline'}
+          </span>
+        </h2>
         <button
-          onClick={fetchBookings}
-          className="flex items-center gap-2 px-4 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors"
+          onClick={handleManualRefresh}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors disabled:opacity-50"
         >
-          <RefreshCw size={16} />
+          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
           {adminTranslations.common.refresh}
         </button>
       </div>

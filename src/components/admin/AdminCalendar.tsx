@@ -18,19 +18,8 @@ import {
   Trash2
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
-
-interface Booking {
-  id: string
-  name: string
-  email: string
-  phone: string
-  date: string
-  time: string
-  service: string
-  message?: string
-  status: 'pending' | 'confirmed' | 'cancelled'
-  created_at: string
-}
+import { useRealtimeBookings } from '@/lib/useRealtimeBookings'
+import { Booking } from '@/lib/supabase'
 
 interface AvailabilitySlot {
   id?: string
@@ -164,7 +153,17 @@ const AvailabilityForm = ({
 
 export default function AdminCalendar() {
   const calendarRef = useRef<FullCalendar>(null)
-  const [bookings, setBookings] = useState<Booking[]>([])
+  
+  // Utilisation du hook Realtime pour les réservations
+  const { 
+    bookings, 
+    loading: bookingsLoading,
+    isRealtimeConnected,
+    refetch: refetchBookings 
+  } = useRealtimeBookings({
+    enableNotifications: true // Afficher des notifications toast
+  })
+
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([])
   const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth')
   const [showAvailability, setShowAvailability] = useState(true)
@@ -173,21 +172,9 @@ export default function AdminCalendar() {
   const [modalType, setModalType] = useState<'booking' | 'availability'>('booking')
   const [selectedEvent, setSelectedEvent] = useState<any>(null)
 
-  // Load bookings
-  const loadBookings = async () => {
-    try {
-      const response = await fetch('/api/bookings')
-      if (response.ok) {
-        const data = await response.json()
-        setBookings(data.bookings || [])
-      }
-    } catch (error) {
-      console.error('Error loading bookings:', error)
-      toast.error('Error loading bookings')
-    }
-  }
+  // Plus besoin de loadBookings - géré par le hook Realtime
 
-  // Load availabilities
+  // Load availabilities (PAS de realtime pour les disponibilités selon les specs)
   const loadAvailability = async () => {
     try {
       // Charger les 60 prochains jours
@@ -299,7 +286,7 @@ export default function AdminCalendar() {
   }
 
   useEffect(() => {
-    loadBookings()
+    // Plus besoin de loadBookings() - géré par le hook Realtime
     loadAvailability()
   }, [])
 
@@ -370,7 +357,8 @@ export default function AdminCalendar() {
 
       if (response.ok) {
         toast.success(`Booking ${status === 'confirmed' ? 'confirmed' : 'cancelled'}`)
-        loadBookings()
+        // Pas besoin de recharger - Realtime met à jour automatiquement
+        // loadBookings()
         setShowModal(false)
       } else {
         throw new Error('Error updating booking')
@@ -390,7 +378,20 @@ export default function AdminCalendar() {
         <div className="flex items-center space-x-3">
           <Calendar className="text-accent" size={32} />
           <div>
-            <h1 className="text-2xl font-bold text-white">Calendrier Admin</h1>
+            <h1 className="text-2xl font-bold text-white">
+              Calendrier Admin
+              {/* Indicateur Realtime */}
+              <span className={`ml-3 text-xs px-2 py-1 rounded-full inline-flex items-center gap-1 ${
+                isRealtimeConnected 
+                  ? 'bg-green-500/20 text-green-400' 
+                  : 'bg-orange-500/20 text-orange-400'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${
+                  isRealtimeConnected ? 'bg-green-400 animate-pulse' : 'bg-orange-400'
+                }`}></span>
+                {isRealtimeConnected ? 'Live' : 'Hors ligne'}
+              </span>
+            </h1>
             <p className="text-gray-400">Gérez vos rendez-vous et disponibilités</p>
           </div>
         </div>

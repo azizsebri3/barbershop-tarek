@@ -25,6 +25,7 @@ import {
 import toast, { Toaster } from 'react-hot-toast'
 import { supabase, Booking } from '@/lib/supabase'
 import { adminTranslations } from '@/lib/admin-translations'
+import { useRealtimeBookings } from '@/lib/useRealtimeBookings'
 
 type BookingStatus = 'pending' | 'confirmed' | 'cancelled'
 type FilterType = 'all' | 'pending' | 'confirmed' | 'cancelled'
@@ -34,8 +35,26 @@ interface AdminBookingsProps {
 }
 
 export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [loading, setLoading] = useState(true)
+  // Utilisation du hook Realtime pour les réservations
+  const { 
+    bookings, 
+    loading, 
+    isRealtimeConnected, 
+    refetch 
+  } = useRealtimeBookings({
+    enableNotifications: true,
+    onInsert: () => {
+      // Notifier le parent pour mettre à jour le compte des pending
+      if (onStatusChange) onStatusChange()
+    },
+    onUpdate: () => {
+      if (onStatusChange) onStatusChange()
+    },
+    onDelete: () => {
+      if (onStatusChange) onStatusChange()
+    }
+  })
+
   const [filter, setFilter] = useState<FilterType>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
@@ -51,27 +70,12 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const [showTips, setShowTips] = useState(true)
   const t = adminTranslations.bookings
 
-  const fetchBookings = useCallback(async () => {
-    try {
-      setLoading(true)
-      const { data, error } = await supabase!
-        .from('bookings')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setBookings(data || [])
-    } catch (error) {
-      console.error('Erreur lors du chargement des réservations:', error)
-      toast.error(t.error)
-    } finally {
-      setLoading(false)
-    }
-  }, [t.error])
-
-  useEffect(() => {
-    fetchBookings()
-  }, [fetchBookings])
+  // Plus besoin de fetchBookings - géré par le hook Realtime
+  // Fonction de refresh manuel si besoin
+  const handleManualRefresh = () => {
+    refetch()
+    toast.success('Réservations actualisées')
+  }
 
   const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus, cancelNote?: string, onLoading?: (loading: boolean) => void) => {
     try {
@@ -97,9 +101,10 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         throw new Error(data.error || 'Erreur lors de la mise à jour')
       }
 
-      setBookings(bookings.map(booking =>
-        booking.id === bookingId ? { ...booking, status: newStatus } : booking
-      ))
+      // Pas besoin de mettre à jour manuellement - Realtime le fait automatiquement
+      // setBookings(bookings.map(booking =>
+      //   booking.id === bookingId ? { ...booking, status: newStatus } : booking
+      // ))
 
       const successMessage = newStatus === 'confirmed' ? t.bookingConfirmed :
                             newStatus === 'cancelled' ? t.bookingCancelled :
@@ -138,7 +143,8 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
         throw new Error(data.error || 'Erreur lors de la suppression')
       }
 
-      setBookings(bookings.filter(booking => booking.id !== bookingId))
+      // Pas besoin de mettre à jour manuellement - Realtime le fait automatiquement
+      // setBookings(bookings.filter(booking => booking.id !== bookingId))
       toast.success(t.bookingDeleted)
 
       // Notify parent to update pending count
@@ -221,7 +227,8 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
 
       await Promise.all(deletePromises)
 
-      setBookings(bookings.filter(booking => !ids.includes(booking.id)))
+      // Pas besoin de mettre à jour manuellement - Realtime le fait automatiquement
+      // setBookings(bookings.filter(booking => !ids.includes(booking.id)))
       setSelectedBookings(new Set())
 
       const message = type === 'single' ? t.bookingDeleted : `${ids.length} réservations supprimées`
@@ -309,24 +316,46 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
     <div className="space-y-6">
       <Toaster position="top-right" />
 
-      {/* Header with Tips Toggle */}
+      {/* Header with Tips Toggle and Realtime Status */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
             <Calendar className="w-6 h-6 text-accent" />
             Gestion des réservations
+            {/* Indicateur de connexion Realtime */}
+            <span className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
+              isRealtimeConnected 
+                ? 'bg-green-500/20 text-green-400' 
+                : 'bg-orange-500/20 text-orange-400'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                isRealtimeConnected ? 'bg-green-400 animate-pulse' : 'bg-orange-400'
+              }`}></span>
+              {isRealtimeConnected ? 'Live' : 'Hors ligne'}
+            </span>
           </h2>
           <p className="text-gray-400 mt-1">
             Gérez facilement vos rendez-vous et clients
           </p>
         </div>
-        <button
-          onClick={() => setShowTips(!showTips)}
-          className="flex items-center gap-2 px-3 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors text-sm"
-        >
-          <Info size={16} />
-          {showTips ? 'Masquer les conseils' : 'Afficher les conseils'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleManualRefresh}
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors text-sm disabled:opacity-50"
+            title="Actualiser manuellement"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            Actualiser
+          </button>
+          <button
+            onClick={() => setShowTips(!showTips)}
+            className="flex items-center gap-2 px-3 py-2 bg-accent/20 hover:bg-accent/30 text-accent rounded-lg transition-colors text-sm"
+          >
+            <Info size={16} />
+            {showTips ? 'Masquer les conseils' : 'Afficher les conseils'}
+          </button>
+        </div>
       </div>
 
       {/* Tips Section */}

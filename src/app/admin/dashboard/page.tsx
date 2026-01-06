@@ -134,7 +134,7 @@ export default function AdminDashboard() {
       const tabId = event.detail as TabType
       setActiveTab(tabId)
     }
-
+""
     window.addEventListener('changeAdminTab', handleTabChangeEvent as EventListener)
     return () => window.removeEventListener('changeAdminTab', handleTabChangeEvent as EventListener)
   }, [])

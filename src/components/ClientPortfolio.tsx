@@ -97,7 +97,9 @@ export default function ClientPortfolio() {
                     sizes="(max-width: 768px) 80vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover"
                     loading="lazy"
-                    quality={75}
+                    quality={55}
+                    placeholder="blur"
+                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
                   />
 
                   {/* Gradient Overlay */}
@@ -147,7 +149,10 @@ export default function ClientPortfolio() {
                 width={1200}
                 height={800}
                 className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
-                unoptimized
+                quality={85}
+                priority
+                placeholder="blur"
+                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMxYTFhMWEiLz48L3N2Zz4="
               />
             </motion.div>
           </motion.div>
