@@ -241,7 +241,7 @@ export function useRealtimeBookings(
     return () => {
       console.log('🧹 Nettoyage Realtime subscription')
       
-      if (channelRef.current) {
+      if (channelRef.current && supabase) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
       }

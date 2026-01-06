@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, User, Mail, Phone, MessageSquare, CheckCircle, XCircle, AlertCircle, Trash2, RefreshCw, Search, CheckSquare, Square } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
-import { supabase, Booking } from '@/lib/supabase'
 import { adminTranslations } from '@/lib/admin-translations'
 import { useRealtimeBookings } from '@/lib/useRealtimeBookings'
 

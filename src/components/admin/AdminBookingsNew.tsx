@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Calendar,
@@ -23,7 +23,6 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
-import { supabase, Booking } from '@/lib/supabase'
 import { adminTranslations } from '@/lib/admin-translations'
 import { useRealtimeBookings } from '@/lib/useRealtimeBookings'
 

@@ -157,9 +157,7 @@ export default function AdminCalendar() {
   // Utilisation du hook Realtime pour les réservations
   const { 
     bookings, 
-    loading: bookingsLoading,
-    isRealtimeConnected,
-    refetch: refetchBookings 
+    isRealtimeConnected
   } = useRealtimeBookings({
     enableNotifications: true // Afficher des notifications toast
   })
