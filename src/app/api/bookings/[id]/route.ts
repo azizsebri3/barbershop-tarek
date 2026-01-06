@@ -97,6 +97,7 @@ export async function PUT(
     // Envoyer l'email approprié selon le nouveau statut
     if (status === 'confirmed') {
       await sendBookingConfirmedEmail({
+        id: booking.id,
         name: booking.name,
         email: booking.email,
         phone: booking.phone,

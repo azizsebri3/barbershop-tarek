@@ -44,6 +44,7 @@ export async function POST(
     // Mettre à jour le statut à annulé avec la note
     const updateData: any = {
       status: 'cancelled',
+      cancelled_by: 'client',
       updated_at: new Date().toISOString()
     }
     if (cancelNote && cancelNote.trim()) {

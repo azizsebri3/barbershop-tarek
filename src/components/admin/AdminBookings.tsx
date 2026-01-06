@@ -492,16 +492,19 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                     </div>
                   )}
 
-                  {booking.cancel_note && (
+                  {booking.status === 'cancelled' && (
                     <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                      <p className="text-red-300 text-sm">
-                        <strong>Cancellation note:</strong> {booking.cancel_note}
-                      </p>
-                      <p className="text-red-300 text-xs mt-1">
-                        <strong>Cancelled by:</strong> {booking.cancelled_by === 'admin' ? '🔴 Admin' : '👤 Client'}
+                      {booking.cancel_note && (
+                        <p className="text-red-300 text-sm mb-2">
+                          <strong>Cancellation note:</strong> {booking.cancel_note}
+                        </p>
+                      )}
+                      <p className="text-red-300 text-xs">
+                        <strong>Cancelled by:</strong> {booking.cancelled_by === 'admin' ? 'by Admin' : 'by Client'}
                       </p>
                     </div>
                   )}
+
                   </div>
                 </div>
 

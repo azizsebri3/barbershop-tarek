@@ -624,13 +624,20 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                     )}
 
                     {/* Cancel Note */}
-                    {booking.cancel_note && (
+                    {booking.status === 'cancelled' && (
                       <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                         <div className="flex items-start gap-2">
                           <AlertTriangle className="text-red-400 mt-0.5" size={16} />
                           <div>
-                            <p className="text-red-300 text-sm font-medium">Note d&apos;annulation:</p>
-                            <p className="text-red-300 text-sm">{booking.cancel_note}</p>
+                            {booking.cancel_note && (
+                              <>
+                                <p className="text-red-300 text-sm font-medium">Note d&apos;annulation:</p>
+                                <p className="text-red-300 text-sm mb-2">{booking.cancel_note}</p>
+                              </>
+                            )}
+                            <p className="text-red-300 text-xs">
+                              <strong>Annulé par:</strong> {booking.cancelled_by === 'admin' ? 'by Admin' : 'by Client'}
+                            </p>
                           </div>
                         </div>
                       </div>
