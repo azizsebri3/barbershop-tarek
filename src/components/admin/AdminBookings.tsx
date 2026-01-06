@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock, User, Mail, Phone, MessageSquare, CheckCircle, XCircle, AlertCircle, Trash2, RefreshCw, Search, CheckSquare, Square } from 'lucide-react'
+import { Calendar, Clock, User, Mail, Phone, MessageSquare, CheckCircle, XCircle, AlertCircle, Trash2, RefreshCw, Search, CheckSquare, Square, Edit } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { adminTranslations } from '@/lib/admin-translations'
 import { useRealtimeBookings } from '@/lib/useRealtimeBookings'
+import EditBookingModal from './EditBookingModal'
 
 type BookingStatus = 'pending' | 'confirmed' | 'cancelled'
 type FilterType = 'all' | 'pending' | 'confirmed' | 'cancelled'
@@ -45,6 +46,9 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'single' | 'bulk', ids: string[] } | null>(null)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingBooking, setEditingBooking] = useState<any | null>(null)
+  const [editLoading, setEditLoading] = useState(false)
   const t = adminTranslations.bookings
 
   // Plus besoin de fetchBookings - géré par le hook Realtime
@@ -153,6 +157,46 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
     } catch (error) {
       console.error('Erreur lors de l\'annulation:', error)
       toast.error('Erreur lors de l\'annulation')
+    }
+  }
+
+  const handleEditBooking = (booking: any) => {
+    setEditingBooking(booking)
+    setEditModalOpen(true)
+  }
+
+  const handleSaveBookingEdit = async (updates: any) => {
+    if (!editingBooking) return
+
+    try {
+      setEditLoading(true)
+      const response = await fetch(`/api/bookings/${editingBooking.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...updates,
+          lang: 'fr'
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error updating booking')
+      }
+
+      const message = updates.notifyClient ? 'Booking updated and client notified' : 'Booking updated'
+      toast.success(message)
+      setEditModalOpen(false)
+      setEditingBooking(null)
+    } catch (error) {
+      console.error('Error saving booking:', error)
+      toast.error('Error updating booking')
+      throw error
+    } finally {
+      setEditLoading(false)
     }
   }
 
@@ -524,6 +568,13 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                         {confirmLoading ? 'Loading...' : t.confirmBooking}
                       </button>
                       <button
+                        onClick={() => handleEditBooking(booking)}
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                      >
+                        <Edit size={16} />
+                        Edit
+                      </button>
+                      <button
                         onClick={() => handleCancelBooking(booking.id)}
                         className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                       >
@@ -534,13 +585,22 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                   )}
 
                   {booking.status === 'confirmed' && (
-                    <button
-                      onClick={() => handleCancelBooking(booking.id)}
-                      className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-                    >
-                      <XCircle size={16} />
-                      {t.cancelBooking}
-                    </button>
+                    <>
+                      <button
+                        onClick={() => handleEditBooking(booking)}
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                      >
+                        <Edit size={16} />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleCancelBooking(booking.id)}
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                      >
+                        <XCircle size={16} />
+                        {t.cancelBooking}
+                      </button>
+                    </>
                   )}
 
                   <button
@@ -693,6 +753,18 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Edit Booking Modal */}
+      <EditBookingModal
+        booking={editingBooking}
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false)
+          setEditingBooking(null)
+        }}
+        onSave={handleSaveBookingEdit}
+        isSaving={editLoading}
+      />
     </motion.div>
   )
 }

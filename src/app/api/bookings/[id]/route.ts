@@ -50,14 +50,7 @@ export async function PUT(
   const { id } = await params
   try {
     const body = await request.json()
-    const { status, lang = 'fr', cancel_note, cancelled_by } = body
-
-    if (!status || !['pending', 'confirmed', 'cancelled'].includes(status)) {
-      return NextResponse.json(
-        { error: 'Statut invalide' },
-        { status: 400 }
-      )
-    }
+    const { status, lang = 'fr', cancel_note, cancelled_by, name, email, phone, date, time, service, message, notifyClient } = body
 
     const supabase = getSupabaseClient()
     
@@ -73,53 +66,101 @@ export async function PUT(
       return NextResponse.json({ error: 'Réservation non trouvée' }, { status: 404 })
     }
 
-    // Mettre à jour le statut
-    const updateData: any = { status, updated_at: new Date().toISOString() }
-    if (status === 'cancelled') {
-      if (cancel_note) {
-        updateData.cancel_note = cancel_note
+    // Check if it's a full booking edit (admin modification) or status update
+    const isFullEdit = name && email && phone && date && time && service
+    
+    if (isFullEdit) {
+      // Admin is editing booking details
+      const updateData: any = {
+        name,
+        email,
+        phone,
+        date,
+        time,
+        service,
+        message,
+        updated_at: new Date().toISOString()
       }
-      if (cancelled_by) {
-        updateData.cancelled_by = cancelled_by
+
+      const { error } = await supabase
+        .from('bookings')
+        .update(updateData)
+        .eq('id', id)
+
+      if (error) {
+        console.error('❌ Erreur Supabase:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
       }
+
+      // Send admin modification email notification ONLY if notifyClient is true
+      try {
+        if (notifyClient) {
+          const { sendAdminModifiedBookingEmail } = await import('@/lib/email-service')
+          await sendAdminModifiedBookingEmail(booking, { ...booking, ...updateData }, lang)
+        }
+      } catch (emailError) {
+        console.error('⚠️ Email notification failed:', emailError)
+        // Don't fail the request if email fails
+      }
+
+      return NextResponse.json({ success: true, modified: true })
+    } else {
+      // Status update only
+      if (!status || !['pending', 'confirmed', 'cancelled'].includes(status)) {
+        return NextResponse.json(
+          { error: 'Statut invalide' },
+          { status: 400 }
+        )
+      }
+
+      // Mettre à jour le statut
+      const updateData: any = { status, updated_at: new Date().toISOString() }
+      if (status === 'cancelled') {
+        if (cancel_note) {
+          updateData.cancel_note = cancel_note
+        }
+        if (cancelled_by) {
+          updateData.cancelled_by = cancelled_by
+        }
+      }
+
+      const { error } = await supabase
+        .from('bookings')
+        .update(updateData)
+        .eq('id', id)
+
+      if (error) {
+        console.error('❌ Erreur Supabase:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      // Envoyer l'email approprié selon le nouveau statut
+      if (status === 'confirmed') {
+        await sendBookingConfirmedEmail({
+          id: booking.id,
+          name: booking.name,
+          email: booking.email,
+          phone: booking.phone,
+          date: booking.date,
+          time: booking.time,
+          service: booking.service,
+          message: booking.message
+        }, lang)
+      } else if (status === 'cancelled') {
+        await sendBookingCancelledEmail({
+          name: booking.name,
+          email: booking.email,
+          phone: booking.phone,
+          date: booking.date,
+          time: booking.time,
+          service: booking.service,
+          message: booking.message,
+          cancelNote: cancel_note
+        }, lang)
+      }
+
+      return NextResponse.json({ success: true })
     }
-
-    const { error } = await supabase
-      .from('bookings')
-      .update(updateData)
-      .eq('id', id)
-
-    if (error) {
-      console.error('❌ Erreur Supabase:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    // Envoyer l'email approprié selon le nouveau statut
-    if (status === 'confirmed') {
-      await sendBookingConfirmedEmail({
-        id: booking.id,
-        name: booking.name,
-        email: booking.email,
-        phone: booking.phone,
-        date: booking.date,
-        time: booking.time,
-        service: booking.service,
-        message: booking.message
-      }, lang)
-    } else if (status === 'cancelled') {
-      await sendBookingCancelledEmail({
-        name: booking.name,
-        email: booking.email,
-        phone: booking.phone,
-        date: booking.date,
-        time: booking.time,
-        service: booking.service,
-        message: booking.message,
-        cancelNote: cancel_note
-      }, lang)
-    }
-
-    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('❌ Erreur lors de la mise à jour:', error)
     return NextResponse.json(
