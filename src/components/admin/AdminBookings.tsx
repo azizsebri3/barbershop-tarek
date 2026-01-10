@@ -193,7 +193,8 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
       setEditingBooking(null)
     } catch (error) {
       console.error('Error saving booking:', error)
-      toast.error('Error updating booking')
+      const errorMessage = error instanceof Error ? error.message : 'Error updating booking'
+      toast.error(errorMessage)
       throw error
     } finally {
       setEditLoading(false)

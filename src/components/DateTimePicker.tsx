@@ -27,6 +27,12 @@ export default function DateTimePicker({
 
   // Fetch available slots when date changes
   useEffect(() => {
+    if (!selectedDate) {
+      setAvailableSlots([])
+      setOccupiedTimes([])
+      return
+    }
+
     const fetchAvailability = async () => {
       setLoading(true)
       try {
@@ -126,8 +132,8 @@ export default function DateTimePicker({
 
         {/* Days of week */}
         <div className="grid grid-cols-7 gap-2 mb-2">
-          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(day => (
-            <div key={day} className="text-center text-gray-400 text-sm font-semibold p-2">
+          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
+            <div key={`day-${idx}`} className="text-center text-gray-400 text-sm font-semibold p-2">
               {day}
             </div>
           ))}

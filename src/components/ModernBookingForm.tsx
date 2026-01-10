@@ -111,7 +111,8 @@ export default function ModernBookingForm() {
       toast.success('Réservation créée avec succès !')
     } catch (error) {
       console.error('Erreur:', error)
-      toast.error('Erreur lors de la réservation. Veuillez réessayer.')
+      const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la réservation. Veuillez réessayer.'
+      toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
