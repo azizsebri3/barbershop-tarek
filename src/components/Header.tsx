@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, LayoutDashboard, Shield, Bell, LogOut } from 'lucide-react'
+import { Menu, X, Bell, LogOut, LayoutDashboard } from 'lucide-react'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import LanguageSwitcher from './LanguageSwitcher'
@@ -14,10 +14,7 @@ import { useRouter } from 'next/navigation'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const [showAdminModal, setShowAdminModal] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
-  const [adminPassword, setAdminPassword] = useState('')
-  const [loadingLogin, setLoadingLogin] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
@@ -74,29 +71,7 @@ export default function Header() {
     }
   }
 
-  const handleAdminLogin = useCallback(async () => {
-    if (!adminPassword.trim()) {
-      toast.error('Veuillez entrer un mot de passe')
-      return
-    }
 
-    setLoadingLogin(true)
-    try {
-      const result = await login(adminPassword)
-      if (result.success) {
-        setShowAdminModal(false)
-        setAdminPassword('')
-        // Rediriger vers /admin pour afficher la modale de succès
-        window.location.href = '/admin'
-      } else {
-        toast.error(result.error || 'Mot de passe incorrect')
-      }
-    } catch (error) {
-      toast.error('Erreur de connexion')
-    } finally {
-      setLoadingLogin(false)
-    }
-  }, [adminPassword, login])
 
   const navLinks = useMemo(() => [
     { href: '/', label: t.nav.home },
@@ -159,7 +134,7 @@ export default function Header() {
           {/* Language & Admin Controls */}
           <div className="flex items-center gap-3 ml-3 pl-3 border-l border-white/10">
             <LanguageSwitcher />
-            {isAdmin ? (
+            {isAdmin && (
               <>
                 {/* Notification Bell */}
                 <button
@@ -193,14 +168,6 @@ export default function Header() {
                   <LogOut size={18} />
                 </button>
               </>
-            ) : (
-              <button
-                onClick={() => setShowAdminModal(true)}
-                className="p-2 text-gray-400 hover:text-accent rounded-lg hover:bg-white/5 transition-colors duration-200"
-                title="Accès Administration"
-              >
-                <Shield size={18} />
-              </button>
             )}
           </div>
         </div>
@@ -251,7 +218,7 @@ export default function Header() {
                 </Link>
                 
                 {/* Mobile Admin */}
-                {isAdmin && (
+                {isAdmin ? (
                   <Link
                     href="/admin/dashboard"
                     className="flex items-center gap-2 w-full px-4 py-3 mt-3 bg-white/5 text-white rounded-lg font-medium border border-white/10"
@@ -260,85 +227,19 @@ export default function Header() {
                     <LayoutDashboard size={20} />
                     Admin Panel
                   </Link>
-                )}
-                
-                {!isAdmin && (
-                  <button
-                    onClick={() => {
-                      setIsOpen(false)
-                      setShowAdminModal(true)
-                    }}
-                    className="flex items-center gap-2 w-full px-4 py-3 mt-2 text-gray-400 hover:text-accent hover:bg-white/5 rounded-lg transition-colors duration-200 border border-white/10"
+                ) : (
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2 w-full px-4 py-3 mt-3 bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg font-medium border border-white/10 transition-colors"
+                    onClick={() => setIsOpen(false)}
                   >
-                    <Shield size={20} />
-                    Accès Admin
-                  </button>
+                    <LayoutDashboard size={20} />
+                    Login
+                  </Link>
                 )}
+
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Admin Authentication Modal */}
-      <AnimatePresence>
-        {showAdminModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowAdminModal(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-              className="bg-secondary rounded-2xl p-6 w-full max-w-md border border-white/10"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                  <Shield className="text-accent" size={24} />
-                  Accès Administration
-                </h3>
-                <button
-                  onClick={() => setShowAdminModal(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Mot de passe administrateur
-                  </label>
-                  <input
-                    type="password"
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
-                    placeholder="Entrez le mot de passe"
-                    className="w-full px-4 py-3 bg-primary border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent transition-colors"
-                    onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
-                  />
-                </div>
-                <motion.button
-                  whileHover={{ scale: loadingLogin ? 1 : 1.02 }}
-                  whileTap={{ scale: loadingLogin ? 1 : 0.98 }}
-                  onClick={handleAdminLogin}
-                  disabled={loadingLogin}
-                  className="w-full py-3 bg-gradient-to-r from-accent to-yellow-500 text-black rounded-xl font-bold text-base shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loadingLogin ? 'Connexion...' : 'Accéder au panneau admin'}
-                </motion.button>
-                <p className="text-xs text-gray-500 text-center">
-                  Contactez l&apos;administrateur pour obtenir le mot de passe
-                </p>
-              </div>
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

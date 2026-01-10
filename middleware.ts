@@ -1,6 +1,5 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
 
 const intlMiddleware = createMiddleware({
   locales: ['en', 'fr'],
@@ -21,8 +20,18 @@ export default async function middleware(request: NextRequest) {
     }
     
     try {
-      const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here';
-      await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
+      // Décoder le token base64
+      const sessionData = JSON.parse(Buffer.from(token, 'base64').toString());
+      
+      // Vérifier l'expiration
+      if (!sessionData.exp || sessionData.exp < Date.now()) {
+        throw new Error('Token expiré');
+      }
+      
+      // Vérifier que les données nécessaires sont présentes
+      if (!sessionData.userId || !sessionData.role) {
+        throw new Error('Token invalide');
+      }
     } catch (error) {
       // Token invalide, rediriger vers login
       const response = NextResponse.redirect(new URL('/admin', request.url));

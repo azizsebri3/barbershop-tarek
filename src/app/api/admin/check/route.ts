@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_here'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,23 +9,31 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      const { payload } = await jwtVerify(token, new TextEncoder().encode(JWT_SECRET))
+      // Décoder le token base64
+      const sessionData = JSON.parse(Buffer.from(token, 'base64').toString())
 
-      // Vérifier si le token n'est pas expiré (24h)
-      const loginTime = payload.loginTime as number
-      const now = Date.now()
-      const twentyFourHours = 24 * 60 * 60 * 1000
+      // Vérifier l'expiration
+      if (!sessionData.exp || sessionData.exp < Date.now()) {
+        return NextResponse.json({ authenticated: false })
+      }
 
-      if (now - loginTime > twentyFourHours) {
+      // Vérifier que les données nécessaires sont présentes
+      if (!sessionData.userId || !sessionData.role) {
         return NextResponse.json({ authenticated: false })
       }
 
       return NextResponse.json({
         authenticated: true,
-        loginTime: payload.loginTime
+        user: {
+          id: sessionData.userId,
+          username: sessionData.username,
+          email: sessionData.email,
+          role: sessionData.role
+        }
       })
     } catch (error) {
       // Token invalide
+      console.error('Token decode error:', error)
       return NextResponse.json({ authenticated: false })
     }
   } catch (error) {

@@ -9,7 +9,14 @@ import {
   Scissors,
   LogOut,
   X,
-  CheckCircle
+  CheckCircle,
+  Calendar,
+  History,
+  Star,
+  Bell,
+  Palette,
+  Building,
+  User
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAdminAuth } from '@/lib/useAdminAuth'
@@ -19,10 +26,15 @@ import toast from 'react-hot-toast'
 export default function AdminMobileNav() {
   const pathname = usePathname()
   const router = useRouter()
-  const { logout } = useAdminAuth()
+  const { logout, isAdmin, loading } = useAdminAuth()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  // Ne pas afficher la navbar si pas connecté ou en chargement
+  if (!isAdmin || loading) {
+    return null
+  }
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -44,37 +56,26 @@ export default function AdminMobileNav() {
   const navItems = [
     {
       id: 'general',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
+      label: 'General',
+      icon: Building,
       onClick: () => {
         window.scrollTo(0, 0)
         if (pathname !== '/admin/dashboard') {
           router.push('/admin/dashboard')
         }
+        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'general' }))
       }
     },
     {
-      id: 'bookings',
-      label: 'Bookings',
-      icon: Settings,
+      id: 'hours',
+      label: 'Hours',
+      icon: Clock,
       onClick: () => {
         window.scrollTo(0, 0)
         if (pathname !== '/admin/dashboard') {
           router.push('/admin/dashboard')
         }
-        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'bookings' }))
-      }
-    },
-    {
-      id: 'gallery',
-      label: 'Gallery',
-      icon: Image,
-      onClick: () => {
-        window.scrollTo(0, 0)
-        if (pathname !== '/admin/dashboard') {
-          router.push('/admin/dashboard')
-        }
-        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'images' }))
+        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'hours' }))
       }
     },
     {
@@ -90,15 +91,87 @@ export default function AdminMobileNav() {
       }
     },
     {
-      id: 'hours',
-      label: 'Hours',
-      icon: Clock,
+      id: 'gallery',
+      label: 'Gallery',
+      icon: Image,
       onClick: () => {
         window.scrollTo(0, 0)
         if (pathname !== '/admin/dashboard') {
           router.push('/admin/dashboard')
         }
-        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'hours' }))
+        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'images' }))
+      }
+    },
+    {
+      id: 'branding',
+      label: 'Branding',
+      icon: Palette,
+      onClick: () => {
+        window.scrollTo(0, 0)
+        if (pathname !== '/admin/dashboard') {
+          router.push('/admin/dashboard')
+        }
+        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'branding' }))
+      }
+    },
+    {
+      id: 'profile',
+      label: 'Profile',
+      icon: User,
+      onClick: () => {
+        window.scrollTo(0, 0)
+        if (pathname !== '/admin/dashboard') {
+          router.push('/admin/dashboard')
+        }
+        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'profile' }))
+      }
+    },
+    {
+      id: 'bookings',
+      label: 'Bookings',
+      icon: Calendar,
+      onClick: () => {
+        window.scrollTo(0, 0)
+        if (pathname !== '/admin/dashboard') {
+          router.push('/admin/dashboard')
+        }
+        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'bookings' }))
+      }
+    },
+    {
+      id: 'history',
+      label: 'History',
+      icon: History,
+      onClick: () => {
+        window.scrollTo(0, 0)
+        if (pathname !== '/admin/dashboard') {
+          router.push('/admin/dashboard')
+        }
+        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'history' }))
+      }
+    },
+    {
+      id: 'testimonials',
+      label: 'Reviews',
+      icon: Star,
+      onClick: () => {
+        window.scrollTo(0, 0)
+        if (pathname !== '/admin/dashboard') {
+          router.push('/admin/dashboard')
+        }
+        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'testimonials' }))
+      }
+    },
+    {
+      id: 'notifications',
+      label: 'Notifs',
+      icon: Bell,
+      onClick: () => {
+        window.scrollTo(0, 0)
+        if (pathname !== '/admin/dashboard') {
+          router.push('/admin/dashboard')
+        }
+        window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'notifications' }))
       }
     },
     {

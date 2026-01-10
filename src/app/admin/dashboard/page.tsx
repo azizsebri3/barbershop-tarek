@@ -27,12 +27,13 @@ import AdminHistory from '@/components/admin/AdminHistory'
 import AdminTestimonials from '@/components/admin/AdminTestimonials'
 import AdminBranding from '@/components/admin/AdminBranding'
 import PushNotificationToggle from '@/components/admin/PushNotificationToggle'
+import ProfileManagement from '@/components/admin/ProfileManagement'
 import { useLanguage } from '@/lib/language-context'
 import { supabase } from '@/lib/supabase'
 import { renewAdminSession, getSessionInfo } from '@/lib/admin-auth'
 import { useAdminAuth } from '@/lib/useAdminAuth'
 
-type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'history' | 'testimonials' | 'branding' | 'notifications'
+type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'history' | 'testimonials' | 'branding' | 'notifications' | 'profile'
 
 export default function AdminDashboard() {
   const { t } = useLanguage()
@@ -52,6 +53,7 @@ export default function AdminDashboard() {
     { id: 'services' as TabType, label: t.admin.services, icon: Scissors },
     { id: 'images' as TabType, label: t.admin.images, icon: Image },
     { id: 'branding' as TabType, label: 'Logo & Branding', icon: Palette },
+    { id: 'profile' as TabType, label: 'Mon Profil', icon: Settings },
     { id: 'bookings' as TabType, label: t.admin.bookings, icon: Calendar, badge: pendingCount },
     { id: 'history' as TabType, label: 'History', icon: History },
     { id: 'testimonials' as TabType, label: 'Customer Reviews', icon: Star },
@@ -253,6 +255,7 @@ export default function AdminDashboard() {
             {activeTab === 'services' && <AdminServices />}
             {activeTab === 'images' && <AdminImages />}
             {activeTab === 'branding' && <AdminBranding />}
+            {activeTab === 'profile' && <ProfileManagement />}
             {activeTab === 'bookings' && <AdminBookings onStatusChange={fetchPendingCount} />}
             {activeTab === 'history' && <AdminHistory />}
             {activeTab === 'testimonials' && <AdminTestimonials />}
