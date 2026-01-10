@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Bell, LogOut, LayoutDashboard } from 'lucide-react'
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import LanguageSwitcher from './LanguageSwitcher'
 import { useLanguage } from '@/lib/language-context'
@@ -20,7 +20,7 @@ export default function Header() {
   const [pendingCount, setPendingCount] = useState(0)
   const { t } = useLanguage()
   const { settings } = usePublicGeneralSettings()
-  const { isAdmin, login, logout } = useAdminAuth()
+  const { isAdmin, logout } = useAdminAuth()
   const router = useRouter()
 
   useEffect(() => {

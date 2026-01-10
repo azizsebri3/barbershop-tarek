@@ -2,9 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard,
   Image,
-  Settings,
   Clock,
   Scissors,
   LogOut,
