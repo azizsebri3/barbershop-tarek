@@ -34,6 +34,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Configuration serveur manquante' },
+        { status: 500 }
+      )
+    }
+
     // Récupérer l'utilisateur
     const { data: user, error: fetchError } = await supabaseAdmin
       .from('admin_users')

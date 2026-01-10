@@ -17,6 +17,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Session expirée' }, { status: 401 })
     }
 
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+    }
+
     // Récupérer les données fraîches depuis la base de données
     const { data: user, error } = await supabaseAdmin
       .from('admin_users')

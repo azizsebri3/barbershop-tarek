@@ -16,6 +16,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Configuration serveur manquante' },
+        { status: 500 }
+      )
+    }
+
     // Trouver l'utilisateur par email
     const { data: user, error: userError } = await supabaseAdmin
       .from('admin_users')
