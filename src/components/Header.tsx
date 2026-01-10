@@ -134,7 +134,7 @@ export default function Header() {
           {/* Language & Admin Controls */}
           <div className="flex items-center gap-3 ml-3 pl-3 border-l border-white/10">
             <LanguageSwitcher />
-            {isAdmin && (
+            {isAdmin ? (
               <>
                 {/* Notification Bell */}
                 <button
@@ -168,6 +168,14 @@ export default function Header() {
                   <LogOut size={18} />
                 </button>
               </>
+            ) : (
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-lg transition-colors duration-200 text-sm font-medium"
+              >
+                <LayoutDashboard size={16} />
+                <span className="hidden lg:inline">Login</span>
+              </Link>
             )}
           </div>
         </div>
