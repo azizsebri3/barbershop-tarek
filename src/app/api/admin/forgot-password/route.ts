@@ -66,7 +66,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Construire l'URL de réinitialisation
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    // Utilise NEXT_PUBLIC_BASE_URL en priorité, sinon détecte l'URL depuis la requête
+    const requestUrl = new URL(request.url)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${requestUrl.protocol}//${requestUrl.host}`
     const resetUrl = `${baseUrl}/admin/reset-password?token=${resetToken}`
 
     // Envoyer l'email via Resend

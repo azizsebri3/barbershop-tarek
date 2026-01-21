@@ -12,6 +12,10 @@ NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
+# URL de Base (REQUIS EN PRODUCTION)
+# Important: définir en production pour les emails de réinitialisation
+NEXT_PUBLIC_BASE_URL=https://votre-domaine.com
+
 # Email Configuration (OPTIONNEL)
 SMTP_HOST=smtp.votre-domaine.com
 SMTP_PORT=587
