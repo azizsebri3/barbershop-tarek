@@ -2,17 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendClientCancellationConfirmation, sendAdminCancellationNotification } from '@/lib/email-service'
 
-function getSupabaseClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !serviceKey) {
-    throw new Error('Missing Supabase environment variables')
-  }
-
-  return createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
-}
-
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -20,9 +9,21 @@ export async function POST(
   const { id } = await params
   try {
     const body = await request.json()
-    const { cancelNote } = body
+    const { cancelNote, email } = body
 
-    const supabase = getSupabaseClient()
+    // ✨ FIX 7: Vérifier que le client fournit son email pour autoriser l'annulation
+    if (!email) {
+      return NextResponse.json(
+        { error: 'Email required to cancel booking' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false } }
+    )
 
     // Récupérer les détails de la réservation avant mise à jour
     const { data: booking, error: fetchError } = await supabase
@@ -34,6 +35,14 @@ export async function POST(
     if (fetchError || !booking) {
       console.error('❌ Réservation non trouvée:', fetchError)
       return NextResponse.json({ error: 'Réservation non trouvée' }, { status: 404 })
+    }
+
+    // ✨ FIX 7: Vérifier que l'email du client correspond à la réservation
+    if (booking.email.toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Email does not match booking' },
+        { status: 403 }
+      )
     }
 
     // Vérifier que la réservation n'est pas déjà annulée
