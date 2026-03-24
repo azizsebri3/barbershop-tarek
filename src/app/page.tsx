@@ -1,38 +1,31 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { Star, Zap, Shield, MapPin, Phone, Clock } from 'lucide-react'
 import Link from 'next/link'
 
-// Lazy load des composants lourds
+// 🚀 Lazy load des composants lourds + loading states
 const Hero = dynamic(() => import('@/components/Hero'), { ssr: true })
-const ServiceCarousel = dynamic(() => import('@/components/ServiceCarousel'), { ssr: false })
-const ClientPortfolio = dynamic(() => import('@/components/ClientPortfolio'), { ssr: false })
-const Testimonials = dynamic(() => import('@/components/Testimonials'), { ssr: false })
-const OpeningHours = dynamic(() => import('@/components/OpeningHours'), { ssr: false })
+const ServiceCarousel = dynamic(() => import('@/components/ServiceCarousel'), {
+  ssr: false,
+  loading: () => <div className="h-64 bg-gradient-to-b from-primary to-secondary animate-pulse rounded-lg" />,
+})
+const ClientPortfolio = dynamic(() => import('@/components/ClientPortfolio'), {
+  ssr: false,
+  loading: () => <div className="h-96 bg-gradient-to-b from-secondary to-primary animate-pulse rounded-lg" />,
+})
+
+const OpeningHours = dynamic(() => import('@/components/OpeningHours'), {
+  ssr: false,
+  loading: () => <div className="h-48 bg-primary/50 animate-pulse rounded-lg" />,
+})
+
+const Testimonials = dynamic(() => import('@/components/Testimonials'), {
+  ssr: false,
+  loading: () => <div className="h-64 bg-primary/50 animate-pulse rounded-lg" />,
+})
 
 export default function Home() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  }
-
   return (
     <>
       <Hero />
@@ -67,21 +60,11 @@ export default function Home() {
       {/* Why Choose Us - Concis */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-secondary/50">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl md:text-4xl font-bold text-white mb-6"
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 animate-fadeInUp">
             Pourquoi <span className="text-accent">Tarek Salon</span> ?
-          </motion.h2>
+          </h2>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { icon: Star, title: 'Expertise', description: 'Plus de 10 ans d\'expérience en coiffure moderne' },
               { icon: Zap, title: 'Rapidité', description: 'Service efficace sans compromettre la qualité' },
@@ -89,46 +72,35 @@ export default function Home() {
             ].map((feature, index) => {
               const Icon = feature.icon
               return (
-                <motion.div
+                <div
                   key={index}
-                  variants={itemVariants}
-                  whileHover={{ y: -5 }}
-                  className="text-center p-6 rounded-xl bg-primary border border-primary hover:border-accent transition-colors"
+                  className="text-center p-6 rounded-xl bg-primary border border-primary hover:border-accent transition-all duration-300 hover:shadow-lg animate-fadeInUp"
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <Icon className="text-accent text-3xl mx-auto mb-3" />
                   <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
                   <p className="text-gray-400 text-sm">{feature.description}</p>
-                </motion.div>
+                </div>
               )
             })}
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Opening Hours - Intégré avec contact */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary/30">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-8"
-          >
+          <div className="text-center mb-8 animate-fadeInUp">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Horaires & <span className="text-accent">Contact</span>
             </h2>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <OpeningHours />
 
             {/* Contact Info */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="space-y-6"
-            >
+            <div className="space-y-6 animate-fadeInUp" style={{ animationDelay: '100ms' }}>
               <div className="text-center lg:text-left">
                 <h3 className="text-xl font-bold text-white mb-4">Nous Trouver</h3>
                 <div className="space-y-3 text-gray-300">
@@ -144,7 +116,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -152,24 +124,14 @@ export default function Home() {
       {/* Location Section with Maps */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-12"
-          >
+          <div className="text-center mb-12 animate-fadeInUp">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Trouvez-Nous à <span className="text-accent">Namur</span>
             </h2>
             <p className="text-gray-400 text-lg">Passage de la Gare 5, au cœur de Namur — parking et transports à proximité</p>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="rounded-2xl overflow-hidden shadow-2xl border border-primary/50 hover:border-accent/50 transition-colors mb-12"
-          >
+          <div className="rounded-2xl overflow-hidden shadow-2xl border border-primary/50 hover:border-accent/50 transition-colors mb-12 animate-fadeInUp" style={{ animationDelay: '100ms' }}>
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5125.421648937018!2d4.860792076398837!3d50.46784768611116!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c199676d2eb1d5%3A0x560fefdeeb40e96e!2sGolden%20Salon!5e1!3m2!1sen!2sbe!4v1767402185853!5m2!1sen!2sbe"
               width="100%"
@@ -180,14 +142,9 @@ export default function Home() {
               referrerPolicy="no-referrer-when-downgrade"
               className="w-full"
             />
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fadeInUp" style={{ animationDelay: '200ms' }}>
             <div className="p-6 rounded-xl bg-primary border border-primary/50 hover:border-accent/50 transition-colors text-center">
               <MapPin className="w-8 h-8 text-accent mx-auto mb-3" />
               <h3 className="text-lg font-bold text-white mb-2">Adresse</h3>
@@ -205,7 +162,7 @@ export default function Home() {
               <h3 className="text-lg font-bold text-white mb-2">Horaires</h3>
               <p className="text-gray-400">Lun-Sam: 9h-18h<br />Dimanche: Fermé</p>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -216,12 +173,7 @@ export default function Home() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-accent/20 to-accent/10 relative overflow-hidden">
         <div className="absolute top-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl opacity-50" />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-4xl mx-auto text-center relative z-10"
-        >
+        <div className="max-w-4xl mx-auto text-center relative z-10 animate-fadeInUp">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Réservez votre créneau à Namur
           </h2>
@@ -230,15 +182,11 @@ export default function Home() {
           </p>
 
           <Link href="/booking">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-accent text-primary font-bold rounded-lg hover:bg-accent/80 transition-colors text-lg"
-            >
+            <button className="px-8 py-4 bg-accent text-primary font-bold rounded-lg hover:bg-accent/80 active:scale-95 transition-all text-lg">
               Réserver un Rendez-vous
-            </motion.button>
+            </button>
           </Link>
-        </motion.div>
+        </div>
       </section>
     </>
   )

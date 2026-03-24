@@ -79,6 +79,7 @@ export default function Header() {
   ], [t.nav.home, t.nav.services])
 
   return (
+    <>
     <header 
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled 
@@ -251,67 +252,68 @@ export default function Header() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Logout Confirmation Modal */}
-      <AnimatePresence>
-        {showLogoutModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-          >
-            <div
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-              onClick={() => !isLoggingOut && setShowLogoutModal(false)}
-            />
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 20 }}
-              transition={{ type: "spring", duration: 0.3 }}
-              className="relative bg-gradient-to-br from-secondary to-primary border-2 border-accent/30 rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-black/50 z-10"
-            >
-              <div className="text-center">
-                <div className="w-24 h-24 mx-auto mb-6 bg-red-500/20 rounded-full flex items-center justify-center border-2 border-red-500/30">
-                  <LogOut className="text-red-400" size={48} />
-                </div>
-                <h3 className="text-3xl font-bold text-white mb-4">Confirmer la déconnexion</h3>
-                <p className="text-gray-300 mb-8 text-lg">
-                  Voulez-vous vraiment vous déconnecter de votre session administrateur ?
-                </p>
-
-                <div className="flex flex-col gap-4">
-                  <button
-                    onClick={handleLogout}
-                    disabled={isLoggingOut}
-                    className="w-full px-8 py-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-300 font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg shadow-red-500/20"
-                  >
-                    {isLoggingOut ? (
-                      <>
-                        <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Déconnexion en cours...</span>
-                      </>
-                    ) : (
-                      <>
-                        <LogOut size={24} />
-                        <span>Oui, me déconnecter</span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setShowLogoutModal(false)}
-                    disabled={isLoggingOut}
-                    className="w-full px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 font-semibold text-xl disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
-                  >
-                    Annuler
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </header>
+
+    {/* Logout Confirmation Modal - Outside header for proper centering */}
+    <AnimatePresence>
+      {showLogoutModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+        >
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => !isLoggingOut && setShowLogoutModal(false)}
+          />
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.8, opacity: 0, y: 20 }}
+            transition={{ type: "spring", duration: 0.3 }}
+            className="relative bg-gradient-to-br from-secondary to-primary border-2 border-accent/30 rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-black/50 z-10"
+          >
+            <div className="text-center">
+              <div className="w-24 h-24 mx-auto mb-6 bg-red-500/20 rounded-full flex items-center justify-center border-2 border-red-500/30">
+                <LogOut className="text-red-400" size={48} />
+              </div>
+              <h3 className="text-3xl font-bold text-white mb-4">Confirm Logout</h3>
+              <p className="text-gray-300 mb-8 text-lg">
+                Are you sure you want to logout from your admin session?
+              </p>
+
+              <div className="flex flex-col gap-4">
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="w-full px-8 py-4 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-300 font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg shadow-red-500/20"
+                >
+                  {isLoggingOut ? (
+                    <>
+                      <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Logging out...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut size={24} />
+                      <span>Yes, logout</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowLogoutModal(false)}
+                  disabled={isLoggingOut}
+                  className="w-full px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 font-semibold text-xl disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   )
 }
