@@ -50,17 +50,18 @@ export default function BookingForm() {
 
       // Vérifier la disponibilité avant de soumettre
       const availabilityResponse = await fetch(`/api/bookings?date=${data.date}`)
+      
+      // Trouver la durée du service sélectionné
+      const selectedService = services.find(s => s.name === data.service)
+      const serviceDuration = selectedService?.duration || 30
+      
+      // Calculer les créneaux que cette réservation occuperait
+      const [startHour, startMin] = data.time.split(':').map(Number)
+      const startMinutes = startHour * 60 + startMin
+      const endMinutes = startMinutes + serviceDuration
+      
       if (availabilityResponse.ok) {
         const existingBookings: Array<{ date: string; time: string; service: string; status: string }> = await availabilityResponse.json()
-        
-        // Trouver la durée du service sélectionné
-        const selectedService = services.find(s => s.name === data.service)
-        const serviceDuration = selectedService?.duration || 30
-        
-        // Calculer les créneaux que cette réservation occuperait
-        const [startHour, startMin] = data.time.split(':').map(Number)
-        const startMinutes = startHour * 60 + startMin
-        const endMinutes = startMinutes + serviceDuration
         
         // Vérifier les conflits avec les réservations existantes
         const servicesData = [
@@ -86,6 +87,47 @@ export default function BookingForm() {
             return
           }
         }
+      }
+
+      // ✨ Vérifier les RDV existants du client (minimum 1h entre les RDV)
+      try {
+        const clientBookingsResponse = await fetch(`/api/bookings/client?email=${encodeURIComponent(data.email)}`)
+        if (clientBookingsResponse.ok) {
+          const clientBookings: Array<{ date: string; time: string; service: string; status: string }> = await clientBookingsResponse.json()
+          const servicesData = [
+            { name: 'Coupe Homme', duration: 30 },
+            { name: 'Barbe + Coupe', duration: 60 },
+            { name: 'Barbe', duration: 30 }
+          ]
+
+          for (const booking of clientBookings) {
+            if (booking.status !== 'confirmed') continue
+
+            const bookingDateTime = new Date(`${booking.date}T${booking.time}`)
+            if (bookingDateTime < new Date()) continue
+
+            const bookingService = servicesData.find(s => s.name === booking.service)
+            const bookingDuration = bookingService?.duration || 30
+            
+            const [bookingHour, bookingMin] = booking.time.split(':').map(Number)
+            const bookingEndMinutes = bookingHour * 60 + bookingMin + bookingDuration
+
+            const newBookingDate = new Date(data.date)
+            const existingDate = new Date(booking.date)
+
+            if (newBookingDate.toDateString() === existingDate.toDateString()) {
+              const minGapMinutes = 60
+              if (startMinutes >= (bookingHour * 60 + bookingMin) - minGapMinutes && startMinutes < bookingEndMinutes + minGapMinutes) {
+                const earliestTime = new Date(0, 0, 0, bookingHour, bookingMin + bookingDuration + minGapMinutes)
+                toast.error(`Vous avez déjà un RDV ce jour. Vous pouvez en prendre un autre à partir de ${earliestTime.getHours().toString().padStart(2, '0')}:${earliestTime.getMinutes().toString().padStart(2, '0')}.`)
+                return
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking client bookings:', error)
+        // Continuer même si la vérification échoue, l'API fera la vérification
       }
 
       // Send to API route for booking
