@@ -135,6 +135,55 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ✨ Vérifier que le client ne prend pas 2 RDV rapidement (minimum 1h après le précédent)
+    const { data: clientBookings, error: clientError } = await supabase
+      .from('bookings')
+      .select('date, time, service, status')
+      .eq('email', email.toLowerCase())
+      .eq('status', 'confirmed')
+
+    if (clientError) {
+      console.error('Error checking client bookings:', clientError)
+      return NextResponse.json(
+        { error: 'Erreur lors de la vérification des réservations client' },
+        { status: 500 }
+      )
+    }
+
+    // Vérifier chaque réservation confirmée du client
+    for (const clientBooking of clientBookings || []) {
+      // Ignorer les réservations passées
+      const bookingDateTime = new Date(`${clientBooking.date}T${clientBooking.time}`)
+      if (bookingDateTime < new Date()) continue
+
+      const clientService = services.find(s => s.name === clientBooking.service)
+      const clientDuration = clientService?.duration || 30
+
+      const [clientHour, clientMin] = clientBooking.time.split(':').map(Number)
+      const clientStartMinutes = clientHour * 60 + clientMin
+      const clientEndMinutes = clientStartMinutes + clientDuration
+
+      // Calcul de la date du nouveau RDV
+      const newBookingDate = new Date(date)
+      const clientBookingDate = new Date(clientBooking.date)
+
+      // Si c'est le même jour, vérifier la proximité en minutes
+      if (newBookingDate.toDateString() === clientBookingDate.toDateString()) {
+        // Vérifier si nouveau RDV est pendant ou moins de 60 min après le RDV existant
+        const minGapMinutes = 60
+        if (startMinutes >= clientStartMinutes - minGapMinutes && startMinutes < clientEndMinutes + minGapMinutes) {
+          const earliestNextTime = new Date(0, 0, 0, clientHour, clientMin + clientDuration + minGapMinutes)
+          
+          return NextResponse.json(
+            { 
+              error: `Vous avez déjà un RDV ce jour. Vous pouvez reprendre un RDV à partir de ${earliestNextTime.getHours().toString().padStart(2, '0')}:${earliestNextTime.getMinutes().toString().padStart(2, '0')}.` 
+            },
+            { status: 409 }
+          )
+        }
+      }
+    }
+
     // Insert booking into Supabase
     const { data, error } = await supabase
       .from('bookings')

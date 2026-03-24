@@ -13,6 +13,12 @@ function getSupabaseClient() {
   return createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 }
 
+// ✨ FIX 5: Helper pour vérifier authentification admin
+function verifyAdminToken(request: NextRequest): boolean {
+  const token = request.cookies.get('admin_token')?.value
+  return !!token && token.length > 0
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -52,6 +58,17 @@ export async function PUT(
     const body = await request.json()
     const { status, lang = 'fr', cancel_note, cancelled_by, name, email, phone, date, time, service, message, notifyClient } = body
 
+    // Check if it's a full booking edit (admin modification)
+    const isFullEdit = name && email && phone && date && time && service
+    
+    // ✨ FIX 5: Vérifier authentification admin pour modifications
+    if (isFullEdit && !verifyAdminToken(request)) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin token required' },
+        { status: 401 }
+      )
+    }
+
     const supabase = getSupabaseClient()
     
     // Récupérer les détails de la réservation avant mise à jour
@@ -66,8 +83,79 @@ export async function PUT(
       return NextResponse.json({ error: 'Réservation non trouvée' }, { status: 404 })
     }
 
-    // Check if it's a full booking edit (admin modification) or status update
-    const isFullEdit = name && email && phone && date && time && service
+    // ✨ FIX 3: Si admin modifie le RDV, vérifier la validation 1h aussi
+    if (isFullEdit) {
+      // Vérifier la disponibilité (comme en POST)
+      const services = [
+        { name: 'Coupe Homme', duration: 30 },
+        { name: 'Barbe + Coupe', duration: 60 },
+        { name: 'Barbe', duration: 30 }
+      ]
+      
+      const selectedService = services.find(s => s.name === service)
+      const serviceDuration = selectedService?.duration || 30
+      
+      const [startHour, startMin] = time.split(':').map(Number)
+      const startMinutes = startHour * 60 + startMin
+      const endMinutes = startMinutes + serviceDuration
+      
+      // Récupérer les conflits (SAUF cette réservation)
+      const { data: existingBookings, error: fetchError2 } = await supabase
+        .from('bookings')
+        .select('time, service, status')
+        .eq('date', date)
+        .neq('id', id)
+        .in('status', ['confirmed'])
+      
+      if (!fetchError2 && existingBookings) {
+        for (const existingBooking of existingBookings) {
+          const existingService = services.find(s => s.name === existingBooking.service)
+          const existingDuration = existingService?.duration || 30
+          
+          const [existingHour, existingMin] = existingBooking.time.split(':').map(Number)
+          const existingStartMinutes = existingHour * 60 + existingMin
+          const existingEndMinutes = existingStartMinutes + existingDuration
+          
+          if (startMinutes < existingEndMinutes && endMinutes > existingStartMinutes) {
+            return NextResponse.json(
+              { error: 'Ce créneau n\'est pas disponible (conflict avec un autre RDV)' },
+              { status: 409 }
+            )
+          }
+        }
+      }
+      
+      // Vérifier validation 1h du client aussi
+      const { data: clientBookings, error: clientError } = await supabase
+        .from('bookings')
+        .select('date, time, service, status')
+        .eq('email', email.toLowerCase())
+        .neq('id', id)
+        .eq('status', 'confirmed')
+
+      if (!clientError && clientBookings) {
+        for (const clientBooking of clientBookings) {
+          const bookingService = services.find(s => s.name === clientBooking.service)
+          const bookingDuration = bookingService?.duration || 30
+          
+          const [bookingHour, bookingMin] = clientBooking.time.split(':').map(Number)
+          const bookingEndMinutes = bookingHour * 60 + bookingMin + bookingDuration
+
+          const newBookingDate = new Date(date)
+          const existingDate = new Date(clientBooking.date)
+
+          if (newBookingDate.toDateString() === existingDate.toDateString()) {
+            const minGapMinutes = 60
+            if (startMinutes >= (bookingHour * 60 + bookingMin) - minGapMinutes && startMinutes < bookingEndMinutes + minGapMinutes) {
+              return NextResponse.json(
+                { error: `Client a déjà un RDV ce jour. Minimum 1h d'écart requis.` },
+                { status: 409 }
+              )
+            }
+          }
+        }
+      }
+    }
     
     if (isFullEdit) {
       // Admin is editing booking details
@@ -171,10 +259,19 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  
+  // ✨ FIX 6: Vérifier authentification admin pour suppression
+  if (!verifyAdminToken(request)) {
+    return NextResponse.json(
+      { error: 'Unauthorized: Admin token required' },
+      { status: 401 }
+    )
+  }
+  
   try {
     const supabase = getSupabaseClient()
     const { error } = await supabase

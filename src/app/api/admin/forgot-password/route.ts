@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Générer un token aléatoire sécurisé
     const resetToken = crypto.randomBytes(32).toString('hex')
     const expiresAt = new Date()
-    expiresAt.setHours(expiresAt.getHours() + 1) // Expire dans 1 heure
+    expiresAt.setHours(expiresAt.getHours() + 24) // Expire dans 24h
 
     // Stocker le token dans la base de données
     const { error: updateError } = await supabaseAdmin
