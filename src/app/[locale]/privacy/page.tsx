@@ -2,42 +2,26 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Shield } from 'lucide-react'
+import { Shield } from 'lucide-react'
 
 export default function PrivacyPage() {
   return (
-    <>
-      {/* Back Button */}
-      <div className="fixed top-20 left-6 z-40 sm:left-8">
-        <Link href="/" className="group flex items-center gap-2 text-accent hover:text-white transition-colors">
-          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-medium hidden sm:inline">Retour</span>
-        </Link>
-      </div>
-
-      <main className="min-h-screen bg-black pt-20 pb-20">
-        {/* Background decorative elements */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[150px]" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[120px]" />
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"
-        >
-          {/* Header */}
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-accent to-yellow-500 rounded-xl flex items-center justify-center">
-                <Shield size={24} className="text-black" />
-              </div>
-              <h1 className="text-4xl sm:text-5xl font-bold text-white">Politique de Confidentialité</h1>
-            </div>
-            <p className="text-gray-400 text-lg">Dernière mise à jour: 24 mars 2026</p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+    >
+      {/* Header */}
+      <div className="mb-12">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-accent to-yellow-500 rounded-xl flex items-center justify-center">
+            <Shield size={24} className="text-black" />
           </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-white">Politique de Confidentialité</h1>
+        </div>
+        <p className="text-gray-400 text-lg">Dernière mise à jour: 24 mars 2026</p>
+      </div>
 
           {/* Content */}
           <div className="prose prose-invert max-w-none">
@@ -189,8 +173,6 @@ export default function PrivacyPage() {
               Retour à l&apos;accueil
             </Link>
           </motion.div>
-        </motion.div>
-      </main>
-    </>
+    </motion.div>
   )
 }

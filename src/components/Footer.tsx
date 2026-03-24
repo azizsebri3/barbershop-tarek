@@ -229,8 +229,8 @@ export default function Footer() {
                 &copy; {currentYear} Tarek Salon. Tous droits réservés.
               </p>
               <div className="flex items-center gap-6 text-xs text-gray-500">
-                <Link href="/privacy" className="hover:text-accent transition-colors">Politique de confidentialité</Link>
-                <Link href="/terms" className="hover:text-accent transition-colors">Conditions d&apos;utilisation</Link>
+                <Link href="/fr/privacy" className="hover:text-accent transition-colors">Politique de confidentialité</Link>
+                <Link href="/fr/terms" className="hover:text-accent transition-colors">Conditions d&apos;utilisation</Link>
               </div>
             </div>
           </motion.div>
