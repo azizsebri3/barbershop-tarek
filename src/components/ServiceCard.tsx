@@ -1,7 +1,6 @@
 'use client'
 
 import { memo } from 'react'
-import { motion } from 'framer-motion'
 import { useLanguage } from '@/lib/language-context'
 import { useRouter } from 'next/navigation'
 import { Clock, ArrowRight, Sparkles } from 'lucide-react'
@@ -24,12 +23,8 @@ const ServiceCard = memo(function ServiceCard({ title, description, price, durat
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] rounded-2xl p-6 sm:p-8 border border-white/10 hover:border-accent/50 transition-all duration-500 shadow-xl shadow-black/20 hover:shadow-2xl hover:shadow-accent/10 overflow-hidden"
+    <div
+      className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] rounded-2xl p-6 sm:p-8 border border-white/10 hover:border-accent/50 transition-all duration-500 shadow-xl shadow-black/20 hover:shadow-2xl hover:shadow-accent/10 overflow-hidden animate-fadeInUp hover:scale-105 hover:-translate-y-2"
     >
       {/* Background glow effect */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -71,18 +66,16 @@ const ServiceCard = memo(function ServiceCard({ title, description, price, durat
         </div>
 
         {/* CTA Button */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={handleReserve}
-          className="group/btn w-full relative inline-flex items-center justify-center gap-2 py-3.5 sm:py-4 px-6 bg-gradient-to-r from-accent to-yellow-500 text-black font-bold rounded-xl overflow-hidden transition-all duration-300 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30"
+          className="group/btn w-full relative inline-flex items-center justify-center gap-2 py-3.5 sm:py-4 px-6 bg-gradient-to-r from-accent to-yellow-500 text-black font-bold rounded-xl overflow-hidden transition-all duration-300 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30 hover:scale-105 active:scale-98"
         >
           <Sparkles size={16} className="transition-transform group-hover/btn:rotate-12" />
           <span>{t.services.reserve}</span>
           <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
-        </motion.button>
+        </button>
       </div>
-    </motion.div>
+    </div>
   )
 })
 

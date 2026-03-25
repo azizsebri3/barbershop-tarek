@@ -7,8 +7,6 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
-  // Server-side only packages (don't bundle on client)
-  serverExternalPackages: ['bcryptjs'],
   experimental: {
     optimizePackageImports: ['framer-motion', 'lucide-react', 'swiper'],
     esmExternals: true,
