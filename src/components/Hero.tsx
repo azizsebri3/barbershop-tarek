@@ -3,7 +3,6 @@
 import { memo, useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
 import { useLanguage } from '@/lib/language-context'
 import { Sparkles, ArrowRight } from 'lucide-react'
 
@@ -13,26 +12,6 @@ const Hero = memo(function Hero() {
   useEffect(() => {
     setIsMobile(typeof window !== 'undefined' && window.innerWidth < 768)
   }, [])
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.7, ease: 'easeOut' },
-    },
-  }
 
   const { t } = useLanguage()
 
@@ -66,94 +45,59 @@ const Hero = memo(function Hero() {
         )}
       </div>
 
-      {/* Content Container */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20"
-      >
+      {/* Content Container - CSS animations instead of Framer Motion */}
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 animate-fadeIn">
         <div className="max-w-5xl mx-auto text-center">
           {/* Premium Badge */}
-          <motion.div
-            variants={itemVariants}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8 shadow-lg shadow-black/20"
-          >
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8 shadow-lg shadow-black/20 animate-fadeInUp"
+            style={{ animationDelay: '0.1s' }}>
             <Sparkles className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium text-white/90 tracking-wide">
               {t.hero.subtitle}
             </span>
-          </motion.div>
+          </div>
 
           {/* Main Title with gradient */}
-          <motion.h1
-            variants={itemVariants}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-6 leading-[1.1] tracking-tight"
-          >
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-6 leading-[1.1] tracking-tight animate-fadeInUp"
+            style={{ animationDelay: '0.2s' }}>
             {t.hero.title}
             <span className="block mt-2 bg-gradient-to-r from-accent via-yellow-400 to-accent bg-clip-text text-transparent">
               {t.hero.titleAccent}
             </span>
-          </motion.h1>
+          </h1>
 
           {/* Subtitle */}
-          <motion.p
-            variants={itemVariants}
-            className="text-lg sm:text-xl md:text-2xl text-white/70 max-w-3xl mx-auto mb-10 leading-relaxed"
-          >
+          <p className="text-lg sm:text-xl md:text-2xl text-white/70 max-w-3xl mx-auto mb-10 leading-relaxed animate-fadeInUp"
+            style={{ animationDelay: '0.3s' }}>
             {t.hero.description}
-          </motion.p>
+          </p>
 
           {/* CTA Buttons */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6"
-          >
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 animate-fadeInUp"
+            style={{ animationDelay: '0.4s' }}>
             <Link href="/booking" className="w-full sm:w-auto">
-              <motion.button
-                whileHover={{ scale: 1.03, boxShadow: '0 20px 40px rgba(212, 175, 55, 0.3)' }}
-                whileTap={{ scale: 0.98 }}
-                className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-accent to-yellow-500 text-black font-bold rounded-full transition-all duration-300 text-base sm:text-lg shadow-xl shadow-accent/25"
-              >
+              <button className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-accent to-yellow-500 text-black font-bold rounded-full transition-all duration-300 text-base sm:text-lg shadow-xl shadow-accent/25 hover:shadow-2xl hover:shadow-accent/40 hover:scale-105 active:scale-98">
                 {t.hero.btnBook}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </motion.button>
+              </button>
             </Link>
             
             <Link href="/pricing" className="w-full sm:w-auto">
-              <motion.button
-                whileHover={{ scale: 1.03, backgroundColor: 'rgba(255,255,255,0.15)' }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-white/10 backdrop-blur-md text-white font-semibold rounded-full border border-white/30 transition-all duration-300 text-base sm:text-lg"
-              >
+              <button className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-white/10 backdrop-blur-md text-white font-semibold rounded-full border border-white/30 transition-all duration-300 text-base sm:text-lg hover:bg-white/20 hover:scale-105 active:scale-98">
                 {t.hero.btnLearn}
-              </motion.button>
+              </button>
             </Link>
-          </motion.div>
-
-
+          </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden sm:block"
-      >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-7 h-12 rounded-full border-2 border-white/30 flex items-start justify-center p-2"
-        >
-          <motion.div
-            animate={{ height: ['20%', '60%', '20%'], opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-1.5 bg-accent rounded-full"
-          />
-        </motion.div>
-      </motion.div>
+      {/* Scroll Indicator - CSS animation */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden sm:block animate-fadeIn"
+        style={{ animationDelay: '1.5s' }}>
+        <div className="w-7 h-12 rounded-full border-2 border-white/30 flex items-start justify-center p-2">
+          <div className="w-1.5 bg-accent rounded-full animate-bounce" style={{ animationDuration: '1.5s' }} />
+        </div>
+      </div>
     </section>
   )
 })
