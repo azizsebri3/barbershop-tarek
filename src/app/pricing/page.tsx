@@ -1,16 +1,5 @@
 import { Metadata } from 'next'
-import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
-
-// Dynamically import heavy component with SSR enabled for SEO
-const PricingPageContent = dynamic(() => import('@/components/PricingPageContent'), {
-  loading: () => (
-    <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-black via-slate-900 to-black">
-      <div className="animate-spin rounded-full h-12 w-12 border-2 border-accent border-t-transparent"></div>
-    </div>
-  ),
-  ssr: true,
-})
+import PricingPageContent from '@/components/PricingPageContent'
 
 export const metadata: Metadata = {
   title: 'Tarifs & Prix | Coiffeur Namur - Tarek Salon',
@@ -24,13 +13,5 @@ export const metadata: Metadata = {
 }
 
 export default function PricingPage() {
-  return (
-    <Suspense fallback={
-      <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-black via-slate-900 to-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-accent border-t-transparent"></div>
-      </div>
-    }>
-      <PricingPageContent />
-    </Suspense>
-  )
+  return <PricingPageContent />
 }

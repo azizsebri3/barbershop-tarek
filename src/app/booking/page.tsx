@@ -1,16 +1,5 @@
 import { Metadata } from 'next'
-import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
-
-// Dynamically import heavy component with SSR disabled
-const BookingPageContent = dynamic(() => import('@/components/BookingPageContent'), {
-  loading: () => (
-    <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-black via-slate-900 to-black">
-      <div className="animate-spin rounded-full h-12 w-12 border-2 border-accent border-t-transparent"></div>
-    </div>
-  ),
-  ssr: true,
-})
+import BookingPageContent from '@/components/BookingPageContent'
 
 export const metadata: Metadata = {
   title: 'Réserver un Rendez-vous | Coiffeur Namur',
@@ -24,13 +13,5 @@ export const metadata: Metadata = {
 }
 
 export default function BookingPage() {
-  return (
-    <Suspense fallback={
-      <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-black via-slate-900 to-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-accent border-t-transparent"></div>
-      </div>
-    }>
-      <BookingPageContent />
-    </Suspense>
-  )
+  return <BookingPageContent />
 }
