@@ -12,6 +12,7 @@ interface TestimonialFormProps {
 
 export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
   const { t } = useLanguage()
+  const googleReviewUrl = 'https://g.page/r/CQIG5Mt4inBSEBM/review'
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -48,19 +49,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
       setSubmitted(true)
       toast.success(t.testimonials.submitToast)
       
-      // Reset form after delay
-      setTimeout(() => {
-        setIsOpen(false)
-        setSubmitted(false)
-        setFormData({
-          name: '',
-          email: '',
-          rating: 5,
-          message: '',
-          service: '',
-        })
-        onSuccess?.()
-      }, 2500)
+      onSuccess?.()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t.testimonials.submitError)
     } finally {
@@ -291,6 +280,32 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                       {t.testimonials.successMessage}<br />
                       {t.testimonials.successNote}
                     </p>
+                    <p className="mt-6 text-sm text-gray-300">{t.testimonials.googleReviewPrompt}</p>
+                    <a
+                      href={googleReviewUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 font-bold text-primary transition-colors hover:bg-orange-300"
+                    >
+                      {t.testimonials.googleReviewButton}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsOpen(false)
+                        setSubmitted(false)
+                        setFormData({
+                          name: '',
+                          email: '',
+                          rating: 5,
+                          message: '',
+                          service: '',
+                        })
+                      }}
+                      className="mt-4 block mx-auto text-sm text-gray-400 hover:text-white transition-colors"
+                    >
+                      {t.testimonials.close}
+                    </button>
                   </motion.div>
                 )}
               </div>

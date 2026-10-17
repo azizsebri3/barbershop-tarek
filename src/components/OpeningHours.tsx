@@ -161,7 +161,14 @@ const OpeningHours = memo(function OpeningHours() {
           </div>
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wider">{t.hours.addressLabel}</p>
-            <p className="text-white font-medium text-sm">Rue Rogier 7A, 5000 Namur</p>
+            <a
+              href="https://www.google.com/maps/dir/?api=1&destination=Rue+Rogier+7A%2C+5000+Namur"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white font-medium text-sm hover:text-accent transition-colors"
+            >
+              {t.location.addressValue}
+            </a>
           </div>
         </motion.div>
       </div>

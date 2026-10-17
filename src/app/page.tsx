@@ -109,7 +109,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8 animate-fadeInUp">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Horaires & <span className="text-accent">Contact</span>
+              {t.hours.title} & <span className="text-accent">{t.footer.contactTitle}</span>
             </h2>
           </div>
 
@@ -119,16 +119,26 @@ export default function Home() {
             {/* Contact Info */}
             <div className="space-y-6 animate-fadeInUp" style={{ animationDelay: '100ms' }}>
               <div className="text-center lg:text-left">
-                <h3 className="text-xl font-bold text-white mb-4">Nous Trouver</h3>
+                <h3 className="text-xl font-bold text-white mb-4">
+                  {t.location.title} <span className="text-accent">{t.location.titleAccent}</span>
+                </h3>
                 <div className="space-y-3 text-gray-300">
                   <div className="flex items-center justify-center lg:justify-start gap-3">
                     <MapPin className="w-5 h-5 text-accent flex-shrink-0" />
-                    <span>Rue Rogier 7A, 5000 Namur</span>
+                    <span>{t.location.addressValue}</span>
                   </div>
                   <div className="flex items-center justify-center lg:justify-start gap-3">
                     <Phone className="w-5 h-5 text-accent flex-shrink-0" />
                     <a href="tel:+32465632205" className="hover:text-accent transition-colors">
-                      +32 465 63 22 05
+                      {t.hours.phone}
+                    </a>
+                  </div>
+                  <div className="flex items-center justify-center lg:justify-start gap-3">
+                    <a
+                      href="mailto:contact@tareksalon.be"
+                      className="hover:text-accent transition-colors"
+                    >
+                      {t.location.email}: contact@tareksalon.be
                     </a>
                   </div>
                 </div>

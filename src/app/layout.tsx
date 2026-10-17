@@ -145,6 +145,14 @@ const jsonLd = {
   email: 'contact@tareksalon.be',
   image: 'https://tareksalon.be/og-image.jpg',
   logo: 'https://tareksalon.be/icons/icon-512x512.png',
+  hasMap: 'https://maps.app.goo.gl/YePu1ryxNkNZUgvZ8',
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: '+32465632205',
+    contactType: 'customer service',
+    areaServed: 'BE',
+    availableLanguage: ['French', 'English']
+  },
   priceRange: '€€',
   currenciesAccepted: 'EUR',
   paymentAccepted: 'Cash, Credit Card, Bancontact',
@@ -251,17 +259,8 @@ const jsonLd = {
     ]
   },
   
-  // Notation (à ajouter quand tu auras des avis)
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    reviewCount: '127',
-    bestRating: '5',
-    worstRating: '1'
-  },
-  
-  // Réseaux sociaux (à ajouter plus tard)
-  sameAs: []
+  // Ajouter ici le profil Google Business et les réseaux sociaux officiels lorsqu'ils sont configurés.
+  sameAs: ['https://maps.app.goo.gl/YePu1ryxNkNZUgvZ8']
 }
 
 export default function RootLayout({

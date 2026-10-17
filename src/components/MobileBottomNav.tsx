@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 // Mobile bottom navigation component
 
 export default function MobileBottomNav() {
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
   const pathname = usePathname()
   const [hash, setHash] = useState('')
 
@@ -28,26 +28,26 @@ export default function MobileBottomNav() {
 
   const navItems = [
     {
-      href: '/',
+      href: `/${locale}`,
       label: t.nav.home,
       icon: Home,
       active: (pathname === '/' || pathname === '/fr' || pathname === '/en' || pathname === '/fr/' || pathname === '/en/') && hash === ''
     },
     {
-      href: '/#services',
+      href: `/${locale}/#services`,
       label: t.nav.services,
       icon: Scissors,
       active: (pathname === '/' || pathname === '/fr' || pathname === '/en' || pathname === '/fr/' || pathname === '/en/') && hash === '#services'
     },
     {
-      href: '/booking',
+      href: `/${locale}/booking`,
       label: t.nav.booking,
       icon: Calendar,
       active: pathname.includes('/booking')
     },
     {
-      href: '/#contact',
-      label: 'Contact',
+      href: `/${locale}/#contact`,
+      label: t.nav.contact,
       icon: Phone,
       active: (pathname === '/' || pathname === '/fr' || pathname === '/en' || pathname === '/fr/' || pathname === '/en/') && hash === '#contact'
     }

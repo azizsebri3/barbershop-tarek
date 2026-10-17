@@ -180,7 +180,14 @@ export default function Footer() {
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <MapPin size={18} className="text-accent flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-400 text-sm">{settings.address || 'Rue Rogier 7A, 5000 Namur'}</span>
+                  <a
+                    href="https://maps.app.goo.gl/YePu1ryxNkNZUgvZ8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 text-sm hover:text-accent transition-colors"
+                  >
+                    {settings.address || 'Rue Rogier 7A, 5000 Namur'}
+                  </a>
                 </li>
                 <li>
                   <a href={`tel:${(settings.phone || '+32465632205').replace(/\s/g, '')}`} className="flex items-center gap-3 text-gray-400 hover:text-accent transition-colors duration-300">
@@ -211,6 +218,14 @@ export default function Footer() {
                   {t.footer.bookButton}
                 </Link>
               </motion.div>
+              <a
+                href="https://g.page/r/CQIG5Mt4inBSEBM/review"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex text-sm font-semibold text-accent hover:text-white transition-colors"
+              >
+                {t.location.reviewGoogle}
+              </a>
             </motion.div>
           </div>
 
