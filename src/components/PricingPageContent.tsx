@@ -40,7 +40,7 @@ export default function PricingPageContent() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/10 mb-4">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent"></div>
             </div>
-            <p className="text-gray-400 mt-4">Chargement des tarifs...</p>
+            <p className="text-gray-400 mt-4">{t.pricing.loading}</p>
           </div>
         </div>
       </>
@@ -91,7 +91,7 @@ export default function PricingPageContent() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-6"
           >
             <Sparkles className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium text-white/80">Tarifs Transparents</span>
+            <span className="text-sm font-medium text-white/80">{t.pricing.badge}</span>
           </motion.div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
@@ -101,7 +101,7 @@ export default function PricingPageContent() {
             </span>
           </h1>
           <p className="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
-            {t.pricing.description} - Coiffeur à Namur, Belgique
+            {t.pricing.description} - {t.pricing.locationSuffix}
           </p>
         </motion.div>
       </section>
@@ -120,6 +120,8 @@ export default function PricingPageContent() {
               <ServiceCard
                 title={service.name}
                 description={service.description}
+                nameEn={service.nameEn}
+                descriptionEn={service.descriptionEn}
                 price={service.price}
                 duration={service.duration}
               />
@@ -138,8 +140,8 @@ export default function PricingPageContent() {
           <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent" />
           <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">Prêt à transformer votre look ?</h3>
-              <p className="text-gray-400">Réservez votre rendez-vous dès maintenant</p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">{t.pricing.ctaTitle}</h3>
+              <p className="text-gray-400">{t.pricing.ctaDescription}</p>
             </div>
             <Link href="/booking">
               <motion.button
@@ -147,7 +149,7 @@ export default function PricingPageContent() {
                 whileTap={{ scale: 0.98 }}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-xl shadow-lg shadow-accent/20"
               >
-                Réserver maintenant
+                {t.pricing.ctaButton}
                 <ArrowRight size={18} />
               </motion.button>
             </Link>
@@ -244,9 +246,9 @@ export default function PricingPageContent() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
-            Comparaison des{' '}
+            {t.pricing.comparisonTitle}{' '}
             <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
-              Services
+              {t.pricing.comparisonAccent}
             </span>
           </h2>
         </motion.div>
@@ -261,7 +263,7 @@ export default function PricingPageContent() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-white/10">
-                <th className="py-5 px-6 font-bold text-white bg-white/5">Caractéristiques</th>
+                <th className="py-5 px-6 font-bold text-white bg-white/5">{t.pricing.features}</th>
                 {services.map(service => (
                   <th key={service.id} className="py-5 px-6 font-bold text-accent text-center bg-white/5">{service.name}</th>
                 ))}
@@ -269,10 +271,10 @@ export default function PricingPageContent() {
             </thead>
             <tbody>
               {[
-                { label: 'Durée', values: services.map(s => `${s.duration} min`) },
-                { label: 'Support Client', values: services.map(() => '✓') },
-                { label: 'Rapport Détaillé', values: services.map((_, i) => i >= 1 ? '✓' : '') },
-                { label: 'Suivi Personnalisé', values: services.map((_, i) => i === 3 ? '✓' : '') },
+                { label: t.pricing.duration, values: services.map(s => `${s.duration} ${t.services.durationUnit}`) },
+                { label: t.pricing.clientSupport, values: services.map(() => '✓') },
+                { label: t.pricing.detailedReport, values: services.map((_, i) => i >= 1 ? '✓' : '') },
+                { label: t.pricing.personalizedFollowUp, values: services.map((_, i) => i === 3 ? '✓' : '') },
               ].map((row, index) => (
                 <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                   <td className="py-5 px-6 font-medium text-gray-300">{row.label}</td>

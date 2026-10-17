@@ -11,6 +11,8 @@ interface Service {
   id: string
   name: string
   description: string
+  nameEn?: string
+  descriptionEn?: string
   price: number
   duration: number
 }
@@ -157,6 +159,20 @@ export default function AdminServices() {
             className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
           />
           <input
+            type="text"
+            placeholder={t.serviceNameEn}
+            value={newService.nameEn || ''}
+            onChange={(e) => setNewService(prev => ({ ...prev, nameEn: e.target.value }))}
+            className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
+          />
+          <input
+            type="text"
+            placeholder={t.descriptionEn}
+            value={newService.descriptionEn || ''}
+            onChange={(e) => setNewService(prev => ({ ...prev, descriptionEn: e.target.value }))}
+            className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
+          />
+          <input
             type="number"
             placeholder={t.pricePlaceholder}
             value={newService.price || ''}
@@ -200,6 +216,20 @@ export default function AdminServices() {
                     value={service.name}
                     onChange={(e) => updateService(service.id, { name: e.target.value })}
                     className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white focus:outline-none focus:border-accent text-sm sm:text-base"
+                  />
+                  <input
+                    type="text"
+                    placeholder={t.serviceNameEn}
+                    value={service.nameEn || ''}
+                    onChange={(e) => updateService(service.id, { nameEn: e.target.value })}
+                    className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
+                  />
+                  <input
+                    type="text"
+                    placeholder={t.descriptionEn}
+                    value={service.descriptionEn || ''}
+                    onChange={(e) => updateService(service.id, { descriptionEn: e.target.value })}
+                    className="px-3 sm:px-4 py-2 sm:py-3 bg-secondary border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent text-sm sm:text-base"
                   />
                   <input
                     type="text"

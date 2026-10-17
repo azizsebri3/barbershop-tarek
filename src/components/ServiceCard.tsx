@@ -6,20 +6,20 @@ import { useRouter } from 'next/navigation'
 import { Clock, ArrowRight, Sparkles } from 'lucide-react'
 
 interface ServiceCardProps {
-  id?: string
   title: string
   description: string
+  nameEn?: string
+  descriptionEn?: string
   price: number
   duration: number
   icon?: React.ReactNode
 }
 
-const ServiceCard = memo(function ServiceCard({ id, title, description, price, duration, icon }: ServiceCardProps) {
-  const { t } = useLanguage()
+const ServiceCard = memo(function ServiceCard({ title, description, nameEn, descriptionEn, price, duration, icon }: ServiceCardProps) {
+  const { t, locale } = useLanguage()
   const router = useRouter()
-  const translatedService = id ? t.services.catalog[id as keyof typeof t.services.catalog] : undefined
-  const displayTitle = translatedService?.name ?? title
-  const displayDescription = translatedService?.description ?? description
+  const displayTitle = locale === 'en' ? nameEn || title : title
+  const displayDescription = locale === 'en' ? descriptionEn || description : description
 
   const handleReserve = () => {
     // Rediriger vers la page booking avec le service pré-sélectionné
@@ -59,7 +59,7 @@ const ServiceCard = memo(function ServiceCard({ id, title, description, price, d
         <div className="flex items-center justify-between mb-6 py-4 px-4 -mx-4 bg-white/5 rounded-xl border-y border-white/5">
           <div className="flex items-center gap-2 text-gray-400">
             <Clock size={16} className="text-accent" />
-            <span className="text-sm font-medium">{duration} min</span>
+            <span className="text-sm font-medium">{duration} {t.services.durationUnit}</span>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">{t.services.from}</p>

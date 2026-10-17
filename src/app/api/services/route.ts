@@ -65,10 +65,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Insérer les nouveaux services avec de vrais UUIDs
-    const servicesToInsert = services.map((service: { id?: string; name: string; description: string; price: number; duration: number }) => ({
+    const servicesToInsert = services.map((service: {
+      id?: string
+      name: string
+      description: string
+      nameEn?: string
+      descriptionEn?: string
+      price: number
+      duration: number
+    }) => ({
       id: crypto.randomUUID(), // Toujours générer un UUID valide
       name: service.name,
       description: service.description,
+      name_en: service.nameEn || service.name,
+      description_en: service.descriptionEn || service.description,
       price: service.price,
       duration: service.duration,
       created_at: new Date().toISOString(),

@@ -119,9 +119,10 @@ const ServiceCarousel = memo(function ServiceCarousel() {
                   viewport={{ once: true }}
                 >
                   <ServiceCard
-                    id={service.id}
                     title={service.name}
                     description={service.description}
+                    nameEn={service.nameEn}
+                    descriptionEn={service.descriptionEn}
                     price={service.price}
                     duration={service.duration}
                   />

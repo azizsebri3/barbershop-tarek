@@ -7,6 +7,8 @@ interface Service {
   id: string
   name: string
   description: string
+  nameEn?: string
+  descriptionEn?: string
   price: number
   duration: number
 }
@@ -26,7 +28,11 @@ async function fetchServices(): Promise<Service[]> {
     return defaultServices
   }
   
-  return data.services || defaultServices
+  return (data.services || defaultServices).map((service: Service & { name_en?: string; description_en?: string }) => ({
+    ...service,
+    nameEn: service.nameEn || service.name_en,
+    descriptionEn: service.descriptionEn || service.description_en,
+  }))
 }
 
 function isCacheValid(): boolean {

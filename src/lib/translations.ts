@@ -38,13 +38,7 @@ export const translations = {
       duration: 'Durée',
       from: 'À partir de',
       loading: 'Chargement des services...',
-      catalog: {
-        'coupe-homme': { name: 'Coupe Homme', description: 'Coupe classique ou moderne, finition nette.' },
-        'barbe-coupe': { name: 'Barbe + Coupe', description: 'Une coupe et une barbe soignées.' },
-        'barbe-seulement': { name: 'Taille de barbe', description: 'Taille et contours de barbe.' },
-        'coupe-enfant': { name: 'Coupe Enfant', description: 'Une coupe simple et adaptée aux enfants.' },
-        'coupe-senior': { name: 'Coupe Senior', description: 'Une coupe confortable et soignée, adaptée aux cheveux seniors.' },
-      },
+      durationUnit: 'min',
     },
     // Portfolio
     portfolio: {
@@ -71,6 +65,19 @@ export const translations = {
       title: 'Nos',
       titleAccent: 'Tarifs',
       description: 'Des tarifs clairs, pensés pour chaque style masculin',
+      loading: 'Chargement des tarifs...',
+      badge: 'Tarifs transparents',
+      locationSuffix: 'à Namur, Belgique',
+      ctaTitle: 'Prêt à transformer votre look ?',
+      ctaDescription: 'Réservez votre rendez-vous dès maintenant',
+      ctaButton: 'Réserver maintenant',
+      comparisonTitle: 'Comparaison des',
+      comparisonAccent: 'services',
+      features: 'Caractéristiques',
+      duration: 'Durée',
+      clientSupport: 'Support client',
+      detailedReport: 'Rapport détaillé',
+      personalizedFollowUp: 'Suivi personnalisé',
     },
     // Booking Page
     bookingPage: {
@@ -269,13 +276,7 @@ export const translations = {
       duration: 'Duration',
       from: 'From',
       loading: 'Loading services...',
-      catalog: {
-        'coupe-homme': { name: 'Men’s haircut', description: 'Classic or modern cut with a clean finish.' },
-        'barbe-coupe': { name: 'Haircut + beard', description: 'A clean haircut with a well-groomed beard.' },
-        'barbe-seulement': { name: 'Beard trim', description: 'Beard trim and clean contours.' },
-        'coupe-enfant': { name: 'Children’s haircut', description: 'A simple cut adapted for children.' },
-        'coupe-senior': { name: 'Senior haircut', description: 'A comfortable, well-groomed cut adapted for seniors.' },
-      },
+      durationUnit: 'min',
     },
     // Portfolio
     portfolio: {
@@ -302,6 +303,19 @@ export const translations = {
       title: 'Our',
       titleAccent: 'Pricing',
       description: 'Clear pricing designed for every style',
+      loading: 'Loading pricing...',
+      badge: 'Transparent pricing',
+      locationSuffix: 'in Namur, Belgium',
+      ctaTitle: 'Ready to refresh your look?',
+      ctaDescription: 'Book your appointment now',
+      ctaButton: 'Book now',
+      comparisonTitle: 'Service',
+      comparisonAccent: 'comparison',
+      features: 'Features',
+      duration: 'Duration',
+      clientSupport: 'Client support',
+      detailedReport: 'Detailed report',
+      personalizedFollowUp: 'Personalized follow-up',
     },
     // Booking Page
     bookingPage: {
