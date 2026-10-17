@@ -17,16 +17,16 @@ interface GeneralSettings {
 }
 
 const defaultSettings: GeneralSettings = {
-  salonName: 'Style & Coupe',
+  salonName: 'Tarek Salon',
   description: 'Votre salon de coiffure et barbershop en Belgique. Coupes modernes, colorations tendance et rasage traditionnel premium.',
   phone: '+32465632205',
   email: 'contact@tareksalon.be',
-  address: 'Belgique',
+  address: 'Rue Rogier 7A, 5000 Namur',
   website: 'tareksalon.be',
   facebook: '',
   instagram: '',
   tiktok: '',
-  logo_url: '/logo.png'
+  logo_url: '/logo.svg'
 }
 
 // Cache global avec TTL de 15 minutes (les settings changent rarement)
@@ -55,7 +55,7 @@ async function fetchSettings(): Promise<GeneralSettings> {
     return { 
       ...defaultSettings, 
       ...data.value,
-      logo_url: data.logo_url || '/logo.png'
+      logo_url: data.logo_url || '/logo.svg'
     }
   }
 

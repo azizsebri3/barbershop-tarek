@@ -8,6 +8,7 @@ import 'swiper/css/effect-coverflow'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import Image from 'next/image'
+import { useLanguage } from '@/lib/language-context'
 import { useGallery } from '../lib/useGallery'
 
 interface Photo {
@@ -18,6 +19,7 @@ interface Photo {
 }
 
 export default function ClientPortfolio() {
+  const { t } = useLanguage()
   const { photos, loading } = useGallery()
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
 
@@ -50,10 +52,10 @@ export default function ClientPortfolio() {
             id="portfolio-title"
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-4"
           >
-            Portfolio <span className="text-accent">Clients</span>
+            {t.portfolio.title} <span className="text-accent">{t.portfolio.titleAccent}</span>
           </h2>
           <p className="text-gray-400 text-xs sm:text-base md:text-lg max-w-2xl mx-auto">
-            Découvrez les magnifiques transformations réalisées pour nos clients satisfaits
+            {t.portfolio.description}
           </p>
         </motion.div>
 
@@ -107,8 +109,8 @@ export default function ClientPortfolio() {
 
                   {/* Text Overlay */}
                   <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <h3 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2">Portfolio Tarek Salon</h3>
-                    <p className="text-accent text-xs sm:text-sm font-semibold">Coiffure Premium</p>
+                    <h3 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2">{t.portfolio.overlayTitle}</h3>
+                    <p className="text-accent text-xs sm:text-sm font-semibold">{t.portfolio.overlayLabel}</p>
                   </div>
                 </motion.div>
               </SwiperSlide>

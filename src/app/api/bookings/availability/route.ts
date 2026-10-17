@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       ?.filter(b => b.id !== excludeBookingId)
       .map(b => b.time) || []
 
-    // Generate available time slots (every 30 minutes from 09:00 to 19:00)
+    // Generate available time slots (every 30 minutes from 09:30 to 19:00)
     const availableSlots = generateTimeSlots(occupiedTimes)
 
     return NextResponse.json({
@@ -61,11 +61,11 @@ export async function GET(request: NextRequest) {
 
 function generateTimeSlots(occupiedTimes: string[]): string[] {
   const slots: string[] = []
-  const startHour = 9 // 09:00
+  const startHour = 9
   const endHour = 19 // 19:00
 
   for (let hour = startHour; hour < endHour; hour++) {
-    for (let minutes of [0, 30]) {
+    for (let minutes of hour === startHour ? [30] : [0, 30]) {
       const timeStr = `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
       if (!occupiedTimes.includes(timeStr)) {
         slots.push(timeStr)

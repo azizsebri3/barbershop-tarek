@@ -13,8 +13,8 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-export function LanguageProvider({ children, initialLocale = 'en' }: { children: React.ReactNode; initialLocale?: string }) {
-  const [locale, setLocaleState] = useState<Locale>((initialLocale as Locale) || 'en')
+export function LanguageProvider({ children, initialLocale = 'fr' }: { children: React.ReactNode; initialLocale?: string }) {
+  const [locale, setLocaleState] = useState<Locale>((initialLocale as Locale) || 'fr')
 
   // Charger la langue depuis localStorage au montage du composant
   useEffect(() => {

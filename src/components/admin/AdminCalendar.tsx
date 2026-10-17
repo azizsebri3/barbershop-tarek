@@ -702,8 +702,8 @@ export default function AdminCalendar() {
         }
         
         .calendar-container .fc-button-active {
-          background: #d4af37 !important;
-          border-color: #d4af37 !important;
+          background: #b87333 !important;
+          border-color: #b87333 !important;
           color: black !important;
         }
         

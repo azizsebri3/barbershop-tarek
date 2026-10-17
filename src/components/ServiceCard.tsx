@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Clock, ArrowRight, Sparkles } from 'lucide-react'
 
 interface ServiceCardProps {
+  id?: string
   title: string
   description: string
   price: number
@@ -13,13 +14,16 @@ interface ServiceCardProps {
   icon?: React.ReactNode
 }
 
-const ServiceCard = memo(function ServiceCard({ title, description, price, duration, icon }: ServiceCardProps) {
+const ServiceCard = memo(function ServiceCard({ id, title, description, price, duration, icon }: ServiceCardProps) {
   const { t } = useLanguage()
   const router = useRouter()
+  const translatedService = id ? t.services.catalog[id as keyof typeof t.services.catalog] : undefined
+  const displayTitle = translatedService?.name ?? title
+  const displayDescription = translatedService?.description ?? description
 
   const handleReserve = () => {
     // Rediriger vers la page booking avec le service pré-sélectionné
-    router.push(`/booking?service=${encodeURIComponent(title)}`)
+    router.push(`/booking?service=${encodeURIComponent(displayTitle)}`)
   }
 
   return (
@@ -43,12 +47,12 @@ const ServiceCard = memo(function ServiceCard({ title, description, price, durat
 
         {/* Title */}
         <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-accent transition-colors duration-300">
-          {title}
+          {displayTitle}
         </h3>
 
         {/* Description */}
         <p className="text-gray-400 text-sm sm:text-base mb-6 leading-relaxed line-clamp-2">
-          {description}
+          {displayDescription}
         </p>
 
         {/* Duration & Price */}
@@ -59,7 +63,7 @@ const ServiceCard = memo(function ServiceCard({ title, description, price, durat
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">{t.services.from}</p>
-            <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-accent to-yellow-400 bg-clip-text text-transparent">
+            <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-300 to-accent bg-clip-text text-transparent">
               {price}€
             </p>
           </div>
@@ -68,7 +72,7 @@ const ServiceCard = memo(function ServiceCard({ title, description, price, durat
         {/* CTA Button */}
         <button
           onClick={handleReserve}
-          className="group/btn w-full relative inline-flex items-center justify-center gap-2 py-3.5 sm:py-4 px-6 bg-gradient-to-r from-accent to-yellow-500 text-black font-bold rounded-xl overflow-hidden transition-all duration-300 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30 hover:scale-105 active:scale-98"
+          className="group/btn w-full relative inline-flex items-center justify-center gap-2 py-3.5 sm:py-4 px-6 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30 hover:scale-105 active:scale-98"
         >
           <Sparkles size={16} className="transition-transform group-hover/btn:rotate-12" />
           <span>{t.services.reserve}</span>

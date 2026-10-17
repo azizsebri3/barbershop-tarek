@@ -85,16 +85,16 @@
 }
 
 .modern-calendar .react-calendar__tile--active {
-  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%) !important;
-  border-color: #d4af37 !important;
+  background: linear-gradient(135deg, #b87333 0%, #d99a5b 100%) !important;
+  border-color: #b87333 !important;
   color: black !important;
-  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3) !important;
+  box-shadow: 0 8px 25px rgba(184, 115, 51, 0.3) !important;
   transform: translateY(-1px) !important;
 }
 
 .modern-calendar .react-calendar__tile--now {
-  background: rgba(212, 175, 55, 0.2) !important;
-  border-color: rgba(212, 175, 55, 0.5) !important;
+  background: rgba(184, 115, 51, 0.2) !important;
+  border-color: rgba(184, 115, 51, 0.5) !important;
   position: relative !important;
 }
 
@@ -106,7 +106,7 @@
   transform: translateX(-50%);
   width: 6px;
   height: 6px;
-  background: #d4af37;
+  background: #b87333;
   border-radius: 50%;
 }
 

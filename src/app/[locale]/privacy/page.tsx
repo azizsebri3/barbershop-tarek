@@ -149,7 +149,7 @@ export default function PrivacyPage() {
               <p className="text-gray-300 mb-4">Pour toute question sur cette politique :</p>
               <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-gray-300">
                 <p><strong>Tarek Salon</strong></p>
-                <p>📍 Passage de la Gare 5, 5000 Namur, Belgique</p>
+                <p>📍 Rue Rogier 7A, 5000 Namur, Belgique</p>
                 <p>📞 +32 465 63 22 05</p>
                 <p>📧 <a href="mailto:contact@tareksalon.be" className="text-accent hover:underline">contact@tareksalon.be</a></p>
               </div>

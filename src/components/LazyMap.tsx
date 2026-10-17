@@ -32,7 +32,7 @@ export default function LazyMap() {
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Trouvez-Nous à <span className="text-accent">Namur</span>
           </h2>
-          <p className="text-gray-400 text-lg">Passage de la Gare 5, au cœur de Namur — parking et transports à proximité</p>
+          <p className="text-gray-400 text-lg">Rue Rogier 7A, 5000 Namur — parking et transports à proximité</p>
         </div>
 
         <div 
@@ -42,7 +42,7 @@ export default function LazyMap() {
         >
           {isLoaded ? (
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5125.421648937018!2d4.860792076398837!3d50.46784768611116!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c199676d2eb1d5%3A0x560fefdeeb40e96e!2sGolden%20Salon!5e1!3m2!1sen!2sbe!4v1767402185853!5m2!1sen!2sbe"
+              src="https://www.google.com/maps?q=Rue+Rogier+7A%2C+5000+Namur&output=embed"
               width="100%"
               height="500"
               style={{ border: 0 }}
@@ -65,13 +65,13 @@ export default function LazyMap() {
           <div className="p-6 rounded-xl bg-primary border border-primary/50 hover:border-accent/50 transition-colors text-center">
             <MapPin className="w-8 h-8 text-accent mx-auto mb-3" />
             <h3 className="text-lg font-bold text-white mb-2">Adresse</h3>
-            <p className="text-gray-400">Passage de la Gare 5<br />5000 Namur, Belgique</p>
+            <p className="text-gray-400">Rue Rogier 7A<br />5000 Namur, Belgique</p>
           </div>
 
           <div className="p-6 rounded-xl bg-primary border border-primary/50 hover:border-accent/50 transition-colors text-center">
             <div className="w-8 h-8 text-accent mx-auto mb-3">📞</div>
             <h3 className="text-lg font-bold text-white mb-2">Téléphone</h3>
-            <p className="text-gray-400">+32 (0) 81 XX XX XX</p>
+            <p className="text-gray-400">+32 465 63 22 05</p>
           </div>
 
           <div className="p-6 rounded-xl bg-primary border border-primary/50 hover:border-accent/50 transition-colors text-center">

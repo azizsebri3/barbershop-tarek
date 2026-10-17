@@ -96,7 +96,7 @@ export default function PricingPageContent() {
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
             {t.pricing.title}{' '}
-            <span className="bg-gradient-to-r from-accent via-yellow-400 to-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
               {t.pricing.titleAccent}
             </span>
           </h1>
@@ -145,7 +145,7 @@ export default function PricingPageContent() {
               <motion.button
                 whileHover={{ scale: 1.03, boxShadow: '0 20px 40px rgba(212, 175, 55, 0.3)' }}
                 whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-accent to-yellow-500 text-black font-bold rounded-xl shadow-lg shadow-accent/20"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-xl shadow-lg shadow-accent/20"
               >
                 Réserver maintenant
                 <ArrowRight size={18} />
@@ -184,7 +184,7 @@ export default function PricingPageContent() {
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
               Questions{' '}
-              <span className="bg-gradient-to-r from-accent via-yellow-400 to-accent bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
                 Fréquentes
               </span>
             </h2>
@@ -201,7 +201,7 @@ export default function PricingPageContent() {
             {[
               {
                 question: 'Où se trouve Tarek Salon à Namur ?',
-                answer: 'Passage de la Gare 5, en plein centre. Bus, train et parking sont à deux pas, venez quand ça vous arrange.',
+                answer: 'Rue Rogier 7A, 5000 Namur. Bus, train et parking sont à proximité, venez quand ça vous arrange.',
               },
               {
                 question: 'Puis-je modifier ma réservation ?',
@@ -245,7 +245,7 @@ export default function PricingPageContent() {
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
             Comparaison des{' '}
-            <span className="bg-gradient-to-r from-accent via-yellow-400 to-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
               Services
             </span>
           </h2>

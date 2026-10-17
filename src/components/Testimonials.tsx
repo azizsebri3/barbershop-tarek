@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, memo } from 'react'
+import { useCallback, useEffect, useState, memo } from 'react'
 import { motion } from 'framer-motion'
 import { Star, Quote, Sparkles, RefreshCw } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
@@ -23,7 +23,7 @@ const Testimonials = memo(function Testimonials() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchTestimonials = async () => {
+  const fetchTestimonials = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     
@@ -40,15 +40,15 @@ const Testimonials = memo(function Testimonials() {
       setTestimonials(data)
     } catch (err) {
       console.error('Error fetching testimonials:', err)
-      setError('Impossible de charger les avis')
+      setError(t.testimonials.error)
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [t.testimonials.error])
 
   useEffect(() => {
     fetchTestimonials()
-  }, [])
+  }, [fetchTestimonials])
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -107,12 +107,12 @@ const Testimonials = memo(function Testimonials() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-6"
           >
             <Sparkles className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium text-white/80">Témoignages</span>
+            <span className="text-sm font-medium text-white/80">{t.testimonials.badge}</span>
           </motion.div>
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6">
             {t.testimonials.title}{' '}
-            <span className="bg-gradient-to-r from-accent via-yellow-400 to-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
               {t.testimonials.titleAccent}
             </span>
           </h2>
@@ -140,7 +140,7 @@ const Testimonials = memo(function Testimonials() {
               onClick={fetchTestimonials}
               className="mt-4 px-6 py-2 bg-accent/20 text-accent rounded-lg hover:bg-accent/30 transition-colors"
             >
-              Réessayer
+              {t.testimonials.retry}
             </button>
           </div>
         ) : testimonials.length === 0 ? (
@@ -154,10 +154,10 @@ const Testimonials = memo(function Testimonials() {
               <Star className="w-10 h-10 text-accent" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">
-              Soyez le premier à laisser un avis !
+              {t.testimonials.emptyTitle}
             </h3>
             <p className="text-gray-400 max-w-md mx-auto">
-              Partagez votre expérience avec notre salon et aidez d&apos;autres clients à nous découvrir.
+              {t.testimonials.emptyDescription}
             </p>
           </motion.div>
         ) : (
@@ -240,21 +240,21 @@ const Testimonials = memo(function Testimonials() {
           className="mt-12 sm:mt-16 flex flex-wrap items-center justify-center gap-8 sm:gap-12"
         >
           <div className="text-center">
-            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-yellow-400 bg-clip-text text-transparent">
+            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
               {avgRating}/5
             </p>
             <p className="text-gray-400 text-sm mt-1">Note moyenne</p>
           </div>
           <div className="w-px h-12 bg-white/10 hidden sm:block" />
           <div className="text-center">
-            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-yellow-400 bg-clip-text text-transparent">
+            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
               {totalCount}+
             </p>
             <p className="text-gray-400 text-sm mt-1">Avis clients</p>
           </div>
           <div className="w-px h-12 bg-white/10 hidden sm:block" />
           <div className="text-center">
-            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-yellow-400 bg-clip-text text-transparent">
+            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
               {satisfactionRate}%
             </p>
             <p className="text-gray-400 text-sm mt-1">Satisfaction</p>

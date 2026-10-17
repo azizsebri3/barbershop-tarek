@@ -65,9 +65,10 @@ export default function AdminGeneral() {
 
       // Estimation du revenu (basé sur les services confirmés)
       const services = [
-        { name: 'Coupe Homme', price: 25 },
-        { name: 'Barbe + Coupe', price: 40 },
-        { name: 'Barbe', price: 20 }
+        { name: 'Coupe Homme', price: 17 },
+        { name: 'Barbe + Coupe', price: 25 },
+        { name: 'Taille de barbe', price: 10 },
+        { name: 'Coupe Enfant', price: 15 }
       ]
 
       const totalRevenue = bookings

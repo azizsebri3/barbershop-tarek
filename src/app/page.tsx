@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { Star, Zap, Shield, MapPin, Phone } from 'lucide-react'
 import Link from 'next/link'
 import LazyMap from '@/components/LazyMap'
+import { useLanguage } from '@/lib/language-context'
 
 // 🚀 Lazy load des composants lourds + loading states
 const Hero = dynamic(() => import('@/components/Hero'), { ssr: true })
@@ -27,9 +28,24 @@ const Testimonials = dynamic(() => import('@/components/Testimonials'), {
 })
 
 export default function Home() {
+  const { t } = useLanguage()
   return (
     <>
       <Hero />
+
+      <section id="about" className="relative py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-primary">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-accent">
+            {t.about.label}
+          </p>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6">
+            {t.about.title}
+          </h2>
+          <p className="text-base sm:text-lg leading-relaxed text-gray-300">
+            {t.about.description}
+          </p>
+        </div>
+      </section>
 
       {/* SEO Content Section - Invisible mais indexé */}
       <section className="sr-only">
@@ -62,14 +78,14 @@ export default function Home() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-secondary/50">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 animate-fadeInUp">
-            Pourquoi <span className="text-accent">Tarek Salon</span> ?
+            {t.features.title}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { icon: Star, title: 'Expertise', description: 'Plus de 10 ans d\'expérience en coiffure moderne' },
-              { icon: Zap, title: 'Rapidité', description: 'Service efficace sans compromettre la qualité' },
-              { icon: Shield, title: 'Qualité', description: 'Produits professionnels et techniques éprouvées' },
+              { icon: Star, title: t.features.feature1Title, description: t.features.feature1Desc },
+              { icon: Zap, title: t.features.feature2Title, description: t.features.feature2Desc },
+              { icon: Shield, title: t.features.feature3Title, description: t.features.feature3Desc },
             ].map((feature, index) => {
               const Icon = feature.icon
               return (
@@ -89,7 +105,7 @@ export default function Home() {
       </section>
 
       {/* Opening Hours - Intégré avec contact */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-primary/30">
+      <section id="contact" className="scroll-mt-24 py-16 px-4 sm:px-6 lg:px-8 bg-primary/30">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8 animate-fadeInUp">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
@@ -107,7 +123,7 @@ export default function Home() {
                 <div className="space-y-3 text-gray-300">
                   <div className="flex items-center justify-center lg:justify-start gap-3">
                     <MapPin className="w-5 h-5 text-accent flex-shrink-0" />
-                    <span>Passage de la Gare 5, Namur</span>
+                    <span>Rue Rogier 7A, 5000 Namur</span>
                   </div>
                   <div className="flex items-center justify-center lg:justify-start gap-3">
                     <Phone className="w-5 h-5 text-accent flex-shrink-0" />
@@ -134,15 +150,15 @@ export default function Home() {
 
         <div className="max-w-4xl mx-auto text-center relative z-10 animate-fadeInUp">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Réservez votre créneau à Namur
+            {t.cta.title}
           </h2>
           <p className="text-lg text-gray-300 mb-8">
-            Choisissez l&apos;heure qui vous arrange, on s&apos;occupe du reste avec un accueil chaleureux et des finitions impeccables.
+            {t.cta.description}
           </p>
 
           <Link href="/booking">
             <button className="px-8 py-4 bg-accent text-primary font-bold rounded-lg hover:bg-accent/80 active:scale-95 transition-all text-lg">
-              Réserver un Rendez-vous
+              {t.hero.btnBook}
             </button>
           </Link>
         </div>

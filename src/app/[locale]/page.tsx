@@ -3,6 +3,7 @@
 import { lazy, Suspense } from 'react'
 import Hero from '@/components/Hero'
 import { Star, Zap, Shield } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 // Lazy load non-critical components
 const ServiceCarousel = lazy(() => import('@/components/ServiceCarousel'))
@@ -18,15 +19,29 @@ function SkeletonLoader() {
 }
 
 export default function LocalePage() {
+  const { t } = useLanguage()
   const features = [
-    { icon: Star, title: 'Excellence', desc: 'Service de qualité supérieure' },
-    { icon: Zap, title: 'Rapidité', desc: 'Rendez-vous pris en quelques minutes' },
-    { icon: Shield, title: 'Confiance', desc: 'Votre satisfaction est garantie' },
+    { icon: Star, title: t.features.feature1Title, desc: t.features.feature1Desc },
+    { icon: Zap, title: t.features.feature2Title, desc: t.features.feature2Desc },
+    { icon: Shield, title: t.features.feature3Title, desc: t.features.feature3Desc },
   ]
 
   return (
     <>
       <Hero />
+      <section id="about" className="relative py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-primary">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-accent">
+            {t.about.label}
+          </p>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6">
+            {t.about.title}
+          </h2>
+          <p className="text-base sm:text-lg leading-relaxed text-gray-300">
+            {t.about.description}
+          </p>
+        </div>
+      </section>
       <section id="services">
         <Suspense fallback={<SkeletonLoader />}>
           <ServiceCarousel />
@@ -40,7 +55,7 @@ export default function LocalePage() {
       <section className="py-20 px-4 bg-secondary/50">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-accent animate-fadeIn">
-            Nos Avantages
+            {t.features.title}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, i) => (
@@ -57,7 +72,7 @@ export default function LocalePage() {
         </div>
       </section>
 
-      <section className="py-20 px-4">
+      <section id="contact" className="py-20 px-4 scroll-mt-24">
         <Suspense fallback={<SkeletonLoader />}>
           <OpeningHours />
         </Suspense>

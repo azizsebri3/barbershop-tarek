@@ -9,12 +9,12 @@ export interface OpeningHours {
 }
 
 export const openingHours: OpeningHours = {
-  monday: { open: '09:00', close: '19:00', closed: false },
-  tuesday: { open: '09:00', close: '19:00', closed: false },
-  wednesday: { open: '09:00', close: '19:00', closed: false },
-  thursday: { open: '09:00', close: '20:00', closed: false },
-  friday: { open: '09:00', close: '20:00', closed: false },
-  saturday: { open: '09:00', close: '18:00', closed: false },
+  monday: { open: '09:30', close: '19:00', closed: false },
+  tuesday: { open: '09:30', close: '19:00', closed: false },
+  wednesday: { open: '09:30', close: '19:00', closed: false },
+  thursday: { open: '09:30', close: '19:00', closed: false },
+  friday: { open: '09:30', close: '19:00', closed: false },
+  saturday: { open: '09:30', close: '19:00', closed: false },
   sunday: { open: '', close: '', closed: true },
 }
 
@@ -22,22 +22,36 @@ export const services = [
   {
     id: 'coupe-homme',
     name: 'Coupe Homme',
-    description: 'Coupe classique ou moderne avec finition impeccable',
-    price: 25,
+    description: 'Coupe classique ou moderne, finition nette.',
+    price: 17,
     duration: 30,
   },
   {
     id: 'barbe-coupe',
     name: 'Barbe + Coupe',
-    description: 'Entretien complet de la barbe combiné avec une coupe de cheveux',
-    price: 40,
+    description: 'Une coupe et une barbe soignées.',
+    price: 25,
     duration: 60,
   },
   {
     id: 'barbe-seulement',
-    name: 'Barbe',
-    description: 'Rasage traditionnel et taille de barbe premium',
-    price: 20,
+    name: 'Taille de barbe',
+    description: 'Taille et contours de barbe.',
+    price: 10,
+    duration: 30,
+  },
+  {
+    id: 'coupe-enfant',
+    name: 'Coupe Enfant',
+    description: 'Une coupe simple et adaptée aux enfants.',
+    price: 15,
+    duration: 30,
+  },
+  {
+    id: 'coupe-senior',
+    name: 'Coupe Senior',
+    description: 'Une coupe confortable et soignée, adaptée aux cheveux seniors.',
+    price: 15,
     duration: 30,
   },
 ]

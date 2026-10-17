@@ -9,9 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: '#000000',     // Pure black
-        secondary: '#1a1a1a',   // Dark gray
-        accent: '#D4AF37',      // Gold
+        primary: '#111111',     // Charcoal black
+        secondary: '#2b2b2b',   // Concrete gray
+        accent: '#b87333',      // Warm bronze
       },
       animation: {
         fadeIn: 'fadeIn 0.5s ease-in',

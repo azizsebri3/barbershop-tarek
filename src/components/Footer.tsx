@@ -56,7 +56,7 @@ export default function Footer() {
               className="lg:col-span-1"
             >
               <Link href="/" className="inline-flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-accent to-yellow-500 rounded-xl flex items-center justify-center text-black font-bold text-xl shadow-lg shadow-accent/20">
+                <div className="w-12 h-12 bg-gradient-to-br from-accent to-orange-300 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-accent/20">
                   ✂️
                 </div>
                 <span className="text-xl font-bold text-white">{settings.salonName || 'Tarek Salon'}</span>
@@ -156,7 +156,7 @@ export default function Footer() {
                   <Clock size={16} className="text-accent" />
                   <span className="text-sm">Horaires</span>
                 </div>
-                <p className="text-gray-400 text-xs">Lun-Sam: 9h00 - 19h00</p>
+                <p className="text-gray-400 text-xs">Lun-Sam: 9h30 - 19h00</p>
                 <p className="text-gray-400 text-xs">Dimanche: Fermé</p>
               </div>
             </motion.div>
@@ -175,7 +175,7 @@ export default function Footer() {
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <MapPin size={18} className="text-accent flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-400 text-sm">{settings.address || 'Passage de la Gare 5, 5000 Namur'}</span>
+                  <span className="text-gray-400 text-sm">{settings.address || 'Rue Rogier 7A, 5000 Namur'}</span>
                 </li>
                 <li>
                   <a href={`tel:${(settings.phone || '+32465632205').replace(/\s/g, '')}`} className="flex items-center gap-3 text-gray-400 hover:text-accent transition-colors duration-300">
@@ -200,7 +200,7 @@ export default function Footer() {
               >
                 <Link 
                   href="/booking" 
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-accent to-yellow-500 text-black font-bold rounded-xl transition-all duration-300 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30"
                 >
                   <Sparkles size={16} />
                   Réserver

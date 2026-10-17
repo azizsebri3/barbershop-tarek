@@ -72,7 +72,7 @@ const OpeningHours = memo(function OpeningHours() {
         </div>
         <div>
           <h3 className="text-xl sm:text-2xl font-bold text-white">{t.hours.title}</h3>
-          <p className="text-gray-400 text-sm">Horaires d&apos;ouverture</p>
+          <p className="text-gray-400 text-sm">{t.hours.openingLabel}</p>
         </div>
       </div>
 
@@ -97,7 +97,7 @@ const OpeningHours = memo(function OpeningHours() {
               {open ? t.hours.open : t.hours.closed}
             </p>
             <p className="text-gray-400 text-xs mt-0.5">
-              {open ? 'Nous sommes disponibles' : 'Revenez bientôt'}
+              {open ? t.hours.available : t.hours.returnSoon}
             </p>
           </div>
         </div>
@@ -140,14 +140,14 @@ const OpeningHours = memo(function OpeningHours() {
       <div className="pt-6 border-t border-white/10 space-y-4">
         <motion.a
           whileHover={{ x: 4 }}
-          href="tel:+3221234567"
+          href="tel:+32465632205"
           className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-all duration-300 group"
         >
           <div className="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
             <Phone size={18} className="text-accent" />
           </div>
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Téléphone</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider">{t.hours.phoneLabel}</p>
             <p className="text-white font-medium text-sm">+32465632205</p>
           </div>
         </motion.a>
@@ -160,8 +160,8 @@ const OpeningHours = memo(function OpeningHours() {
             <MapPin size={18} className="text-accent" />
           </div>
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Adresse</p>
-            <p className="text-white font-medium text-sm">Belgique</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider">{t.hours.addressLabel}</p>
+            <p className="text-white font-medium text-sm">Rue Rogier 7A, 5000 Namur</p>
           </div>
         </motion.div>
       </div>

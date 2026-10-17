@@ -82,7 +82,7 @@ html {
 }
 
 body {
-  background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #000000 100%);
+  background: linear-gradient(135deg, #111111 0%, #2b2b2b 50%, #111111 100%);
   background-attachment: fixed;
   color: #e5e7eb;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -90,26 +90,26 @@ body {
     sans-serif;
 }
 
-/* Selection styles - Gold accent */
+/* Selection styles - Bronze accent */
 ::selection {
-  background-color: #d4af37;
-  color: #000000;
+  background-color: #b87333;
+  color: #ffffff;
 }
 
 ::-moz-selection {
-  background-color: #d4af37;
-  color: #000000;
+  background-color: #b87333;
+  color: #ffffff;
 }
 
 /* Links */
 a {
-  color: #d4af37;
+  color: #b87333;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 a:hover {
-  color: #e6c158;
+  color: #d99a5b;
 }
 
 /* Scrollbar */
@@ -123,18 +123,18 @@ a:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d4af37;
+  background: #b87333;
   border-radius: 4px;
   transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #e6c158;
+  background: #d99a5b;
 }
 
 /* Firefox Scrollbar */
 * {
-  scrollbar-color: #d4af37 #000000;
+  scrollbar-color: #b87333 #111111;
   scrollbar-width: thin;
 }
 
@@ -150,8 +150,8 @@ select {
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: #d4af37;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+  border-color: #b87333;
+  box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.15);
 }
 
 /* Placeholder text */
@@ -167,7 +167,7 @@ button {
 
 /* Focus visible for accessibility */
 *:focus-visible {
-  outline: 2px solid #d4af37;
+  outline: 2px solid #b87333;
   outline-offset: 2px;
 }
 
@@ -175,4 +175,3 @@ button {
 * {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
-

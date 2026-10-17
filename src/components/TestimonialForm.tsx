@@ -87,7 +87,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
           />
           
           {/* Button */}
-          <div className="relative flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-accent via-yellow-400 to-accent text-black font-bold rounded-full shadow-2xl shadow-accent/50">
+          <div className="relative flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-accent via-orange-300 to-accent text-white font-bold rounded-full shadow-2xl shadow-accent/50">
             <Sparkles className="w-5 h-5" />
             <span className="hidden sm:inline">Laissez votre avis</span>
             <Star className="w-5 h-5 fill-current" />
@@ -128,13 +128,13 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                        className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-accent to-yellow-500 rounded-2xl mb-4 shadow-lg shadow-accent/20"
+                        className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-accent to-orange-300 rounded-2xl mb-4 shadow-lg shadow-accent/20"
                       >
                         <Star className="w-8 h-8 text-black fill-current" />
                       </motion.div>
                       <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">
                         Partagez votre{' '}
-                        <span className="bg-gradient-to-r from-accent to-yellow-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
                           expérience
                         </span>
                       </h2>
@@ -248,7 +248,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           disabled={isSubmitting}
-                          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-accent to-yellow-500 text-black font-bold rounded-xl shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30 transition-all disabled:opacity-50"
+                          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-xl shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30 transition-all disabled:opacity-50"
                         >
                           {isSubmitting ? (
                             <>

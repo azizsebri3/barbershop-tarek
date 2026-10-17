@@ -8,11 +8,13 @@ import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import ServiceCard from './ServiceCard'
 import { useServices } from '@/lib/useServicesCached'
+import { useLanguage } from '@/lib/language-context'
 import { motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 
 const ServiceCarousel = memo(function ServiceCarousel() {
   const { services, loading } = useServices()
+  const { t } = useLanguage()
 
   if (loading) {
     return (
@@ -27,7 +29,7 @@ const ServiceCarousel = memo(function ServiceCarousel() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/10 mb-4">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent"></div>
             </div>
-            <p className="text-gray-400 mt-4">Chargement des services...</p>
+            <p className="text-gray-400 mt-4">{t.services.loading}</p>
           </div>
         </div>
       </section>
@@ -61,17 +63,17 @@ const ServiceCarousel = memo(function ServiceCarousel() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-6"
           >
             <Sparkles className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium text-white/80">Services Exclusifs</span>
+            <span className="text-sm font-medium text-white/80">{t.services.badge}</span>
           </motion.div>
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6">
-            Nos Services{' '}
-            <span className="bg-gradient-to-r from-accent via-yellow-400 to-accent bg-clip-text text-transparent">
-              Premium
+            {t.services.title}{' '}
+            <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
+              {t.services.titleAccent}
             </span>
           </h2>
           <p className="text-gray-400 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            Découvrez notre gamme complète de services de coiffure pour hommes et femmes
+            {t.services.description}
           </p>
         </motion.div>
 
@@ -117,6 +119,7 @@ const ServiceCarousel = memo(function ServiceCarousel() {
                   viewport={{ once: true }}
                 >
                   <ServiceCard
+                    id={service.id}
                     title={service.name}
                     description={service.description}
                     price={service.price}
@@ -132,7 +135,7 @@ const ServiceCarousel = memo(function ServiceCarousel() {
       <style jsx>{`
         :global(.swiper-button-next),
         :global(.swiper-button-prev) {
-          color: #d4af37;
+          color: #b87333;
           background: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(10px);
           width: 48px;
@@ -158,8 +161,8 @@ const ServiceCarousel = memo(function ServiceCarousel() {
 
         :global(.swiper-button-next:hover),
         :global(.swiper-button-prev:hover) {
-          background: rgba(212, 175, 55, 0.2);
-          border-color: rgba(212, 175, 55, 0.4);
+          background: rgba(184, 115, 51, 0.2);
+          border-color: rgba(184, 115, 51, 0.4);
           transform: translateY(-50%) scale(1.05);
         }
 
@@ -182,7 +185,7 @@ const ServiceCarousel = memo(function ServiceCarousel() {
         }
 
         :global(.swiper-pagination-bullet-active) {
-          background: linear-gradient(to right, #d4af37, #f4d03f);
+          background: linear-gradient(to right, #b87333, #d99a5b);
           width: 32px;
           border-radius: 4px;
         }

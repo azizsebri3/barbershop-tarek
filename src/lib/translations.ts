@@ -3,45 +3,68 @@ export const translations = {
     // Navigation
     nav: {
       home: 'Accueil',
+      about: 'À propos',
       services: 'Services',
       pricing: 'Tarifs',
+      contact: 'Contact',
       booking: 'Réserver',
     },
     // Hero
     hero: {
-      subtitle: 'Salon Signature 2025',
-      title: 'Style & ',
-      titleAccent: 'Coupe',
-      description:
-        'Maison de coiffure & barbershop à Namur. Looks sur-mesure, couleurs lumineuses et rituels barbe avec finition premium.',
-      btnBook: 'Réserver en 2 clics',
-      btnLearn: 'Découvrir le salon',
+      subtitle: 'Barbershop à Namur',
+      title: 'Coupes & ',
+      titleAccent: 'barbe',
+      description: 'Une coupe nette, une barbe soignée et un rendez-vous simple.',
+      btnBook: 'Réserver',
+      btnLearn: 'Voir les services',
+      imageAlt: 'Intérieur de Tarek Salon à Namur',
       stat1: 'Clients ravis',
       stat2: 'Looks créés',
       stat3: "Années d'expertise",
     },
+    about: {
+      label: 'Tarek Salon · Namur',
+      title: 'Un style qui vous ressemble',
+      description:
+        'Tarek Salon est un salon de coiffure et barbershop dédié aux hommes, situé Rue Rogier 7A à 5000 Namur. Des coupes modernes, des dégradés précis et une barbe soignée dans une ambiance simple et conviviale.',
+    },
     // Services
     services: {
-      title: 'Nos Services',
-      titleAccent: 'Premium',
-      description:
-        'Coupes sur-mesure, dégradés précis et entretien de barbe avec gestes experts',
+      badge: 'Nos prestations',
+      title: 'Styles &',
+      titleAccent: 'coupes',
+      description: 'Des coupes nettes et une barbe soignée, sans superflu.',
       reserve: 'Réserver',
       duration: 'Durée',
       from: 'À partir de',
+      loading: 'Chargement des services...',
+      catalog: {
+        'coupe-homme': { name: 'Coupe Homme', description: 'Coupe classique ou moderne, finition nette.' },
+        'barbe-coupe': { name: 'Barbe + Coupe', description: 'Une coupe et une barbe soignées.' },
+        'barbe-seulement': { name: 'Taille de barbe', description: 'Taille et contours de barbe.' },
+        'coupe-enfant': { name: 'Coupe Enfant', description: 'Une coupe simple et adaptée aux enfants.' },
+        'coupe-senior': { name: 'Coupe Senior', description: 'Une coupe confortable et soignée, adaptée aux cheveux seniors.' },
+      },
     },
     // Portfolio
     portfolio: {
       title: 'Portfolio',
       titleAccent: 'Clients',
-      description:
-        'Une sélection de looks qui font briller nos clients',
+      description: 'Quelques styles réalisés au salon',
+      badge: 'Nos réalisations',
+      overlayTitle: 'Portfolio Tarek Salon',
+      overlayLabel: 'Coiffure & barbe',
     },
     // Testimonials
     testimonials: {
       title: 'Avis de nos',
       titleAccent: 'Clients',
-      description: 'Leurs mots valent plus que mille pubs',
+      description: 'Les avis de nos clients',
+      badge: 'Témoignages',
+      error: 'Impossible de charger les avis',
+      retry: 'Réessayer',
+      emptyTitle: 'Soyez le premier à laisser un avis !',
+      emptyDescription: 'Partagez votre expérience avec notre salon.',
     },
     // Pricing
     pricing: {
@@ -63,6 +86,11 @@ export const translations = {
       closed: '✗ Actuellement fermé',
       phone: '+32465632205',
       location: 'Namur, Belgique',
+      openingLabel: "Horaires d'ouverture",
+      available: 'Nous sommes disponibles',
+      returnSoon: 'Revenez bientôt',
+      phoneLabel: 'Téléphone',
+      addressLabel: 'Adresse',
     },
     // Booking
     booking: {
@@ -99,26 +127,25 @@ export const translations = {
       description:
         "Réservez en ligne et profitez d'une expérience signature au salon.",
     },
-    // Features
     features: {
-      title: 'Pourquoi Nous Choisir ?',
-      feature1Title: 'Experts Signature',
-      feature1Desc: 'Des coiffeurs passionnés, formés aux tendances 2025',
-      feature2Title: 'Rapide & Précis',
-      feature2Desc: 'Un service fluide et des finitions nettes, sans attente inutile',
-      feature3Title: 'Produits Haute Qualité',
-      feature3Desc: 'Rituels barbe et cheveux avec des soins professionnels',
+      title: 'Pourquoi nous choisir ?',
+      feature1Title: 'Expertise',
+      feature1Desc: 'Des coupes maîtrisées et adaptées à votre style',
+      feature2Title: 'Rapidité',
+      feature2Desc: 'Un rendez-vous simple et efficace',
+      feature3Title: 'Qualité',
+      feature3Desc: 'Des finitions nettes et des produits professionnels',
     },
     // Location
     location: {
       title: 'Trouvez-Nous à',
       titleAccent: 'Namur',
-      description: 'Passage de la Gare 5, au cœur de Namur — parking et transports à proximité',
+      description: 'Rue Rogier 7A, 5000 Namur — parking et transports à proximité',
       address: 'Adresse',
-      addressValue: 'Passage de la Gare 5, 5000 Namur, Belgique',
+      addressValue: 'Rue Rogier 7A, 5000 Namur, Belgique',
       phone: 'Téléphone',
       hours: 'Horaires',
-      hoursValue: 'Lun-Sam: 9h-18h, Dimanche: Fermé',
+      hoursValue: 'Lun-Sam: 9h30-19h, Dimanche: Fermé',
     },
     // Admin Panel
     admin: {
@@ -207,43 +234,68 @@ export const translations = {
     // Navigation
     nav: {
       home: 'Home',
+      about: 'About',
       services: 'Services',
       pricing: 'Pricing',
+      contact: 'Contact',
       booking: 'Book Now',
     },
     // Hero
     hero: {
-      subtitle: 'Signature Salon 2025',
-      title: 'Style & ',
-      titleAccent: 'Cut',
-      description:
-        'Signature hair house in Namur. Bespoke looks, luminous color, and premium barber rituals.',
-      btnBook: 'Book in 2 taps',
-      btnLearn: 'Explore the salon',
+      subtitle: 'Barbershop in Namur',
+      title: 'Cuts & ',
+      titleAccent: 'beard',
+      description: 'A clean cut, a sharp beard, and an easy appointment.',
+      btnBook: 'Book now',
+      btnLearn: 'View services',
+      imageAlt: 'Interior of Tarek Salon in Namur',
       stat1: 'Happy clients',
       stat2: 'Looks crafted',
       stat3: 'Years of craft',
     },
+    about: {
+      label: 'Tarek Salon · Namur',
+      title: 'A style that feels like you',
+      description:
+        'Tarek Salon is a men’s hair salon and barbershop at Rue Rogier 7A, 5000 Namur. Modern cuts, sharp fades and careful beard grooming in a simple, welcoming atmosphere.',
+    },
     // Services
     services: {
-      title: 'Our Services',
-      titleAccent: 'Premium',
-      description: 'Tailored cuts, sharp fades, and expert beard care',
+      badge: 'Our services',
+      title: 'Styles &',
+      titleAccent: 'cuts',
+      description: 'Clean cuts and sharp beard care, without the fuss.',
       reserve: 'Reserve',
       duration: 'Duration',
       from: 'From',
+      loading: 'Loading services...',
+      catalog: {
+        'coupe-homme': { name: 'Men’s haircut', description: 'Classic or modern cut with a clean finish.' },
+        'barbe-coupe': { name: 'Haircut + beard', description: 'A clean haircut with a well-groomed beard.' },
+        'barbe-seulement': { name: 'Beard trim', description: 'Beard trim and clean contours.' },
+        'coupe-enfant': { name: 'Children’s haircut', description: 'A simple cut adapted for children.' },
+        'coupe-senior': { name: 'Senior haircut', description: 'A comfortable, well-groomed cut adapted for seniors.' },
+      },
     },
     // Portfolio
     portfolio: {
       title: 'Portfolio',
       titleAccent: 'Clients',
-      description: 'Curated looks our clients love',
+      description: 'A few styles created in our salon',
+      badge: 'Our work',
+      overlayTitle: 'Tarek Salon portfolio',
+      overlayLabel: 'Hair & beard',
     },
     // Testimonials
     testimonials: {
       title: 'What Our',
       titleAccent: 'Clients Say',
-      description: 'Their words say it best',
+      description: 'What our clients say',
+      badge: 'Testimonials',
+      error: 'Unable to load reviews',
+      retry: 'Try again',
+      emptyTitle: 'Be the first to leave a review!',
+      emptyDescription: 'Share your experience with our salon.',
     },
     // Pricing
     pricing: {
@@ -265,6 +317,11 @@ export const translations = {
       closed: '✗ Currently closed',
       phone: '+32465632205',
       location: 'Namur, Belgium',
+      openingLabel: 'Opening hours',
+      available: 'We are available',
+      returnSoon: 'Please come back soon',
+      phoneLabel: 'Phone',
+      addressLabel: 'Address',
     },
     // Booking
     booking: {
@@ -301,26 +358,25 @@ export const translations = {
       description:
         'Book online and enjoy a signature in-salon experience.',
     },
-    // Features
     features: {
-      title: 'Why Choose Us?',
-      feature1Title: 'Signature Experts',
-      feature1Desc: 'Passionate stylists trained on 2025 trends',
-      feature2Title: 'Fast & Precise',
-      feature2Desc: 'Fluid service and crisp finishes, no wasted time',
-      feature3Title: 'High-End Products',
-      feature3Desc: 'Barber and hair rituals with pro-grade care',
+      title: 'Why choose us?',
+      feature1Title: 'Expertise',
+      feature1Desc: 'Cuts tailored to your style',
+      feature2Title: 'Fast service',
+      feature2Desc: 'A simple and efficient appointment',
+      feature3Title: 'Quality',
+      feature3Desc: 'Clean finishes and professional products',
     },
     // Location
     location: {
       title: 'Find Us in',
       titleAccent: 'Namur',
-      description: 'Passage de la Gare 5, heart of Namur — parking and transit nearby',
+      description: 'Rue Rogier 7A, 5000 Namur — parking and transit nearby',
       address: 'Address',
-      addressValue: 'Passage de la Gare 5, 5000 Namur, Belgium',
+      addressValue: 'Rue Rogier 7A, 5000 Namur, Belgium',
       phone: 'Phone',
       hours: 'Hours',
-      hoursValue: 'Mon-Sat: 9am-6pm, Sunday: Closed',
+      hoursValue: 'Mon-Sat: 9:30am-7pm, Sunday: Closed',
     },
     // Admin Panel
     admin: {

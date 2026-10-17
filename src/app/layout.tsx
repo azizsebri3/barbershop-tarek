@@ -124,7 +124,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#D4AF37',
+  themeColor: '#b87333',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -151,7 +151,7 @@ const jsonLd = {
   // Adresse réelle
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'Passage de la Gare 5',
+    streetAddress: 'Rue Rogier 7A',
     addressLocality: 'Namur',
     addressRegion: 'Namur',
     postalCode: '5000',
@@ -183,38 +183,38 @@ const jsonLd = {
     {
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: 'Monday',
-      opens: '11:00',
-      closes: '20:00'
+      opens: '09:30',
+      closes: '19:00'
     },
     {
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: 'Tuesday',
-      opens: '09:00',
-      closes: '18:00'
+      opens: '09:30',
+      closes: '19:00'
     },
     {
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: 'Wednesday',
-      opens: '09:00',
-      closes: '18:00'
+      opens: '09:30',
+      closes: '19:00'
     },
     {
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: 'Thursday',
-      opens: '09:00',
-      closes: '18:00'
+      opens: '09:30',
+      closes: '19:00'
     },
     {
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: 'Friday',
-      opens: '09:00',
-      closes: '18:00'
+      opens: '09:30',
+      closes: '19:00'
     },
     {
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: 'Saturday',
-      opens: '08:00',
-      closes: '17:00'
+      opens: '09:30',
+      closes: '19:00'
     }
   ],
   

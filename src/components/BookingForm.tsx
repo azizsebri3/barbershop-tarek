@@ -272,9 +272,7 @@ export default function BookingForm() {
             Horaires d&apos;ouverture
           </h4>
           <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
-            <p>Lundi - Jeudi</p><p className="text-right text-white">9h00 - 19h00</p>
-            <p>Vendredi</p><p className="text-right text-white">9h00 - 20h00</p>
-            <p>Samedi</p><p className="text-right text-white">9h00 - 18h00</p>
+            <p>Lundi - Samedi</p><p className="text-right text-white">9h30 - 19h00</p>
             <p>Dimanche</p><p className="text-right text-red-400">Fermé</p>
           </div>
         </div>
@@ -285,7 +283,7 @@ export default function BookingForm() {
           whileTap={{ scale: 0.99 }}
           disabled={isSubmitting}
           type="submit"
-          className="w-full bg-gradient-to-r from-accent to-yellow-500 text-black py-4 rounded-xl font-bold text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-accent/20"
+          className="w-full bg-gradient-to-r from-accent to-orange-300 text-white py-4 rounded-xl font-bold text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-accent/20"
         >
           {isSubmitting ? t.booking.submitting : t.booking.submit}
         </motion.button>

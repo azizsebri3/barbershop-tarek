@@ -25,7 +25,7 @@ const defaultSettings: GeneralSettings = {
   facebook: '',
   instagram: '',
   tiktok: '',
-  logo_url: '/logo.png'
+  logo_url: '/logo.svg'
 }
 
 export function useGeneralSettings() {

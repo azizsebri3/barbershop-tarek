@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Bell, LogOut, LayoutDashboard } from 'lucide-react'
+import { Menu, X, Bell, LogOut, LayoutDashboard, Home, Info, Scissors, Tag, Phone } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import LanguageSwitcher from './LanguageSwitcher'
@@ -11,6 +11,7 @@ import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettingsCached'
 import { useAdminAuth } from '@/lib/useAdminAuth'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -18,10 +19,11 @@ export default function Header() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
-  const { t } = useLanguage()
+  const { t, locale } = useLanguage()
   const { settings } = usePublicGeneralSettings()
   const { isAdmin, logout } = useAdminAuth()
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     // Handle scroll effect
@@ -74,59 +76,65 @@ export default function Header() {
 
 
   const navLinks = useMemo(() => [
-    { href: '/', label: t.nav.home },
-    { href: '/#services', label: t.nav.services },
-  ], [t.nav.home, t.nav.services])
+    { href: `/${locale}`, label: t.nav.home, icon: Home, active: pathname === `/${locale}` || pathname === `/${locale}/` || pathname === '/' },
+    { href: `/${locale}/#about`, label: t.nav.about, icon: Info, active: false },
+    { href: `/${locale}/#services`, label: t.nav.services, icon: Scissors, active: false },
+    { href: '/pricing', label: t.nav.pricing, icon: Tag, active: pathname.includes('/pricing') },
+    { href: `/${locale}/#contact`, label: t.nav.contact, icon: Phone, active: false },
+  ], [locale, pathname, t.nav.about, t.nav.contact, t.nav.home, t.nav.pricing, t.nav.services])
 
   return (
     <>
     <header 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+      className={`fixed top-0 w-full z-50 transition-all duration-500 ${
         scrolled 
-          ? 'bg-black/95 backdrop-blur-2xl shadow-2xl shadow-black/40' 
-          : 'bg-black/80 backdrop-blur-md'
+          ? 'pt-2 sm:pt-3' 
+          : 'pt-3 sm:pt-5'
       }`}
       role="banner"
       suppressHydrationWarning
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
-        {/* Logo - Clean & Aligned */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-10 h-10">
-            <div className="absolute inset-0 bg-accent/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative w-full h-full bg-white/5 rounded-xl flex items-center justify-center border border-white/10 group-hover:border-accent/50 transition-all duration-300">
-              <img 
-                src={settings.logo_url || '/logo.png'} 
-                alt={settings.salonName}
-                className="w-full h-full object-contain p-2"
-              />
-            </div>
-          </div>
-          <div className="hidden sm:block">
-            <h1 className="text-base font-bold text-white group-hover:text-accent transition-colors duration-300">
+      <nav className={`max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 transition-all duration-500 ${scrolled ? 'h-[4.5rem]' : 'h-16 sm:h-[4.5rem]'}`}>
+        <div className="w-full h-full px-3 sm:px-4 rounded-2xl border border-white/10 bg-black/45 backdrop-blur-xl shadow-2xl shadow-black/20 flex justify-between items-center">
+        {/* Brand */}
+        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+          <img
+            src={settings.logo_url || '/logo.svg'}
+            alt={settings.salonName}
+            className={`object-contain rounded-full bg-black/30 p-1 ring-1 ring-white/20 group-hover:ring-accent/70 transition-all duration-500 ease-out ${
+              scrolled ? 'w-11 h-11 scale-105' : 'w-10 h-10 scale-100'
+            }`}
+          />
+          <div className="hidden sm:block leading-tight">
+            <h1 className="text-sm sm:text-base font-black uppercase tracking-tight text-white group-hover:text-accent transition-colors duration-300">
               {settings.salonName}
             </h1>
-            <p className="text-[10px] text-gray-500">Premium Barbershop</p>
+            <p className="text-[9px] uppercase tracking-[0.2em] text-white/55">Barbershop</p>
           </div>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden lg:flex items-center gap-1.5 xl:gap-2">
           {navLinks.map((link, index) => (
             <Link
               key={index}
               href={link.href}
-              className="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200"
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] uppercase tracking-[0.12em] font-semibold transition-all duration-200 ${
+                link.active
+                  ? 'bg-white/10 text-white shadow-inner'
+                  : 'text-white/65 hover:text-white hover:bg-white/5'
+              }`}
               suppressHydrationWarning
             >
-              {link.label}
+                <link.icon size={14} className={link.active ? 'text-accent' : 'text-white/45'} />
+                {link.label}
             </Link>
           ))}
 
           {/* CTA Button */}
           <Link
             href="/booking"
-            className="px-5 py-2 bg-gradient-to-r from-accent to-yellow-500 hover:from-yellow-500 hover:to-accent text-black rounded-lg font-bold text-sm transition-all duration-300 hover:shadow-lg hover:shadow-accent/30"
+            className="ml-2 px-4 py-2.5 bg-accent hover:bg-orange-300 text-primary rounded-xl font-black text-[10px] uppercase tracking-[0.12em] transition-all duration-300 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5"
             suppressHydrationWarning
           >
             {t.nav.booking}
@@ -182,15 +190,16 @@ export default function Header() {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center gap-3">
+        <div className="lg:hidden flex items-center gap-3">
           <LanguageSwitcher />
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors duration-200"
+            className="w-10 h-10 rounded-xl bg-accent text-primary hover:bg-orange-300 shadow-lg shadow-accent/20 transition-all duration-200 flex items-center justify-center"
             aria-label={isOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
           >
-            {isOpen ? <X size={20} className="text-white" /> : <Menu size={20} className="text-white" />}
+            {isOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
+        </div>
         </div>
       </nav>
 
@@ -202,17 +211,18 @@ export default function Header() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden overflow-hidden border-t border-white/10"
+            className="lg:hidden overflow-hidden border-t border-white/10"
           >
-            <div className="bg-black/95 backdrop-blur-xl">
-              <div className="px-4 py-4 space-y-1">
+            <div className="mx-3 mt-2 rounded-2xl border border-white/10 bg-[#111111]/95 backdrop-blur-2xl shadow-2xl">
+              <div className="px-3 py-3 space-y-1">
                 {navLinks.map((link, index) => (
                   <Link
                     key={index}
                     href={link.href}
-                    className="block px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors duration-200 font-medium"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors duration-200 font-medium"
                     onClick={() => setIsOpen(false)}
                   >
+                    <link.icon size={17} className="text-accent" />
                     {link.label}
                   </Link>
                 ))}
@@ -220,7 +230,7 @@ export default function Header() {
                 {/* Mobile CTA */}
                 <Link
                   href="/booking"
-                  className="flex items-center justify-center gap-2 w-full px-6 py-3 mt-3 bg-gradient-to-r from-accent to-yellow-500 text-black rounded-lg font-bold shadow-lg"
+                  className="flex items-center justify-center gap-2 w-full px-6 py-3 mt-3 bg-accent text-primary rounded-xl font-black shadow-lg shadow-accent/20"
                   onClick={() => setIsOpen(false)}
                 >
                   {t.nav.booking}

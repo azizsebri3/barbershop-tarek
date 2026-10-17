@@ -2,8 +2,6 @@ import React from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import '../globals.css'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import MobileBottomNav from '@/components/MobileBottomNav'
 import { LanguageProvider } from '@/lib/language-context'
 
@@ -13,7 +11,7 @@ export const metadata: Metadata = {
   title: 'Elite Services - Barbershop',
   description: 'Premium barbershop experience. Book your appointment online.',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.png',
   },
 }
 
@@ -36,11 +34,7 @@ export default function LocaleLayout({
 
   return (
     <LanguageProvider initialLocale={locale}>
-      <Header />
-      <main className="pt-16">
-        {children}
-      </main>
-      <Footer />
+      {children}
       <MobileBottomNav />
     </LanguageProvider>
   )
