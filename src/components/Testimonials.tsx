@@ -243,21 +243,21 @@ const Testimonials = memo(function Testimonials() {
             <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
               {avgRating}/5
             </p>
-            <p className="text-gray-400 text-sm mt-1">Note moyenne</p>
+            <p className="text-gray-400 text-sm mt-1">{t.testimonials.averageRating}</p>
           </div>
           <div className="w-px h-12 bg-white/10 hidden sm:block" />
           <div className="text-center">
             <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
               {totalCount}+
             </p>
-            <p className="text-gray-400 text-sm mt-1">Avis clients</p>
+            <p className="text-gray-400 text-sm mt-1">{t.testimonials.clientReviews}</p>
           </div>
           <div className="w-px h-12 bg-white/10 hidden sm:block" />
           <div className="text-center">
             <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
               {satisfactionRate}%
             </p>
-            <p className="text-gray-400 text-sm mt-1">Satisfaction</p>
+            <p className="text-gray-400 text-sm mt-1">{t.testimonials.satisfaction}</p>
           </div>
         </motion.div>
       </div>

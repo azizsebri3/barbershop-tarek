@@ -4,6 +4,7 @@ import { lazy, Suspense } from 'react'
 import Hero from '@/components/Hero'
 import { Star, Zap, Shield } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
+import LazyMap from '@/components/LazyMap'
 
 // Lazy load non-critical components
 const ServiceCarousel = lazy(() => import('@/components/ServiceCarousel'))
@@ -77,6 +78,8 @@ export default function LocalePage() {
           <OpeningHours />
         </Suspense>
       </section>
+
+      <LazyMap />
 
       <Suspense fallback={<SkeletonLoader />}>
         <Testimonials />

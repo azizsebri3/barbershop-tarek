@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import dynamic from 'next/dynamic'
 import './globals.css'
 import { LanguageProvider } from '@/lib/language-context'
+import WhatsAppButton from '@/components/WhatsAppButton'
 
 // Lazy load des composants lourds
 const Header = dynamic(() => import('@/components/Header'), { ssr: true })
@@ -291,6 +292,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <WhatsAppButton />
         </LanguageProvider>
       </body>
     </html>

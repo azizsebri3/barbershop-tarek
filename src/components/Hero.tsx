@@ -4,7 +4,7 @@ import { memo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useLanguage } from '@/lib/language-context'
-import { ArrowRight, CalendarCheck, Clock3, MapPin } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 const Hero = memo(function Hero() {
   const { t } = useLanguage()
@@ -69,32 +69,6 @@ const Hero = memo(function Hero() {
             </Link>
           </div>
 
-          <div
-            className="mt-10 grid grid-cols-1 sm:grid-cols-3 max-w-3xl mx-auto overflow-hidden rounded-2xl border border-white/20 bg-black/45 backdrop-blur-md text-left animate-fadeInUp"
-            style={{ animationDelay: '0.4s' }}
-          >
-            <div className="flex items-center gap-3 px-5 py-4 border-b sm:border-b-0 sm:border-r border-white/15">
-              <MapPin className="w-5 h-5 shrink-0 text-accent" />
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/55">{t.location.address}</p>
-                <p className="text-sm font-semibold text-white">Rue Rogier 7A, Namur</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 px-5 py-4 border-b sm:border-b-0 sm:border-r border-white/15">
-              <Clock3 className="w-5 h-5 shrink-0 text-accent" />
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/55">{t.location.hours}</p>
-                <p className="text-sm font-semibold text-white">{t.location.hoursValue}</p>
-              </div>
-            </div>
-            <Link href="/booking" className="flex items-center gap-3 px-5 py-4 hover:bg-white/10 transition-colors">
-              <CalendarCheck className="w-5 h-5 shrink-0 text-accent" />
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/55">{t.hero.subtitle}</p>
-                <p className="text-sm font-semibold text-white">{t.hero.btnBook}</p>
-              </div>
-            </Link>
-          </div>
         </div>
       </div>
 

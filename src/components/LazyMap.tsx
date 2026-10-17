@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { MapPin } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 export default function LazyMap() {
+  const { t } = useLanguage()
   const [isLoaded, setIsLoaded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -30,9 +32,9 @@ export default function LazyMap() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12 animate-fadeInUp">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Trouvez-Nous à <span className="text-accent">Namur</span>
+            {t.location.title} <span className="text-accent">{t.location.titleAccent}</span>
           </h2>
-          <p className="text-gray-400 text-lg">Rue Rogier 7A, 5000 Namur — parking et transports à proximité</p>
+          <p className="text-gray-400 text-lg">{t.location.description}</p>
         </div>
 
         <div 
@@ -65,19 +67,27 @@ export default function LazyMap() {
           <div className="p-6 rounded-xl bg-primary border border-primary/50 hover:border-accent/50 transition-colors text-center">
             <MapPin className="w-8 h-8 text-accent mx-auto mb-3" />
             <h3 className="text-lg font-bold text-white mb-2">Adresse</h3>
-            <p className="text-gray-400">Rue Rogier 7A<br />5000 Namur, Belgique</p>
+            <p className="text-gray-400">{t.location.addressValue}</p>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Rue+Rogier+7A%2C+5000+Namur"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex text-sm font-semibold text-accent hover:text-white transition-colors"
+            >
+              {t.location.mapButton}
+            </a>
           </div>
 
           <div className="p-6 rounded-xl bg-primary border border-primary/50 hover:border-accent/50 transition-colors text-center">
             <div className="w-8 h-8 text-accent mx-auto mb-3">📞</div>
-            <h3 className="text-lg font-bold text-white mb-2">Téléphone</h3>
-            <p className="text-gray-400">+32 465 63 22 05</p>
+            <h3 className="text-lg font-bold text-white mb-2">{t.location.phone}</h3>
+            <a href="tel:+32465632205" className="text-gray-400 hover:text-accent transition-colors">+32 465 63 22 05</a>
           </div>
 
           <div className="p-6 rounded-xl bg-primary border border-primary/50 hover:border-accent/50 transition-colors text-center">
             <div className="w-8 h-8 text-accent mx-auto mb-3">📧</div>
             <h3 className="text-lg font-bold text-white mb-2">Email</h3>
-            <p className="text-gray-400">contact@tareksalon.be</p>
+            <a href="mailto:contact@tareksalon.be" className="text-gray-400 hover:text-accent transition-colors">contact@tareksalon.be</a>
           </div>
         </div>
       </div>

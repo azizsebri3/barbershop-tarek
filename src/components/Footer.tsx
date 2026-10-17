@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { MapPin, Phone, Mail, ArrowRight, Sparkles, Clock, Instagram, Facebook } from 'lucide-react'
 import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettingsCached'
+import { useLanguage } from '@/lib/language-context'
 
 // TikTok icon component
 const TikTokIcon = ({ size = 18 }: { size?: number }) => (
@@ -21,16 +22,20 @@ const TikTokIcon = ({ size = 18 }: { size?: number }) => (
 export default function Footer() {
   const currentYear = new Date().getFullYear()
   const { settings } = usePublicGeneralSettings()
+  const { t, locale } = useLanguage()
+  const description = settings.description === t.footer.defaultDescriptionFr
+    ? t.footer.defaultDescription
+    : settings.description || t.footer.defaultDescription
 
   const footerLinks = {
     services: [
-      { label: 'Coupe homme', href: '/pricing' },
-      { label: 'Dégradé', href: '/pricing' },
-      { label: 'Taille de barbe', href: '/pricing' },
-      { label: 'Coupe enfant', href: '/pricing' },
+      { label: t.footer.serviceHaircut, href: '/pricing' },
+      { label: t.footer.serviceFade, href: '/pricing' },
+      { label: t.footer.serviceBeard, href: '/pricing' },
+      { label: t.footer.serviceChild, href: '/pricing' },
     ],
     zones: [
-      'Namur Centre',
+      t.footer.serviceArea,
     ],
   }
 
@@ -62,7 +67,7 @@ export default function Footer() {
                 <span className="text-xl font-bold text-white">{settings.salonName || 'Tarek Salon'}</span>
               </Link>
               <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                {settings.description || 'Votre coiffeur et barbershop de confiance à Namur, Belgique.'}
+                {description}
               </p>
               <div className="flex items-center gap-3">
                 {settings.instagram && (
@@ -113,7 +118,7 @@ export default function Footer() {
             >
               <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
                 <Sparkles size={18} className="text-accent" />
-                Nos Services
+                {t.footer.servicesTitle}
               </h3>
               <ul className="space-y-3">
                 {footerLinks.services.map((service, index) => (
@@ -139,7 +144,7 @@ export default function Footer() {
             >
               <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
                 <MapPin size={18} className="text-accent" />
-                Zone de Service
+                {t.footer.serviceAreaTitle}
               </h3>
               <ul className="space-y-3">
                 {footerLinks.zones.map((zone, index) => (
@@ -154,10 +159,10 @@ export default function Footer() {
               <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
                 <div className="flex items-center gap-2 text-white font-medium mb-2">
                   <Clock size={16} className="text-accent" />
-                  <span className="text-sm">Horaires</span>
+                  <span className="text-sm">{t.footer.hoursTitle}</span>
                 </div>
-                <p className="text-gray-400 text-xs">Lun-Sam: 9h30 - 19h00</p>
-                <p className="text-gray-400 text-xs">Dimanche: Fermé</p>
+                <p className="text-gray-400 text-xs">{t.footer.weekdayHours}</p>
+                <p className="text-gray-400 text-xs">{t.footer.sundayHours}</p>
               </div>
             </motion.div>
 
@@ -170,7 +175,7 @@ export default function Footer() {
             >
               <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
                 <Phone size={18} className="text-accent" />
-                Contact
+                {t.footer.contactTitle}
               </h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
@@ -203,7 +208,7 @@ export default function Footer() {
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30"
                 >
                   <Sparkles size={16} />
-                  Réserver
+                  {t.footer.bookButton}
                 </Link>
               </motion.div>
             </motion.div>
@@ -219,18 +224,17 @@ export default function Footer() {
           >
             {/* SEO Keywords */}
             <p className="text-gray-600 text-xs text-center mb-6 max-w-4xl mx-auto">
-              Coiffeur Namur • Barbershop Namur • Salon de coiffure Namur • Coiffeur homme Namur • 
-              Dégradé Namur • Barbe Namur • Meilleur coiffeur Namur Belgique • Tarek Salon
+              {t.footer.seoKeywords}
             </p>
             
             {/* Copyright */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-gray-500 text-sm">
-                &copy; {currentYear} Tarek Salon. Tous droits réservés.
+                &copy; {currentYear} {settings.salonName || 'Tarek Salon'}. {t.footer.rights}
               </p>
               <div className="flex items-center gap-6 text-xs text-gray-500">
-                <Link href="/fr/privacy" className="hover:text-accent transition-colors">Politique de confidentialité</Link>
-                <Link href="/fr/terms" className="hover:text-accent transition-colors">Conditions d&apos;utilisation</Link>
+                <Link href={`/${locale}/privacy`} className="hover:text-accent transition-colors">{t.footer.privacy}</Link>
+                <Link href={`/${locale}/terms`} className="hover:text-accent transition-colors">{t.footer.terms}</Link>
               </div>
             </div>
           </motion.div>

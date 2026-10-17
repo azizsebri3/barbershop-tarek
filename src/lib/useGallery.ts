@@ -9,13 +9,20 @@ interface Photo {
   createdAt: string
 }
 
+const fallbackPhotos: Photo[] = [
+  { id: 'local-hero', name: 'Tarek Salon', url: '/hero-bg1.jpeg', createdAt: '' },
+  { id: 'local-cut', name: 'Coupe et barbe', url: '/landing.png', createdAt: '' },
+  { id: 'local-barber', name: 'Savoir-faire barber', url: '/hero-bg.jpg', createdAt: '' },
+]
+
 let cachedPhotos: Photo[] | null = null
 let pendingPromise: Promise<Photo[]> | null = null
 
 async function fetchPhotos(): Promise<Photo[]> {
   const res = await fetch('/api/gallery')
   const data = await res.json()
-  return data.photos || []
+  const photos = data.photos || []
+  return photos.length > 0 ? photos : fallbackPhotos
 }
 
 export function useGallery() {
@@ -38,7 +45,7 @@ export function useGallery() {
         setLoading(false)
       }).catch(() => {
         if (!mounted) return
-        setPhotos([])
+        setPhotos(fallbackPhotos)
         setLoading(false)
       })
       return
@@ -55,7 +62,7 @@ export function useGallery() {
       console.error('❌ Erreur chargement photos (cached):', err)
       pendingPromise = null
       if (!mounted) return
-      setPhotos([])
+      setPhotos(fallbackPhotos)
       setLoading(false)
     })
 

@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Star, Send, Sparkles, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useLanguage } from '@/lib/language-context'
 
 interface TestimonialFormProps {
   onSuccess?: () => void
 }
 
 export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
+  const { t } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -44,7 +46,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
       }
 
       setSubmitted(true)
-      toast.success('Merci pour votre feedback ! 🌟')
+      toast.success(t.testimonials.submitToast)
       
       // Reset form after delay
       setTimeout(() => {
@@ -60,7 +62,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
         onSuccess?.()
       }, 2500)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Une erreur est survenue')
+      toast.error(error instanceof Error ? error.message : t.testimonials.submitError)
     } finally {
       setIsSubmitting(false)
     }
@@ -76,7 +78,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
         whileHover={{ scale: 1.1, rotate: 5 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 z-50 group"
+        className="fixed bottom-24 right-4 z-50 group sm:bottom-24 sm:right-6"
       >
         <div className="relative">
           {/* Pulsating ring */}
@@ -89,7 +91,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
           {/* Button */}
           <div className="relative flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-accent via-orange-300 to-accent text-white font-bold rounded-full shadow-2xl shadow-accent/50">
             <Sparkles className="w-5 h-5" />
-            <span className="hidden sm:inline">Laissez votre avis</span>
+            <span className="hidden sm:inline">{t.testimonials.formButton}</span>
             <Star className="w-5 h-5 fill-current" />
           </div>
         </div>
@@ -133,12 +135,12 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                         <Star className="w-8 h-8 text-black fill-current" />
                       </motion.div>
                       <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                        Partagez votre{' '}
+                        {t.testimonials.formTitle}{' '}
                         <span className="bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
-                          expérience
+                          {t.testimonials.formTitleAccent}
                         </span>
                       </h2>
-                      <p className="text-gray-400">Votre avis compte beaucoup pour nous</p>
+                      <p className="text-gray-400">{t.testimonials.formDescription}</p>
                     </div>
 
                     {/* Form */}
@@ -147,7 +149,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Nom *
+                            {t.testimonials.name}
                           </label>
                           <input
                             type="text"
@@ -155,12 +157,12 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent focus:bg-white/10 transition-all"
-                            placeholder="Votre nom"
+                            placeholder={t.testimonials.namePlaceholder}
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Email *
+                            {t.testimonials.email}
                           </label>
                           <input
                             type="email"
@@ -168,7 +170,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent focus:bg-white/10 transition-all"
-                            placeholder="votre@email.com"
+                            placeholder={t.testimonials.emailPlaceholder}
                           />
                         </div>
                       </div>
@@ -176,21 +178,21 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                       {/* Service */}
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Service (optionnel)
+                          {t.testimonials.service}
                         </label>
                         <input
                           type="text"
                           value={formData.service}
                           onChange={(e) => setFormData({ ...formData, service: e.target.value })}
                           className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent focus:bg-white/10 transition-all"
-                          placeholder="Ex: Coupe homme, Dégradé, etc."
+                          placeholder={t.testimonials.servicePlaceholder}
                         />
                       </div>
 
                       {/* Rating */}
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-3">
-                          Note *
+                          {t.testimonials.rating}
                         </label>
                         <div className="flex gap-2 justify-center sm:justify-start">
                           {[1, 2, 3, 4, 5].map((star) => (
@@ -219,7 +221,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                       {/* Message */}
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Votre message *
+                          {t.testimonials.message}
                         </label>
                         <textarea
                           required
@@ -227,7 +229,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                           value={formData.message}
                           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                           className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-accent focus:bg-white/10 transition-all resize-none"
-                          placeholder="Partagez votre expérience avec nous..."
+                          placeholder={t.testimonials.messagePlaceholder}
                         />
                       </div>
 
@@ -241,7 +243,7 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                           disabled={isSubmitting}
                           className="flex-1 px-6 py-3 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all disabled:opacity-50"
                         >
-                          Annuler
+                          {t.testimonials.cancel}
                         </motion.button>
                         <motion.button
                           type="submit"
@@ -257,12 +259,12 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                                 transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                                 className="w-5 h-5 border-2 border-black border-t-transparent rounded-full"
                               />
-                              Envoi...
+                              {t.testimonials.submitting}
                             </>
                           ) : (
                             <>
                               <Send className="w-5 h-5" />
-                              Envoyer
+                              {t.testimonials.submit}
                             </>
                           )}
                         </motion.button>
@@ -284,10 +286,10 @@ export default function TestimonialForm({ onSuccess }: TestimonialFormProps) {
                     >
                       <CheckCircle className="w-12 h-12 text-green-500" />
                     </motion.div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Merci !</h3>
+                    <h3 className="text-2xl font-bold text-white mb-2">{t.testimonials.successTitle}</h3>
                     <p className="text-gray-400">
-                      Votre avis a été envoyé avec succès.<br />
-                      Il sera publié après validation.
+                      {t.testimonials.successMessage}<br />
+                      {t.testimonials.successNote}
                     </p>
                   </motion.div>
                 )}

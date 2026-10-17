@@ -51,11 +51,8 @@ export default function PricingPageContent() {
     <>
       {/* SEO Hidden Content */}
       <div className="sr-only">
-        <h1>Tarifs Coiffeur Namur - Prix Tarek Salon Barbershop</h1>
-        <p>
-          Découvrez nos tarifs compétitifs pour tous nos services de coiffure à Namur.
-          Coupe homme, dégradé, barbe, coloration. Meilleur rapport qualité-prix de Namur, Belgique.
-        </p>
+        <h1>{t.pricing.seoTitle}</h1>
+        <p>{t.pricing.seoDescription}</p>
       </div>
 
       <ClientPortfolio />
@@ -181,16 +178,16 @@ export default function PricingPageContent() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-6"
             >
               <HelpCircle className="w-4 h-4 text-accent" />
-              <span className="text-sm font-medium text-white/80">FAQ</span>
+              <span className="text-sm font-medium text-white/80">{t.pricing.faqBadge}</span>
             </motion.div>
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
-              Questions{' '}
+              {t.pricing.faqTitle}{' '}
               <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
-                Fréquentes
+                {t.pricing.faqTitleAccent}
               </span>
             </h2>
-            <p className="text-gray-400 text-base sm:text-lg">Tout ce que vous devez savoir sur notre salon de coiffure à Namur</p>
+            <p className="text-gray-400 text-base sm:text-lg">{t.pricing.faqDescription}</p>
           </motion.div>
 
           <motion.div
@@ -200,28 +197,7 @@ export default function PricingPageContent() {
             viewport={{ once: true }}
             className="space-y-4"
           >
-            {[
-              {
-                question: 'Où se trouve Tarek Salon à Namur ?',
-                answer: 'Rue Rogier 7A, 5000 Namur. Bus, train et parking sont à proximité, venez quand ça vous arrange.',
-              },
-              {
-                question: 'Puis-je modifier ma réservation ?',
-                answer: "Bien sûr. Prévenez-nous 24h à l'avance et on ajuste votre créneau en douceur.",
-              },
-              {
-                question: 'Offrez-vous des réductions pour les forfaits ?',
-                answer: 'Oui, on a des tarifs doux pour les forfaits barbe + coupe et pour vos visites régulières.',
-              },
-              {
-                question: 'Quel est le meilleur coiffeur à Namur ?',
-                answer: 'Nos clients nous classent parmi les meilleures adresses de Namur (4.9/5). On vous accueille comme un habitué.',
-              },
-              {
-                question: 'Acceptez-vous les paiements par carte ?',
-                answer: 'Carte, Bancontact ou cash : payez comme vous préférez.',
-              },
-            ].map((faq, index) => (
+            {t.pricing.faq.map((faq, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
