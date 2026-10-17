@@ -85,9 +85,19 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString()
     }))
 
-    const { error: insertError } = await supabase
+    let { error: insertError } = await supabase
       .from('services')
       .insert(servicesToInsert)
+
+    // Production projects may not have run the bilingual-services migration yet.
+    // Keep service management working with the original schema until it is applied.
+    if (insertError?.code === 'PGRST204') {
+      const legacyServices = servicesToInsert.map(({ name_en, description_en, ...service }) => service)
+      const legacyInsert = await supabase
+        .from('services')
+        .insert(legacyServices)
+      insertError = legacyInsert.error
+    }
 
     if (insertError) {
       console.error('❌ Erreur insertion:', insertError)
