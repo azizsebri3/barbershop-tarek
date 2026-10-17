@@ -23,12 +23,16 @@ async function fetchServices(): Promise<Service[]> {
   const res = await fetch('/api/services')
   const data = await res.json()
   
-  if (data.error) {
+  if (!res.ok || data.error) {
     console.error('❌ Erreur chargement services:', data.error)
     return defaultServices
   }
   
-  return (data.services || defaultServices).map((service: Service & { name_en?: string; description_en?: string }) => ({
+  const remoteServices = Array.isArray(data.services) && data.services.length > 0
+    ? data.services
+    : defaultServices
+
+  return remoteServices.map((service: Service & { name_en?: string; description_en?: string }) => ({
     ...service,
     nameEn: service.nameEn || service.name_en,
     descriptionEn: service.descriptionEn || service.description_en,
