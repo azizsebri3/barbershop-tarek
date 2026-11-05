@@ -2,8 +2,8 @@
 
 import dynamic from 'next/dynamic'
 import { Star, Zap, Shield, MapPin, Phone } from 'lucide-react'
-import Link from 'next/link'
 import LazyMap from '@/components/LazyMap'
+import BookingLink from '@/components/BookingLink'
 import { useLanguage } from '@/lib/language-context'
 
 // 🚀 Lazy load des composants lourds + loading states
@@ -166,11 +166,11 @@ export default function Home() {
             {t.cta.description}
           </p>
 
-          <Link href="/booking">
+          <BookingLink>
             <button className="px-8 py-4 bg-accent text-primary font-bold rounded-lg hover:bg-accent/80 active:scale-95 transition-all text-lg">
               {t.hero.btnBook}
             </button>
-          </Link>
+          </BookingLink>
         </div>
       </section>
     </>

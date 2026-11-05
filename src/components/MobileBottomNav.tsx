@@ -6,6 +6,7 @@ import { Home, Scissors, Calendar, Phone } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import BookingLink from '@/components/BookingLink'
 
 // Mobile bottom navigation component
 
@@ -63,6 +64,19 @@ export default function MobileBottomNav() {
         {navItems.map((item, index) => {
           const Icon = item.icon
           return (
+            item.label === t.nav.booking ? (
+            <BookingLink
+              key={index}
+              className={`flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-300 min-w-0 flex-1 ${
+                item.active
+                  ? 'bg-accent/20 text-accent'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Icon size={20} className="mb-1" />
+              <span className="text-xs font-medium truncate">{item.label}</span>
+            </BookingLink>
+            ) : (
             <Link
               key={index}
               href={item.href}
@@ -75,6 +89,7 @@ export default function MobileBottomNav() {
               <Icon size={20} className="mb-1" />
               <span className="text-xs font-medium truncate">{item.label}</span>
             </Link>
+            )
           )
         })}
       </div>

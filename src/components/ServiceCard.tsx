@@ -2,8 +2,8 @@
 
 import { memo } from 'react'
 import { useLanguage } from '@/lib/language-context'
-import { useRouter } from 'next/navigation'
 import { Clock, ArrowRight, Sparkles } from 'lucide-react'
+import BookingLink from '@/components/BookingLink'
 
 interface ServiceCardProps {
   title: string
@@ -17,14 +17,8 @@ interface ServiceCardProps {
 
 const ServiceCard = memo(function ServiceCard({ title, description, nameEn, descriptionEn, price, duration, icon }: ServiceCardProps) {
   const { t, locale } = useLanguage()
-  const router = useRouter()
   const displayTitle = locale === 'en' ? nameEn || title : title
   const displayDescription = locale === 'en' ? descriptionEn || description : description
-
-  const handleReserve = () => {
-    // Rediriger vers la page booking avec le service pré-sélectionné
-    router.push(`/booking?service=${encodeURIComponent(displayTitle)}`)
-  }
 
   return (
     <div
@@ -70,14 +64,14 @@ const ServiceCard = memo(function ServiceCard({ title, description, nameEn, desc
         </div>
 
         {/* CTA Button */}
-        <button
-          onClick={handleReserve}
+        <BookingLink
+          fallbackHref={`/${locale}/booking?service=${encodeURIComponent(displayTitle)}`}
           className="group/btn w-full relative inline-flex items-center justify-center gap-2 py-3.5 sm:py-4 px-6 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30 hover:scale-105 active:scale-98"
         >
           <Sparkles size={16} className="transition-transform group-hover/btn:rotate-12" />
           <span>{t.services.reserve}</span>
           <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
-        </button>
+        </BookingLink>
       </div>
     </div>
   )

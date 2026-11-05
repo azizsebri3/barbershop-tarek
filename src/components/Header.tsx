@@ -12,6 +12,7 @@ import { useAdminAuth } from '@/lib/useAdminAuth'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
+import BookingLink from '@/components/BookingLink'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -132,13 +133,12 @@ export default function Header() {
           ))}
 
           {/* CTA Button */}
-          <Link
-            href="/booking"
+          <BookingLink
             className="ml-2 px-4 py-2.5 bg-accent hover:bg-orange-300 text-primary rounded-xl font-black text-[10px] uppercase tracking-[0.12em] transition-all duration-300 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5"
             suppressHydrationWarning
           >
             {t.nav.booking}
-          </Link>
+          </BookingLink>
 
           {/* Language & Admin Controls */}
           <div className="flex items-center gap-3 ml-3 pl-3 border-l border-white/10">
@@ -228,13 +228,12 @@ export default function Header() {
                 ))}
                 
                 {/* Mobile CTA */}
-                <Link
-                  href="/booking"
+                <BookingLink
                   className="flex items-center justify-center gap-2 w-full px-6 py-3 mt-3 bg-accent text-primary rounded-xl font-black shadow-lg shadow-accent/20"
                   onClick={() => setIsOpen(false)}
                 >
                   {t.nav.booking}
-                </Link>
+                </BookingLink>
                 
                 {/* Mobile Admin */}
                 {isAdmin ? (

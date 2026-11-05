@@ -2,11 +2,11 @@
 
 import { motion } from 'framer-motion'
 import ServiceCard from '@/components/ServiceCard'
+import BookingLink from '@/components/BookingLink'
 import { useServices } from '@/lib/useServicesCached'
 import { Check, Sparkles, HelpCircle, ArrowRight } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import ClientPortfolio from '@/components/ClientPortfolio'
-import Link from 'next/link'
 
 export default function PricingPageContent() {
   const { t } = useLanguage()
@@ -140,7 +140,7 @@ export default function PricingPageContent() {
               <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">{t.pricing.ctaTitle}</h3>
               <p className="text-gray-400">{t.pricing.ctaDescription}</p>
             </div>
-            <Link href="/booking">
+            <BookingLink>
               <motion.button
                 whileHover={{ scale: 1.03, boxShadow: '0 20px 40px rgba(212, 175, 55, 0.3)' }}
                 whileTap={{ scale: 0.98 }}
@@ -149,7 +149,7 @@ export default function PricingPageContent() {
                 {t.pricing.ctaButton}
                 <ArrowRight size={18} />
               </motion.button>
-            </Link>
+            </BookingLink>
           </div>
         </motion.div>
       </section>

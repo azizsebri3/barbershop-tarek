@@ -83,6 +83,21 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient()
+    const { data: generalSettings, error: settingsError } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'general')
+      .single()
+
+    if (settingsError && settingsError.code !== 'PGRST116') {
+      console.error('Error fetching booking settings:', settingsError)
+      return NextResponse.json(
+        { error: 'Erreur lors du chargement des paramètres de réservation' },
+        { status: 500 }
+      )
+    }
+
+    const autoConfirmBookings = generalSettings?.value?.autoConfirmBookings === true
 
     // Vérifier la disponibilité en tenant compte de la durée du service
     const services = [
@@ -195,7 +210,7 @@ export async function POST(request: NextRequest) {
         time,
         service,
         message,
-        status: 'pending',
+        status: autoConfirmBookings ? 'confirmed' : 'pending',
       })
       .select()
 

@@ -178,6 +178,11 @@ export const translations = {
         phone: '+32465632205',
         message: 'Ajouter des détails supplémentaires...',
       },
+      choiceTitle: 'Comment souhaitez-vous réserver ?',
+      choiceDescription: 'Choisissez la plateforme qui vous convient le mieux.',
+      choiceWebsite: 'Réserver sur notre site',
+      choiceSalonkee: 'Réserver sur Salonkee',
+      closeChoice: 'Fermer',
       errors: {
         nameRequired: 'Le nom est requis',
         emailRequired: "L'email est requis",
@@ -483,6 +488,11 @@ export const translations = {
         phone: '+32465632205',
         message: 'Add additional details...',
       },
+      choiceTitle: 'How would you like to book?',
+      choiceDescription: 'Choose the booking platform that works best for you.',
+      choiceWebsite: 'Book on our website',
+      choiceSalonkee: 'Book on Salonkee',
+      closeChoice: 'Close',
       errors: {
         nameRequired: 'Name is required',
         emailRequired: 'Email is required',

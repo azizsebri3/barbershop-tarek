@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useLanguage } from '@/lib/language-context'
 import { ArrowRight } from 'lucide-react'
+import BookingLink from '@/components/BookingLink'
 
 const Hero = memo(function Hero() {
   const { t } = useLanguage()
@@ -55,12 +56,12 @@ const Hero = memo(function Hero() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 animate-fadeInUp"
             style={{ animationDelay: '0.3s' }}
           >
-            <Link href="/booking" className="w-full sm:w-auto">
+            <BookingLink className="w-full sm:w-auto">
               <button className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-full transition-all duration-300 text-base sm:text-lg shadow-xl shadow-accent/25 hover:from-orange-300 hover:to-accent hover:shadow-2xl hover:shadow-accent/40 hover:scale-105 active:scale-98">
                 {t.hero.btnBook}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </button>
-            </Link>
+            </BookingLink>
 
             <Link href="/pricing" className="w-full sm:w-auto">
               <button className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-black/40 backdrop-blur-md text-white font-semibold rounded-full border border-white/40 transition-all duration-300 text-base sm:text-lg hover:bg-black/60 hover:scale-105 active:scale-98">

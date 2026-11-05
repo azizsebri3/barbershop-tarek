@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import BookingLink from '@/components/BookingLink'
 import { MapPin, Phone, Mail, ArrowRight, Sparkles, Clock, Instagram, Facebook } from 'lucide-react'
 import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettingsCached'
 import { useLanguage } from '@/lib/language-context'
@@ -210,13 +211,12 @@ export default function Footer() {
                 whileTap={{ scale: 0.98 }}
                 className="mt-6"
               >
-                <Link 
-                  href="/booking" 
+                <BookingLink
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30"
                 >
                   <Sparkles size={16} />
                   {t.footer.bookButton}
-                </Link>
+                </BookingLink>
               </motion.div>
               <a
                 href="https://g.page/r/CQIG5Mt4inBSEBM/review"
