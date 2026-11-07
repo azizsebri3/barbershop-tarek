@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { format } from 'date-fns'
@@ -39,8 +39,21 @@ export default function ModernBookingForm() {
   const [selectedService, setSelectedService] = useState('')
   const [selectedDateTime, setSelectedDateTime] = useState<{ date: string; time: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const formRef = useRef<HTMLDivElement>(null)
 
   const { register, handleSubmit, formState: { errors } } = useForm<BookingFormData>()
+
+  useEffect(() => {
+    if (currentStep === 'service') return
+
+    const formTop = formRef.current?.getBoundingClientRect().top
+    if (formTop === undefined) return
+
+    window.scrollTo({
+      top: window.scrollY + formTop - 24,
+      behavior: 'smooth',
+    })
+  }, [currentStep])
 
   const steps = useMemo(() => [
     { id: 'service', label: t.booking.serviceStep, icon: Sparkles },
@@ -369,13 +382,13 @@ export default function ModernBookingForm() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div ref={formRef} className="max-w-4xl mx-auto">
       <Toaster position="top-right" />
 
       {/* Progress Steps */}
       {currentStep !== 'confirm' && (
       <div className="mb-8">
-        <div className="flex items-center space-x-4">
+        <div className="mx-auto flex w-full max-w-md items-center justify-center px-2 sm:max-w-lg">
           {steps.map((step, index) => {
             const isActive = step.id === currentStep
             const isCompleted = steps.findIndex(s => s.id === currentStep) > index
@@ -399,7 +412,7 @@ export default function ModernBookingForm() {
                   <span className="text-xs text-zinc-400">{index + 1}/3</span>
                   </div>
                 {index < steps.length - 1 && (
-                  <div className={`w-12 h-0.5 mx-2 ${
+                  <div className={`h-0.5 min-w-8 flex-1 mx-2 sm:min-w-12 ${
                     isCompleted ? 'bg-green-500' : 'bg-gray-600'
                   }`} />
                 )}
@@ -419,7 +432,7 @@ export default function ModernBookingForm() {
       </AnimatePresence>
 
       {/* Navigation */}
-      {currentStep !== 'service' && currentStep !== 'confirm' && (
+      {currentStep === 'datetime' && (
         <div className="flex justify-start mt-8">
           <button
             onClick={handleBack}
