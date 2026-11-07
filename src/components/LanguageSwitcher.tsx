@@ -3,13 +3,12 @@
 import { useLanguage } from '@/lib/language-context'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 export default function LanguageSwitcher() {
   const { locale, setLocale } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
 
   const languages = [
     { code: 'fr', label: 'FR', short: 'FR', enabled: true },
@@ -55,7 +54,7 @@ export default function LanguageSwitcher() {
                   if (!lang.enabled) return
                   setLocale(lang.code as 'en' | 'fr' | 'nl')
                   const pathWithoutLocale = pathname.replace(/^\/(fr|en|nl)(?=\/|$)/, '') || '/'
-                  router.push(`/${lang.code}${pathWithoutLocale}`)
+                  window.location.assign(`/${lang.code}${pathWithoutLocale}`)
                   setIsOpen(false)
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 transition-all duration-200 ${
