@@ -121,11 +121,15 @@ export async function POST(request: NextRequest) {
       .eq('date', date)
 
     if (availabilityError) {
-      console.error('Error fetching configured availability:', availabilityError)
-      return NextResponse.json(
-        { error: 'Unable to verify availability' },
-        { status: 500 }
-      )
+      if (isMissingAvailabilityTable(availabilityError)) {
+        console.warn('availability_slots is not available; using default booking hours')
+      } else {
+        console.error('Error fetching configured availability:', availabilityError)
+        return NextResponse.json(
+          { error: 'Unable to verify availability' },
+          { status: 500 }
+        )
+      }
     }
 
     if (availabilitySlots && availabilitySlots.length > 0) {
@@ -168,6 +172,12 @@ export async function POST(request: NextRequest) {
     function toMinutes(time: string): number {
       const [hours, minutes] = time.split(':').map(Number)
       return hours * 60 + minutes
+    }
+
+    function isMissingAvailabilityTable(error: { code?: string; message?: string }): boolean {
+      return error.code === '42P01' ||
+        error.code === 'PGRST205' ||
+        error.message?.toLowerCase().includes('availability_slots') === true
     }
     
     // Vérifier les conflits

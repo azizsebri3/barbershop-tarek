@@ -4,9 +4,15 @@ import { MessageCircle } from 'lucide-react'
 import BookingLink from '@/components/BookingLink'
 import { useLanguage } from '@/lib/language-context'
 import { track } from '@vercel/analytics'
+import { usePathname } from 'next/navigation'
 
 export default function MobileBottomNav() {
   const { locale, t } = useLanguage()
+  const pathname = usePathname()
+
+  if (pathname?.includes('/booking')) {
+    return null
+  }
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-ink/90 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">

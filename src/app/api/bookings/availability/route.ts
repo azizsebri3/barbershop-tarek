@@ -50,8 +50,12 @@ export async function GET(request: NextRequest) {
       .eq('date', date)
 
     if (availabilityError) {
-      console.error('❌ Supabase availability error:', availabilityError)
-      return NextResponse.json({ error: availabilityError.message }, { status: 500 })
+      if (isMissingAvailabilityTable(availabilityError)) {
+        console.warn('availability_slots is not available; using default booking hours')
+      } else {
+        console.error('❌ Supabase availability error:', availabilityError)
+        return NextResponse.json({ error: availabilityError.message }, { status: 500 })
+      }
     }
 
     const availableSlots = generateTimeSlots(
@@ -70,6 +74,12 @@ export async function GET(request: NextRequest) {
       { error: 'Internal server error' },
       { status: 500 }
     )
+  }
+
+  function isMissingAvailabilityTable(error: { code?: string; message?: string }): boolean {
+    return error.code === '42P01' ||
+      error.code === 'PGRST205' ||
+      error.message?.toLowerCase().includes('availability_slots') === true
   }
 }
 

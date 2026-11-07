@@ -167,6 +167,7 @@ export default function AdminCalendar() {
   })
 
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([])
+  const availabilityEditingEnabled = false
   const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>(
     typeof window !== 'undefined' && window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek'
   )
@@ -202,51 +203,21 @@ export default function AdminCalendar() {
         const data = await response.json()
         setAvailability(data)
       } else {
-        // Si l'API n'est pas encore configurée, utiliser des créneaux par défaut
-        const defaultSlots: AvailabilitySlot[] = []
-        for (let i = 0; i < 30; i++) {
-          const date = new Date()
-          date.setDate(date.getDate() + i)
-          
-          // Skip Sundays
-          if (date.getDay() === 0) continue
-          
-          const dateStr = date.toISOString().split('T')[0]
-          defaultSlots.push({
-            date: dateStr,
-            start_time: '09:00',
-            end_time: '18:00',
-            is_available: true,
-            is_all_day: false
-          })
-        }
-        setAvailability(defaultSlots)
+        toast.error('Availability controls are temporarily disabled')
       }
     } catch (error) {
       console.error('Error loading availability:', error)
-      // Fallback sur des créneaux par défaut
-      const defaultSlots: AvailabilitySlot[] = []
-      for (let i = 0; i < 30; i++) {
-        const date = new Date()
-        date.setDate(date.getDate() + i)
-        
-        if (date.getDay() === 0) continue
-        
-        const dateStr = date.toISOString().split('T')[0]
-        defaultSlots.push({
-          date: dateStr,
-          start_time: '09:00',
-          end_time: '18:00',
-          is_available: true,
-          is_all_day: false
-        })
-      }
-      setAvailability(defaultSlots)
+      toast.error('Availability controls are temporarily disabled')
     }
   }
 
   // Sauvegarder les disponibilités
   const saveAvailability = async (slot: AvailabilitySlot) => {
+    if (!availabilityEditingEnabled) {
+      toast.error('Availability controls are temporarily disabled')
+      return
+    }
+
     try {
       const method = slot.id ? 'PUT' : 'POST'
       const url = slot.id ? `/api/availability/${slot.id}` : '/api/availability'
@@ -282,6 +253,11 @@ export default function AdminCalendar() {
 
   // Delete an availability
   const deleteAvailability = async (slotId: string) => {
+    if (!availabilityEditingEnabled) {
+      toast.error('Availability controls are temporarily disabled')
+      return
+    }
+
     try {
       const response = await fetch(`/api/availability/${slotId}`, {
         method: 'DELETE',
@@ -402,6 +378,12 @@ export default function AdminCalendar() {
   }
 
   const moveBooking = async (event: any) => {
+    if (!availabilityEditingEnabled) {
+      event.revert()
+      toast.error('Appointment changes are temporarily disabled')
+      return
+    }
+
     const booking = event.event.extendedProps.data as Booking
     const start = event.event.start as Date
     const updates = {
@@ -441,6 +423,11 @@ export default function AdminCalendar() {
 
   // Gérer les clics sur les dates
   const handleDateClick = (dateInfo: any) => {
+    if (!availabilityEditingEnabled) {
+      toast.error('Availability controls are temporarily disabled')
+      return
+    }
+
     setSelectedDate(dateInfo.dateStr)
     setModalType('availability')
     setShowModal(true)
@@ -603,6 +590,11 @@ export default function AdminCalendar() {
             ))}
           </div>
         </div>
+        {!availabilityEditingEnabled && (
+          <p className="mx-3 mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-200 sm:mx-5">
+            Availability controls are temporarily disabled until the production database is verified.
+          </p>
+        )}
         <div className="calendar-container px-1 py-2 sm:p-5">
           <FullCalendar
             ref={calendarRef}
@@ -610,8 +602,8 @@ export default function AdminCalendar() {
             initialView={currentView}
             headerToolbar={false}
             events={events}
-            editable={true}
-            selectable={true}
+            editable={availabilityEditingEnabled}
+            selectable={false}
             selectMirror={true}
             select={(selectionInfo) => openManualBooking(selectionInfo.start)}
             eventDrop={moveBooking}
