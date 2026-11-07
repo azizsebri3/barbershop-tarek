@@ -58,7 +58,7 @@ export default function AdminGalleryPage() {
           continue
         }
 
-        toast.success(`Photo ${file.name} uploadée !`)
+        toast.success(`Photo ${file.name} uploaded!`)
       } catch (error) {
         console.error('Erreur upload:', error)
         toast.error(`Erreur upload de ${file.name}`)
@@ -91,7 +91,7 @@ export default function AdminGalleryPage() {
       })
 
       if (response.ok) {
-        toast.success('Photo supprimée')
+        toast.success('Photo deleted')
         fetchPhotos()
       } else {
         toast.error('Erreur de suppression')
@@ -126,7 +126,7 @@ export default function AdminGalleryPage() {
           <h1 className="text-4xl font-bold text-white mb-2">
             📸 <span className="text-accent">Galerie</span> Photos
           </h1>
-          <p className="text-gray-400">Gérez les photos de votre salon</p>
+          <p className="text-gray-400">Manage your salon photos</p>
         </motion.div>
 
         {/* Zone d'upload */}
@@ -149,14 +149,14 @@ export default function AdminGalleryPage() {
             {uploading ? (
               <p className="text-white font-semibold">Upload en cours...</p>
             ) : isDragActive ? (
-              <p className="text-white font-semibold">Déposez les photos ici...</p>
+              <p className="text-white font-semibold">Drop your photos here...</p>
             ) : (
               <>
                 <p className="text-white font-semibold mb-2">
-                  Glissez-déposez des photos ici
+                  Drag and drop photos here
                 </p>
                 <p className="text-gray-400 text-sm">
-                  ou cliquez pour sélectionner (JPG, PNG, WEBP - Max 10 MB)
+                  or click to select (JPG, PNG, WEBP - Max 10 MB)
                 </p>
               </>
             )}
@@ -169,7 +169,7 @@ export default function AdminGalleryPage() {
             <ImageIcon className="mx-auto text-gray-600 mb-4" size={64} />
             <p className="text-gray-400">Aucune photo pour le moment</p>
             <p className="text-gray-500 text-sm mt-2">
-              Uploadez vos premières photos ci-dessus
+              Upload your first photos above
             </p>
           </div>
         ) : (

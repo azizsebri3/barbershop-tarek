@@ -72,7 +72,8 @@ async function sendPushNotification(booking: { name: string; service: string; da
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, email, phone, date, time, service, message } = body
+    const { name, email, phone, date, time, service, message, language = 'fr' } = body
+    const bookingLanguage = ['fr', 'en', 'nl'].includes(language) ? language : 'fr'
 
     // Validation
     if (!name || !email || !phone || !date || !time || !service) {
@@ -83,6 +84,21 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient()
+    const { data: generalSettings, error: settingsError } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'general')
+      .single()
+
+    if (settingsError && settingsError.code !== 'PGRST116') {
+      console.error('Error fetching booking settings:', settingsError)
+      return NextResponse.json(
+        { error: 'Erreur lors du chargement des paramètres de réservation' },
+        { status: 500 }
+      )
+    }
+
+    const autoConfirmBookings = generalSettings?.value?.autoConfirmBookings === true
 
     // Vérifier la disponibilité en tenant compte de la durée du service
     const services = [
@@ -98,6 +114,41 @@ export async function POST(request: NextRequest) {
     const [startHour, startMin] = time.split(':').map(Number)
     const startMinutes = startHour * 60 + startMin
     const endMinutes = startMinutes + serviceDuration
+
+    const { data: availabilitySlots, error: availabilityError } = await supabase
+      .from('availability_slots')
+      .select('start_time, end_time, is_available, is_all_day')
+      .eq('date', date)
+
+    if (availabilityError) {
+      console.error('Error fetching configured availability:', availabilityError)
+      return NextResponse.json(
+        { error: 'Unable to verify availability' },
+        { status: 500 }
+      )
+    }
+
+    if (availabilitySlots && availabilitySlots.length > 0) {
+      const isWithinAvailableSlot = availabilitySlots.some(slot => {
+        if (!slot.is_available) return false
+        const slotStart = slot.is_all_day ? 0 : toMinutes(slot.start_time)
+        const slotEnd = slot.is_all_day ? 24 * 60 : toMinutes(slot.end_time)
+        return startMinutes >= slotStart && endMinutes <= slotEnd
+      })
+      const overlapsUnavailableSlot = availabilitySlots.some(slot => {
+        if (slot.is_available) return false
+        const slotStart = slot.is_all_day ? 0 : toMinutes(slot.start_time)
+        const slotEnd = slot.is_all_day ? 24 * 60 : toMinutes(slot.end_time)
+        return startMinutes < slotEnd && endMinutes > slotStart
+      })
+
+      if (!isWithinAvailableSlot || overlapsUnavailableSlot) {
+        return NextResponse.json(
+          { error: 'This time is not available for booking' },
+          { status: 409 }
+        )
+      }
+    }
     
     // Récupérer les réservations existantes pour cette date
     const { data: existingBookings, error: fetchError } = await supabase
@@ -112,6 +163,11 @@ export async function POST(request: NextRequest) {
         { error: 'Erreur lors de la vérification des disponibilités' },
         { status: 500 }
       )
+    }
+
+    function toMinutes(time: string): number {
+      const [hours, minutes] = time.split(':').map(Number)
+      return hours * 60 + minutes
     }
     
     // Vérifier les conflits
@@ -185,19 +241,34 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert booking into Supabase
-    const { data, error } = await supabase
+    const bookingRecord = {
+      name,
+      email,
+      phone,
+      date,
+      time,
+      service,
+      message,
+      language: bookingLanguage,
+      status: autoConfirmBookings ? 'confirmed' : 'pending',
+    }
+
+    let { data, error } = await supabase
       .from('bookings')
-      .insert({
-        name,
-        email,
-        phone,
-        date,
-        time,
-        service,
-        message,
-        status: 'pending',
-      })
+      .insert(bookingRecord)
       .select()
+
+    // Keep bookings working until the existing Supabase database gets the new column.
+    if (error && (error.code === '42703' || error.code === 'PGRST204') && error.message.toLowerCase().includes('language')) {
+      const { language: _language, ...legacyBookingRecord } = bookingRecord
+      const retry = await supabase
+        .from('bookings')
+        .insert(legacyBookingRecord)
+        .select()
+
+      data = retry.data
+      error = retry.error
+    }
 
     if (error) {
       console.error('Supabase error:', error)
@@ -220,6 +291,7 @@ export async function POST(request: NextRequest) {
       time, 
       service, 
       message 
+      ,language: bookingLanguage
     })
 
     return NextResponse.json(

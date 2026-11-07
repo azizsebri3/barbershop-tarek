@@ -5,12 +5,24 @@ import { services as defaultServices } from '@/lib/data'
 
 interface Service {
   id: string
+  translationKey?: string
   name: string
   description: string
   nameEn?: string
   descriptionEn?: string
   price: number
   duration: number
+}
+
+function getTranslationKey(name: string, id: string): string | undefined {
+  if (['coupe-homme', 'barbe-coupe', 'barbe-seulement', 'coupe-enfant', 'coupe-senior'].includes(id)) return id
+  const normalized = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  if (normalized.includes('coupe') && normalized.includes('homme')) return 'coupe-homme'
+  if (normalized.includes('barbe') && normalized.includes('coupe')) return 'barbe-coupe'
+  if (normalized.includes('barbe')) return 'barbe-seulement'
+  if (normalized.includes('enfant') || normalized.includes('children') || normalized.includes('kinder')) return 'coupe-enfant'
+  if (normalized.includes('senior')) return 'coupe-senior'
+  return undefined
 }
 
 // Cache global avec TTL de 5 minutes
@@ -34,6 +46,7 @@ async function fetchServices(): Promise<Service[]> {
 
   return remoteServices.map((service: Service & { name_en?: string; description_en?: string }) => ({
     ...service,
+    translationKey: getTranslationKey(service.name, service.id),
     nameEn: service.nameEn || service.name_en,
     descriptionEn: service.descriptionEn || service.description_en,
   }))
@@ -46,7 +59,7 @@ function isCacheValid(): boolean {
 
 export function useServices() {
   const [services, setServices] = useState<Service[]>(cachedServices || defaultServices)
-  const [loading, setLoading] = useState<boolean>(!cachedServices)
+  const [loading, setLoading] = useState<boolean>(false)
 
   useEffect(() => {
     let mounted = true

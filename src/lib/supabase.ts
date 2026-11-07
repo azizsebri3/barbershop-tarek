@@ -32,6 +32,7 @@ export interface Booking {
   cancelled_by?: 'client' | 'admin'
   created_at: string
   status: 'pending' | 'confirmed' | 'cancelled'
+  language?: 'fr' | 'en' | 'nl'
 }
 
 export interface Service {

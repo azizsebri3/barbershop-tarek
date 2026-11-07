@@ -42,8 +42,22 @@ export async function GET(request: NextRequest) {
       ?.filter(b => b.id !== excludeBookingId)
       .map(b => b.time) || []
 
-    // Generate available time slots (every 30 minutes from 09:30 to 19:00)
-    const availableSlots = generateTimeSlots(occupiedTimes)
+    // Apply the availability configured by the admin for this date.
+    // If no override exists, preserve the normal 09:30-18:30 schedule.
+    const { data: availabilitySlots, error: availabilityError } = await supabase
+      .from('availability_slots')
+      .select('start_time, end_time, is_available, is_all_day')
+      .eq('date', date)
+
+    if (availabilityError) {
+      console.error('❌ Supabase availability error:', availabilityError)
+      return NextResponse.json({ error: availabilityError.message }, { status: 500 })
+    }
+
+    const availableSlots = generateTimeSlots(
+      occupiedTimes,
+      availabilitySlots || []
+    )
 
     return NextResponse.json({
       date,
@@ -59,7 +73,15 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function generateTimeSlots(occupiedTimes: string[]): string[] {
+function generateTimeSlots(
+  occupiedTimes: string[],
+  availabilitySlots: Array<{
+    start_time: string
+    end_time: string
+    is_available: boolean
+    is_all_day: boolean
+  }>
+): string[] {
   const slots: string[] = []
   const startHour = 9
   const endHour = 19 // 19:00
@@ -67,7 +89,23 @@ function generateTimeSlots(occupiedTimes: string[]): string[] {
   for (let hour = startHour; hour < endHour; hour++) {
     for (let minutes of hour === startHour ? [30] : [0, 30]) {
       const timeStr = `${String(hour).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
-      if (!occupiedTimes.includes(timeStr)) {
+      const isWithinAvailability = availabilitySlots.length === 0
+        ? true
+        : availabilitySlots.some(slot => {
+            const slotStart = slot.is_all_day ? '00:00' : slot.start_time
+            const slotEnd = slot.is_all_day ? '23:59' : slot.end_time
+            const isInSlot = timeStr >= slotStart && timeStr < slotEnd
+            return slot.is_available ? isInSlot : !isInSlot
+          })
+
+      const isBlockedByUnavailableSlot = availabilitySlots.some(slot => {
+        if (slot.is_available) return false
+        const slotStart = slot.is_all_day ? '00:00' : slot.start_time
+        const slotEnd = slot.is_all_day ? '23:59' : slot.end_time
+        return timeStr >= slotStart && timeStr < slotEnd
+      })
+
+      if (!occupiedTimes.includes(timeStr) && isWithinAvailability && !isBlockedByUnavailableSlot) {
         slots.push(timeStr)
       }
     }

@@ -27,7 +27,7 @@ src/
   │   ├── Footer.tsx
   │   ├── Hero.tsx
   │   ├── ServiceCard.tsx
-  │   ├── BookingForm.tsx
+  │     ├── ModernBookingForm.tsx
   │   └── OpeningHours.tsx
   └── lib/                   # Utilities
       ├── supabase.ts        # Supabase client

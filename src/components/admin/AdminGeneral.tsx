@@ -16,6 +16,8 @@ import {
   BarChart3
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useGeneralSettings } from '@/lib/useGeneralSettings'
+import type { BookingMode } from '@/lib/booking'
 
 interface DashboardStats {
   totalBookings: number
@@ -38,10 +40,49 @@ export default function AdminGeneral() {
     avgRating: 0
   })
   const [loading, setLoading] = useState(true)
+  const { settings, updateSettings } = useGeneralSettings()
+  const [bookingMode, setBookingMode] = useState<BookingMode>('choice')
+  const [savingBookingMode, setSavingBookingMode] = useState(false)
+  const [bookingModeMessage, setBookingModeMessage] = useState('')
+  const [autoConfirmBookings, setAutoConfirmBookings] = useState(false)
+  const [savingAutoConfirm, setSavingAutoConfirm] = useState(false)
 
   useEffect(() => {
     fetchDashboardStats()
   }, [])
+
+  useEffect(() => {
+    if (settings.bookingMode) setBookingMode(settings.bookingMode as BookingMode)
+    if (typeof settings.autoConfirmBookings === 'boolean') {
+      setAutoConfirmBookings(settings.autoConfirmBookings)
+    }
+  }, [settings.bookingMode, settings.autoConfirmBookings])
+
+  const handleBookingModeChange = async (mode: BookingMode) => {
+    setBookingMode(mode)
+    setSavingBookingMode(true)
+    setBookingModeMessage('')
+    try {
+      await updateSettings({ bookingMode: mode })
+      setBookingModeMessage('Booking mode saved.')
+    } catch {
+      setBookingModeMessage('Unable to save the booking mode.')
+    } finally {
+      setSavingBookingMode(false)
+    }
+  }
+
+  const handleAutoConfirmChange = async (enabled: boolean) => {
+    setAutoConfirmBookings(enabled)
+    setSavingAutoConfirm(true)
+    try {
+      await updateSettings({ autoConfirmBookings: enabled })
+    } catch {
+      setAutoConfirmBookings(!enabled)
+    } finally {
+      setSavingAutoConfirm(false)
+    }
+  }
 
   const fetchDashboardStats = async () => {
     try {
@@ -230,6 +271,81 @@ export default function AdminGeneral() {
           color="bg-amber-500/20 border-amber-500/30 text-amber-400"
         />
       </div>
+
+      {/* Quick Actions */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl border border-accent/20 bg-secondary/50 p-6"
+      >
+        <h2 className="mb-2 flex items-center text-2xl font-bold text-white">
+          <Calendar className="mr-3 h-6 w-6 text-accent" />
+          Booking mode
+        </h2>
+        <p className="mb-5 text-gray-400">
+          Choose what happens when a client clicks “Book”.
+        </p>
+        <div className="grid gap-3 md:grid-cols-3">
+          {([
+            ['choice', 'Let the client choose', 'The client chooses between the website and Salonkee.'],
+            ['website', 'Website only', 'Opens the website booking form directly.'],
+            ['salonkee', 'Salonkee only', 'Opens Salonkee booking directly.'],
+          ] as const).map(([mode, title, description]) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => handleBookingModeChange(mode)}
+              disabled={savingBookingMode}
+              className={`rounded-xl border p-4 text-left transition-colors ${
+                bookingMode === mode
+                  ? 'border-accent bg-accent/15 text-white'
+                  : 'border-white/10 bg-black/10 text-gray-300 hover:border-accent/50'
+              }`}
+            >
+              <span className="font-bold">{title}</span>
+              <span className="mt-1 block text-sm text-gray-400">{description}</span>
+            </button>
+          ))}
+        </div>
+        {bookingModeMessage && <p className="mt-3 text-sm text-accent">{bookingModeMessage}</p>}
+      </motion.section>
+
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl border border-accent/20 bg-secondary/50 p-6"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Automatic booking confirmation</h2>
+            <p className="mt-2 text-gray-400">
+              Accept new website bookings immediately without manual approval.
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={autoConfirmBookings}
+            aria-label="Automatic booking confirmation"
+            disabled={savingAutoConfirm}
+            onClick={() => handleAutoConfirmChange(!autoConfirmBookings)}
+            className={`relative h-8 w-14 shrink-0 rounded-full transition-colors ${
+              autoConfirmBookings ? 'bg-accent' : 'bg-gray-600'
+            }`}
+          >
+            <span
+              className={`absolute top-1 h-6 w-6 rounded-full bg-white transition-transform ${
+                autoConfirmBookings ? 'translate-x-7' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+        <p className={`mt-4 text-sm ${autoConfirmBookings ? 'text-green-400' : 'text-gray-400'}`}>
+          {autoConfirmBookings
+            ? 'Active: new bookings are confirmed automatically.'
+            : 'Inactive: new bookings remain pending until you confirm them.'}
+        </p>
+      </motion.section>
 
       {/* Quick Actions */}
       <motion.div

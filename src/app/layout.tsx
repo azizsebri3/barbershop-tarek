@@ -3,52 +3,38 @@ import dynamic from 'next/dynamic'
 import './globals.css'
 import { LanguageProvider } from '@/lib/language-context'
 import WhatsAppButton from '@/components/WhatsAppButton'
+import MobileBottomNav from '@/components/MobileBottomNav'
+import { Analytics } from '@vercel/analytics/react'
+import { Cormorant_Garamond, Inter } from 'next/font/google'
 
 // Lazy load des composants lourds
 const Header = dynamic(() => import('@/components/Header'), { ssr: true })
 const Footer = dynamic(() => import('@/components/Footer'), { ssr: true })
 
-// SEO Metadata optimisé pour Namur, Belgique
+const displayFont = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-display',
+  weight: ['500', '600', '700'],
+})
+
+const bodyFont = Inter({
+  subsets: ['latin'],
+  variable: '--font-body',
+})
+
+// TODO(contenu): ajouter le vrai jeton Google Search Console lorsqu'il sera fourni.
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'),
-  
-  // Titre optimisé avec mots-clés locaux
   title: {
-    default: 'Tarek Salon | Coiffeur & Barbershop à Namur, Belgique',
-    template: '%s | Tarek Salon Namur'
+    default: 'Tarek Salon | Barbershop à Namur',
+    template: '%s | Tarek Salon'
   },
-  
-  // Description avec mots-clés locaux (155-160 caractères)
-  description: 'Tarek Salon, votre coiffeur et barbershop à Namur. Coupes modernes, barbe, dégradé, coloration. Réservez en ligne 24h/24. Meilleur salon de coiffure à Namur, Belgique.',
-  
-  // Mots-clés ciblés
-  keywords: [
-    'coiffeur namur',
-    'barbershop namur',
-    'salon de coiffure namur',
-    'coiffeur namur belgique',
-    'tarek salon',
-    'tarek salon namur',
-    'coiffeur homme namur',
-    'barbier namur',
-    'coupe homme namur',
-    'dégradé namur',
-    'barbe namur',
-    'meilleur coiffeur namur',
-    'coiffeur pas cher namur',
-    'salon coiffure namur centre',
-    'coiffeur belgique'
-  ],
-  
-  // Auteur et créateur
+  description: 'Tarek Salon à Namur : coupes homme, barbe et soins précis dans un espace premium. Réservez votre rendez-vous en ligne.',
   authors: [{ name: 'Tarek Salon' }],
   creator: 'Tarek Salon',
   publisher: 'Tarek Salon',
-  
-  // Catégorie
   category: 'Coiffure & Beauté',
-  
-  // Robots
   robots: {
     index: true,
     follow: true,
@@ -61,18 +47,17 @@ export const metadata: Metadata = {
     },
   },
   
-  // Open Graph (Facebook, LinkedIn)
   openGraph: {
     type: 'website',
     locale: 'fr_BE',
     alternateLocale: 'en_BE',
     url: 'https://tareksalon.be',
     siteName: 'Tarek Salon',
-    title: 'Tarek Salon | Coiffeur & Barbershop à Namur, Belgique',
-    description: 'Votre coiffeur et barbershop à Namur. Coupes modernes, barbe, dégradé. Réservez en ligne 24h/24. Le meilleur salon de coiffure à Namur.',
+    title: 'Tarek Salon | Barbershop à Namur',
+    description: 'Coupes homme, barbe et soins précis dans un espace premium à Namur. Réservez votre rendez-vous en ligne.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/hero-bg1.jpeg',
         width: 1200,
         height: 630,
         alt: 'Tarek Salon - Coiffeur Barbershop Namur',
@@ -80,22 +65,13 @@ export const metadata: Metadata = {
     ],
   },
   
-  // Twitter Card
   twitter: {
     card: 'summary_large_image',
-    title: 'Tarek Salon | Coiffeur & Barbershop Namur',
-    description: 'Votre coiffeur à Namur. Coupes modernes, barbe, dégradé. Réservez en ligne!',
-    images: ['/og-image.jpg'],
+    title: 'Tarek Salon | Barbershop à Namur',
+    description: 'Coupes homme, barbe et soins précis à Namur. Réservez votre rendez-vous en ligne.',
+    images: ['/hero-bg1.jpeg'],
   },
   
-  // Verification (à remplir après inscription)
-  verification: {
-    google: 'votre-code-google-search-console',
-    // yandex: 'votre-code-yandex',
-    // bing: 'votre-code-bing',
-  },
-  
-  // Alternates pour langues
   alternates: {
     canonical: 'https://tareksalon.be',
     languages: {
@@ -125,7 +101,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#b87333',
+  themeColor: '#0b0b0c',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -143,9 +119,17 @@ const jsonLd = {
   url: 'https://tareksalon.be',
   telephone: '+32465632205',
   email: 'contact@tareksalon.be',
-  image: 'https://tareksalon.be/og-image.jpg',
+  image: 'https://tareksalon.be/hero-bg1.jpeg',
   logo: 'https://tareksalon.be/icons/icon-512x512.png',
   hasMap: 'https://maps.app.goo.gl/YePu1ryxNkNZUgvZ8',
+  potentialAction: {
+    '@type': 'ReserveAction',
+    target: 'https://tareksalon.be/fr/booking',
+    result: {
+      '@type': 'Reservation',
+      name: 'Rendez-vous chez Tarek Salon',
+    },
+  },
   contactPoint: {
     '@type': 'ContactPoint',
     telephone: '+32465632205',
@@ -284,14 +268,16 @@ export default function RootLayout({
         {/* PWA Service Worker Registration */}
         <script src="/register-sw.js" defer />
       </head>
-      <body className="bg-primary text-white">
+      <body className={`${displayFont.variable} ${bodyFont.variable} bg-ink text-bone`}>
         <LanguageProvider>
           <Header />
-          <main className="pt-16">
+          <main className="pb-20 pt-16 md:pb-0">
             {children}
           </main>
           <Footer />
           <WhatsAppButton />
+          <MobileBottomNav />
+          <Analytics />
         </LanguageProvider>
       </body>
     </html>

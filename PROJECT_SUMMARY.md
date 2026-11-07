@@ -18,7 +18,7 @@ Félicitations ! Votre site vitrine moderne a été créé avec succès ! 🚀
 - ✅ **Footer** - Pied de page avec informations
 - ✅ **Hero** - Section d'accueil animée
 - ✅ **ServiceCard** - Carte de service réutilisable
-- ✅ **BookingForm** - Formulaire de réservation complet
+- ✅ **ModernBookingForm** - Formulaire de réservation complet
 - ✅ **OpeningHours** - Affichage des horaires en temps réel
 
 ### 📡 API Routes

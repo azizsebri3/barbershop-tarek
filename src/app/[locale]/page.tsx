@@ -2,9 +2,9 @@
 
 import { lazy, Suspense } from 'react'
 import Hero from '@/components/Hero'
-import { Star, Zap, Shield } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import LazyMap from '@/components/LazyMap'
+import BookingLink from '@/components/BookingLink'
 
 // Lazy load non-critical components
 const ServiceCarousel = lazy(() => import('@/components/ServiceCarousel'))
@@ -21,24 +21,18 @@ function SkeletonLoader() {
 
 export default function LocalePage() {
   const { t } = useLanguage()
-  const features = [
-    { icon: Star, title: t.features.feature1Title, desc: t.features.feature1Desc },
-    { icon: Zap, title: t.features.feature2Title, desc: t.features.feature2Desc },
-    { icon: Shield, title: t.features.feature3Title, desc: t.features.feature3Desc },
-  ]
-
   return (
     <>
       <Hero />
-      <section id="about" className="relative py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-primary">
+      <section id="about" className="relative py-20 md:py-32 px-5 md:px-8 bg-ink">
         <div className="max-w-4xl mx-auto text-center">
           <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-accent">
             {t.about.label}
           </p>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-bone mb-6 tracking-tight">
             {t.about.title}
           </h2>
-          <p className="text-base sm:text-lg leading-relaxed text-gray-300">
+          <p className="text-base sm:text-lg leading-relaxed text-zinc-400">
             {t.about.description}
           </p>
         </div>
@@ -53,27 +47,7 @@ export default function LocalePage() {
         <ClientPortfolio />
       </Suspense>
 
-      <section className="py-20 px-4 bg-secondary/50">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-accent animate-fadeIn">
-            {t.features.title}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, i) => (
-              <div
-                key={i}
-                className="bg-primary/50 rounded-lg p-6 border border-accent/20 hover:shadow-lg transition-shadow duration-300 hover:-translate-y-2"
-              >
-                <feature.icon className="w-12 h-12 text-accent mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-                <p className="text-gray-300">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" className="py-20 px-4 scroll-mt-24">
+      <section id="contact" className="py-20 md:py-32 px-5 md:px-8 scroll-mt-24 bg-ink">
         <Suspense fallback={<SkeletonLoader />}>
           <OpeningHours />
         </Suspense>
@@ -84,6 +58,16 @@ export default function LocalePage() {
       <Suspense fallback={<SkeletonLoader />}>
         <Testimonials />
       </Suspense>
+
+      <section className="relative overflow-hidden bg-surface px-5 py-20 md:px-8 md:py-32">
+        <div className="relative z-10 mx-auto max-w-3xl text-center">
+          <h2 className="mb-6 text-4xl font-bold text-bone md:text-5xl">{t.cta.title}</h2>
+          <p className="mb-8 text-lg leading-relaxed text-zinc-400">{t.cta.description}</p>
+          <BookingLink className="inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-8 py-4 font-bold text-ink transition-colors hover:bg-accent-hover">
+            {t.nav.booking}
+          </BookingLink>
+        </div>
+      </section>
     </>
   )
 }

@@ -26,7 +26,7 @@ export default function AdminNav() {
         window.location.href = '/'
       }, 2000)
     } catch (error) {
-      toast.error('Erreur lors de la déconnexion')
+      toast.error('Error during logout')
       setIsLoggingOut(false)
       setShowLogoutModal(false)
     }
@@ -35,12 +35,12 @@ export default function AdminNav() {
   const navItems = [
     {
       href: '/admin/dashboard',
-      label: 'Tableau de bord',
+      label: 'Dashboard',
       icon: LayoutDashboard,
     },
     {
       href: '/admin/gallery',
-      label: 'Galerie Photos',
+      label: 'Photo gallery',
       icon: Image,
     },
   ]
@@ -85,7 +85,7 @@ export default function AdminNav() {
             className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
           >
             <LogOut size={18} />
-            <span className="hidden sm:inline font-medium">Déconnexion</span>
+            <span className="hidden sm:inline font-medium">Log out</span>
           </button>
         </div>
 
@@ -148,9 +148,9 @@ export default function AdminNav() {
                 <div className="w-20 h-20 mx-auto mb-6 bg-red-500/20 rounded-full flex items-center justify-center border-2 border-red-500/30">
                   <LogOut className="text-red-400" size={36} />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Confirmer la déconnexion</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">Confirm logout</h3>
                 <p className="text-gray-300 mb-8 text-base">
-                  Êtes-vous sûr de vouloir vous déconnecter de votre session admin?
+                  Are you sure you want to log out of the admin session?
                 </p>
 
                 <div className="flex flex-col gap-3">
@@ -162,12 +162,12 @@ export default function AdminNav() {
                     {isLoggingOut ? (
                       <>
                         <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Déconnexion...</span>
+                        <span>Logging out...</span>
                       </>
                     ) : (
                       <>
                         <LogOut size={20} />
-                        <span>Oui, me déconnecter</span>
+                        <span>Yes, log me out</span>
                       </>
                     )}
                   </button>
@@ -176,7 +176,7 @@ export default function AdminNav() {
                     disabled={isLoggingOut}
                     className="w-full px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
                   >
-                    Annuler
+                    Cancel
                   </button>
                 </div>
               </div>
@@ -216,9 +216,9 @@ export default function AdminNav() {
                 >
                   <CheckCircle className="text-green-400" size={36} />
                 </motion.div>
-                <h3 className="text-2xl font-bold text-white mb-3">Déconnexion réussie!</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">Logged out successfully!</h3>
                 <p className="text-gray-300 mb-6 text-base">
-                  Vous avez été déconnecté avec succès. Redirection en cours...
+                  You have been logged out successfully. Redirecting...
                 </p>
                 <div className="flex justify-center">
                   <div className="w-8 h-8 border-3 border-green-400/30 border-t-green-400 rounded-full animate-spin" />

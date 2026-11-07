@@ -10,7 +10,6 @@ import ServiceCard from './ServiceCard'
 import { useServices } from '@/lib/useServicesCached'
 import { useLanguage } from '@/lib/language-context'
 import { motion } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
 
 const ServiceCarousel = memo(function ServiceCarousel() {
   const { services, loading } = useServices()
@@ -22,7 +21,7 @@ const ServiceCarousel = memo(function ServiceCarousel() {
         {/* Background elements */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-[100px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-[100px]" />
         </div>
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
@@ -38,11 +37,10 @@ const ServiceCarousel = memo(function ServiceCarousel() {
 
   return (
     <section id="services" className="relative py-16 sm:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background decorative elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
         <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] opacity-30" />
-        <div className="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px] opacity-20" />
+        <div className="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px] opacity-20" />
       </div>
 
       <div className="max-w-7xl mx-auto">
@@ -62,13 +60,13 @@ const ServiceCarousel = memo(function ServiceCarousel() {
             viewport={{ once: true }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-6"
           >
-            <Sparkles className="w-4 h-4 text-accent" />
+            <span className="w-10 h-px bg-accent" />
             <span className="text-sm font-medium text-white/80">{t.services.badge}</span>
           </motion.div>
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6">
             {t.services.title}{' '}
-            <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
+            <span className="text-accent">
               {t.services.titleAccent}
             </span>
           </h2>
@@ -119,6 +117,8 @@ const ServiceCarousel = memo(function ServiceCarousel() {
                   viewport={{ once: true }}
                 >
                   <ServiceCard
+                    id={service.id}
+                    translationKey={service.translationKey}
                     title={service.name}
                     description={service.description}
                     nameEn={service.nameEn}
@@ -162,8 +162,8 @@ const ServiceCarousel = memo(function ServiceCarousel() {
 
         :global(.swiper-button-next:hover),
         :global(.swiper-button-prev:hover) {
-          background: rgba(184, 115, 51, 0.2);
-          border-color: rgba(184, 115, 51, 0.4);
+          background: rgba(215, 25, 32, 0.1);
+          border-color: rgba(215, 25, 32, 0.4);
           transform: translateY(-50%) scale(1.05);
         }
 
@@ -186,7 +186,7 @@ const ServiceCarousel = memo(function ServiceCarousel() {
         }
 
         :global(.swiper-pagination-bullet-active) {
-          background: linear-gradient(to right, #b87333, #d99a5b);
+          background: #b87333;
           width: 32px;
           border-radius: 4px;
         }

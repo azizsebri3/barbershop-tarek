@@ -13,6 +13,8 @@ interface GeneralSettings {
   instagram?: string
   tiktok?: string
   logo_url?: string
+  bookingMode?: 'choice' | 'website' | 'salonkee'
+  autoConfirmBookings?: boolean
 }
 
 const defaultSettings: GeneralSettings = {

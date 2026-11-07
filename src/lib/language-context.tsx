@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { translations } from '@/lib/translations'
 
-type Locale = 'en' | 'fr'
+export type Locale = 'en' | 'fr' | 'nl'
 
 interface LanguageContextType {
   locale: Locale
@@ -20,7 +20,7 @@ export function LanguageProvider({ children, initialLocale = 'fr' }: { children:
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedLocale = localStorage.getItem('preferred-locale') as Locale | null
-      if (savedLocale && ['en', 'fr'].includes(savedLocale)) {
+      if (savedLocale && ['en', 'fr', 'nl'].includes(savedLocale)) {
         setLocaleState(savedLocale)
       }
     }

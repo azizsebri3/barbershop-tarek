@@ -16,6 +16,14 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 # Important: définir en production pour les emails de réinitialisation
 NEXT_PUBLIC_BASE_URL=https://votre-domaine.com
 
+# Avis Google (server-side uniquement)
+GOOGLE_PLACES_API_KEY=votre_cle_google_places
+GOOGLE_PLACE_ID=votre_place_id_google
+
+# Réservation Salonkee (OPTIONNEL jusqu'à réception du lien)
+# URL publique fournie par Salonkee pour la réservation de Tarek
+NEXT_PUBLIC_SALONKEE_BOOKING_URL=https://salonkee.com/...
+
 # Email Configuration (OPTIONNEL)
 SMTP_HOST=smtp.votre-domaine.com
 SMTP_PORT=587
@@ -23,6 +31,23 @@ SMTP_USER=votre-email@example.com
 SMTP_PASSWORD=votre-mot-de-passe
 EMAIL_FROM=noreply@example.com
 ```
+
+### Avis Google
+
+La section des témoignages affiche les avis publics de la fiche Google Business
+via **Places API (New)**. Activez cette API dans Google Cloud, créez une clé
+restreinte à cette API, puis renseignez `GOOGLE_PLACE_ID`. Le lien de la fiche
+Google seul ne permet pas de récupérer automatiquement les avis.
+
+## 📅 Connexion à Salonkee
+
+Quand Salonkee aura activé la fiche de Tarek et fourni son lien de réservation :
+
+1. Ajoutez ce lien dans `.env.local` sous `NEXT_PUBLIC_SALONKEE_BOOKING_URL`.
+2. Ajoutez la même variable dans les variables d'environnement de Vercel (environnements **Production**, et **Preview** si nécessaire).
+3. Relancez le déploiement.
+
+Tous les boutons « Réserver » du site (accueil, menu, tarifs, services, pied de page et navigation mobile) utiliseront alors automatiquement Salonkee. Si la variable est vide, le formulaire de réservation interne reste disponible comme solution de repli.
 
 ## 🔑 Où Trouver les Clés Supabase
 

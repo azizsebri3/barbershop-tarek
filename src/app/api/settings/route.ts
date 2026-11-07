@@ -51,11 +51,22 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseClient()
+    const { data: currentSettings, error: currentSettingsError } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'general')
+      .single()
+
+    if (currentSettingsError && currentSettingsError.code !== 'PGRST116') {
+      console.error('Erreur lecture settings existants:', currentSettingsError)
+      return NextResponse.json({ error: currentSettingsError.message }, { status: 500 })
+    }
+
     const { error } = await supabase
       .from('settings')
       .upsert({
         key: 'general',
-        value: settings,
+        value: { ...(currentSettings?.value || {}), ...settings },
         updated_at: new Date().toISOString()
       }, {
         onConflict: 'key'
