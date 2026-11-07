@@ -22,13 +22,12 @@ import AdminHours from '@/components/admin/AdminHours'
 import AdminServices from '@/components/admin/AdminServices'
 import AdminGeneral from '@/components/admin/AdminGeneral'
 import AdminImages from '@/components/admin/AdminImages'
-import AdminBookings from '@/components/admin/AdminBookings'
+import AdminCalendar from '@/components/admin/AdminCalendar'
 import AdminHistory from '@/components/admin/AdminHistory'
 import AdminTestimonials from '@/components/admin/AdminTestimonials'
 import AdminBranding from '@/components/admin/AdminBranding'
 import PushNotificationToggle from '@/components/admin/PushNotificationToggle'
 import ProfileManagement from '@/components/admin/ProfileManagement'
-import { useLanguage } from '@/lib/language-context'
 import { supabase } from '@/lib/supabase'
 import { renewAdminSession, getSessionInfo } from '@/lib/admin-auth'
 import { useAdminAuth } from '@/lib/useAdminAuth'
@@ -36,7 +35,6 @@ import { useAdminAuth } from '@/lib/useAdminAuth'
 type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'history' | 'testimonials' | 'branding' | 'notifications' | 'profile'
 
 export default function AdminDashboard() {
-  const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<TabType>('general')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
@@ -48,13 +46,13 @@ export default function AdminDashboard() {
   const { isAdmin, loading, logout } = useAdminAuth()
 
   const tabs = [
-    { id: 'general' as TabType, label: t.admin.general, icon: Building },
-    { id: 'hours' as TabType, label: t.admin.hours, icon: Clock },
-    { id: 'services' as TabType, label: t.admin.services, icon: Scissors },
-    { id: 'images' as TabType, label: t.admin.images, icon: Image },
+    { id: 'general' as TabType, label: 'General', icon: Building },
+    { id: 'hours' as TabType, label: 'Opening hours', icon: Clock },
+    { id: 'services' as TabType, label: 'Services', icon: Scissors },
+    { id: 'images' as TabType, label: 'Gallery', icon: Image },
     { id: 'branding' as TabType, label: 'Logo & Branding', icon: Palette },
-    { id: 'profile' as TabType, label: 'Mon Profil', icon: Settings },
-    { id: 'bookings' as TabType, label: t.admin.bookings, icon: Calendar, badge: pendingCount },
+    { id: 'profile' as TabType, label: 'My profile', icon: Settings },
+    { id: 'bookings' as TabType, label: 'Bookings', icon: Calendar, badge: pendingCount },
     { id: 'history' as TabType, label: 'History', icon: History },
     { id: 'testimonials' as TabType, label: 'Customer Reviews', icon: Star },
     { id: 'notifications' as TabType, label: 'Notifications', icon: Bell },
@@ -177,7 +175,7 @@ export default function AdminDashboard() {
                 <button
                   onClick={() => setShowLogoutModal(true)}
                   className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                  title="Déconnexion"
+                  title="Log out"
                 >
                   <LogOut size={20} />
                 </button>
@@ -256,7 +254,7 @@ export default function AdminDashboard() {
             {activeTab === 'images' && <AdminImages />}
             {activeTab === 'branding' && <AdminBranding />}
             {activeTab === 'profile' && <ProfileManagement />}
-            {activeTab === 'bookings' && <AdminBookings onStatusChange={fetchPendingCount} />}
+            {activeTab === 'bookings' && <AdminCalendar />}
             {activeTab === 'history' && <AdminHistory />}
             {activeTab === 'testimonials' && <AdminTestimonials />}
             {activeTab === 'notifications' && (
@@ -351,9 +349,9 @@ export default function AdminDashboard() {
                 <div className="w-20 h-20 mx-auto mb-6 bg-red-500/20 rounded-full flex items-center justify-center border-2 border-red-500/30">
                   <LogOut className="text-red-400" size={36} />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Confirmer la déconnexion</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">Confirm logout</h3>
                 <p className="text-gray-300 mb-8 text-base">
-                  Êtes-vous sûr de vouloir vous déconnecter de votre session admin?
+                  Are you sure you want to log out of the admin session?
                 </p>
                 <div className="flex flex-col gap-3">
                   <button
@@ -364,12 +362,12 @@ export default function AdminDashboard() {
                     {isLoggingOut ? (
                       <>
                         <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Déconnexion...</span>
+                        <span>Logging out...</span>
                       </>
                     ) : (
                       <>
                         <LogOut size={20} />
-                        <span>Oui, me déconnecter</span>
+                        <span>Yes, log me out</span>
                       </>
                     )}
                   </button>
@@ -378,7 +376,7 @@ export default function AdminDashboard() {
                     disabled={isLoggingOut}
                     className="w-full px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
                   >
-                    Annuler
+                    Cancel
                   </button>
                 </div>
               </div>
@@ -418,9 +416,9 @@ export default function AdminDashboard() {
                 >
                   <CheckCircle className="text-green-400" size={36} />
                 </motion.div>
-                <h3 className="text-2xl font-bold text-white mb-3">Déconnexion réussie!</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">Logged out successfully!</h3>
                 <p className="text-gray-300 mb-6 text-base">
-                  Vous avez été déconnecté avec succès. Redirection en cours...
+                  You have been logged out successfully. Redirecting...
                 </p>
                 <div className="flex justify-center">
                   <div className="w-8 h-8 border-3 border-green-400/30 border-t-green-400 rounded-full animate-spin" />

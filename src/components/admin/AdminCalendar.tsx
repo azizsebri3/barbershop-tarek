@@ -15,11 +15,15 @@ import {
   XCircle,
   Eye,
   EyeOff,
-  Trash2
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Plus
 } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { useRealtimeBookings } from '@/lib/useRealtimeBookings'
 import { Booking } from '@/lib/supabase'
+import { useServices } from '@/lib/useServicesCached'
 
 interface AvailabilitySlot {
   id?: string
@@ -74,7 +78,7 @@ const AvailabilityForm = ({
             onChange={() => setIsAvailable(true)}
             className="form-radio text-green-500"
           />
-          <span className="text-white">Disponible</span>
+          <span className="text-white">Available</span>
         </label>
         <label className="flex items-center space-x-2">
           <input
@@ -84,7 +88,7 @@ const AvailabilityForm = ({
             onChange={() => setIsAvailable(false)}
             className="form-radio text-red-500"
           />
-          <span className="text-white">Non disponible</span>
+          <span className="text-white">Unavailable</span>
         </label>
       </div>
 
@@ -98,14 +102,14 @@ const AvailabilityForm = ({
               onChange={(e) => setIsAllDay(e.target.checked)}
               className="form-checkbox text-blue-500"
             />
-            <span className="text-white">Toute la journée</span>
+            <span className="text-white">All day</span>
           </label>
 
           {/* Heures spécifiques */}
           {!isAllDay && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-400 text-sm mb-1">Début</label>
+                <label className="block text-gray-400 text-sm mb-1">Start</label>
                 <input
                   type="time"
                   value={startTime}
@@ -115,7 +119,7 @@ const AvailabilityForm = ({
                 />
               </div>
               <div>
-                <label className="block text-gray-400 text-sm mb-1">Fin</label>
+                <label className="block text-gray-400 text-sm mb-1">End</label>
                 <input
                   type="time"
                   value={endTime}
@@ -135,7 +139,7 @@ const AvailabilityForm = ({
           type="submit"
           className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
         >
-          Sauvegarder
+          Save
         </button>
         {existingSlot && onDelete && (
           <button
@@ -163,12 +167,26 @@ export default function AdminCalendar() {
   })
 
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([])
-  const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth')
+  const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>(
+    typeof window !== 'undefined' && window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek'
+  )
   const [showAvailability, setShowAvailability] = useState(true)
+  const [calendarTitle, setCalendarTitle] = useState('')
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [showModal, setShowModal] = useState(false)
-  const [modalType, setModalType] = useState<'booking' | 'availability'>('booking')
+  const [modalType, setModalType] = useState<'booking' | 'availability' | 'create'>('booking')
   const [selectedEvent, setSelectedEvent] = useState<any>(null)
+  const { services } = useServices()
+  const [manualBooking, setManualBooking] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    service: '',
+    date: '',
+    time: '',
+    message: '',
+  })
+  const [manualBookingLoading, setManualBookingLoading] = useState(false)
 
   // Plus besoin de loadBookings - géré par le hook Realtime
 
@@ -205,7 +223,7 @@ export default function AdminCalendar() {
         setAvailability(defaultSlots)
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des disponibilités:', error)
+      console.error('Error loading availability:', error)
       // Fallback sur des créneaux par défaut
       const defaultSlots: AvailabilitySlot[] = []
       for (let i = 0; i < 30; i++) {
@@ -243,12 +261,12 @@ export default function AdminCalendar() {
 
       if (response.ok) {
         await loadAvailability() // Recharger les disponibilités
-        toast.success('Disponibilité sauvegardée')
+        toast.success('Availability saved')
       } else {
-        throw new Error('Erreur lors de la sauvegarde')
+        throw new Error('Error saving availability')
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde de disponibilité:', error)
+      console.error('Error saving availability:', error)
       // Pour l'instant, juste mettre à jour le state local
       if (slot.id) {
         setAvailability(prev => prev.map(s => 
@@ -288,6 +306,16 @@ export default function AdminCalendar() {
     loadAvailability()
   }, [])
 
+  useEffect(() => {
+    calendarRef.current?.getApi().changeView(currentView)
+  }, [currentView])
+
+  const navigateCalendar = (action: 'prev' | 'next' | 'today') => {
+    const calendar = calendarRef.current?.getApi()
+    if (!calendar) return
+    calendar[action]()
+  }
+
   // Convert data to events for FullCalendar
   const events = [
     // Bookings
@@ -295,7 +323,7 @@ export default function AdminCalendar() {
       id: `booking-${booking.id}`,
       title: `${booking.service} - ${booking.name}`,
       start: `${booking.date}T${booking.time}`,
-      end: `${booking.date}T${addMinutes(booking.time, 60)}`, // Durée estimée 1h
+      end: `${booking.date}T${addMinutes(booking.time, getServiceDuration(booking.service))}`,
       backgroundColor: booking.status === 'confirmed' ? '#10b981' : 
                       booking.status === 'cancelled' ? '#ef4444' : '#f59e0b',
       borderColor: booking.status === 'confirmed' ? '#059669' : 
@@ -308,7 +336,7 @@ export default function AdminCalendar() {
     // Disponibilités (si activées)
     ...(showAvailability ? availability.map(slot => ({
       id: `availability-${slot.date}`,
-      title: 'Disponible',
+      title: 'Available',
       start: slot.is_all_day ? slot.date : `${slot.date}T${slot.start_time}`,
       end: slot.is_all_day ? slot.date : `${slot.date}T${slot.end_time}`,
       backgroundColor: '#3b82f6',
@@ -330,8 +358,82 @@ export default function AdminCalendar() {
     return `${newHours.toString().padStart(2, '0')}:${newMins.toString().padStart(2, '0')}`
   }
 
+  function getServiceDuration(serviceName: string): number {
+    const service = services.find(item =>
+      item.name === serviceName ||
+      item.nameEn === serviceName ||
+      item.id === serviceName
+    )
+    return service?.duration || 30
+  }
+
+  const openManualBooking = (date: Date) => {
+    const datePart = date.toLocaleDateString('en-CA')
+    const timePart = date.toTimeString().slice(0, 5)
+    setManualBooking(prev => ({
+      ...prev,
+      date: datePart,
+      time: timePart,
+      service: prev.service || services[0]?.name || '',
+    }))
+    setModalType('create')
+    setShowModal(true)
+  }
+
+  const createManualBooking = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setManualBookingLoading(true)
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(manualBooking),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Unable to create the appointment')
+      toast.success('Appointment added to the calendar')
+      setShowModal(false)
+      setManualBooking({ name: '', email: '', phone: '', service: '', date: '', time: '', message: '' })
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unable to create the appointment')
+    } finally {
+      setManualBookingLoading(false)
+    }
+  }
+
+  const moveBooking = async (event: any) => {
+    const booking = event.event.extendedProps.data as Booking
+    const start = event.event.start as Date
+    const updates = {
+      name: booking.name,
+      email: booking.email,
+      phone: booking.phone,
+      date: start.toISOString().slice(0, 10),
+      time: start.toTimeString().slice(0, 5),
+      service: booking.service,
+      message: booking.message || '',
+      lang: booking.language || 'fr',
+      notifyClient: true,
+    }
+
+    try {
+      const response = await fetch(`/api/bookings/${booking.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      })
+      if (!response.ok) throw new Error((await response.json()).error || 'Time slot unavailable')
+      toast.success('Appointment rescheduled')
+    } catch (error) {
+      event.revert()
+      toast.error(error instanceof Error ? error.message : 'Unable to move the appointment')
+    }
+  }
+
   // Gérer les clics sur les événements
   const handleEventClick = (clickInfo: any) => {
+    clickInfo.jsEvent.preventDefault()
+    clickInfo.jsEvent.stopPropagation()
     setSelectedEvent(clickInfo.event)
     setModalType(clickInfo.event.extendedProps.type)
     setShowModal(true)
@@ -346,6 +448,10 @@ export default function AdminCalendar() {
 
   // Change booking status
   const updateBookingStatus = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
+    if (status === 'cancelled' && !window.confirm('Are you sure you want to cancel this appointment?')) {
+      return
+    }
+
     try {
       const response = await fetch(`/api/bookings/${bookingId}`, {
         method: 'PATCH',
@@ -372,12 +478,14 @@ export default function AdminCalendar() {
       <Toaster position="top-right" />
       
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Calendar className="text-accent" size={32} />
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex items-start gap-3">
+          <div className="rounded-2xl bg-accent/10 p-3">
+            <Calendar className="text-accent" size={26} />
+          </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">
-              Calendrier Admin
+            <h1 className="text-xl font-bold text-white sm:text-2xl">
+              Admin Calendar
               {/* Indicateur Realtime */}
               <span className={`ml-3 text-xs px-2 py-1 rounded-full inline-flex items-center gap-1 ${
                 isRealtimeConnected 
@@ -387,58 +495,55 @@ export default function AdminCalendar() {
                 <span className={`w-1.5 h-1.5 rounded-full ${
                   isRealtimeConnected ? 'bg-green-400 animate-pulse' : 'bg-orange-400'
                 }`}></span>
-                {isRealtimeConnected ? 'Live' : 'Hors ligne'}
+                {isRealtimeConnected ? 'Live' : 'Offline'}
               </span>
             </h1>
-            <p className="text-gray-400">Gérez vos rendez-vous et disponibilités</p>
+            <p className="mt-1 text-sm text-gray-400">Tarek&apos;s schedule, updated in real time</p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Toggle disponibilités */}
           <button
             onClick={() => setShowAvailability(!showAvailability)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              className={`flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${
               showAvailability 
-                ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                  ? 'border-sky-400/30 bg-sky-400/15 text-sky-200 hover:bg-sky-400/25'
+                  : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
             }`}
           >
             {showAvailability ? <Eye size={16} /> : <EyeOff size={16} />}
-            <span className="text-sm">Disponibilités</span>
+            <span className="text-sm">Availability</span>
           </button>
           
-          {/* Sélecteur de vue */}
-          <select 
-            value={currentView}
-            onChange={(e) => setCurrentView(e.target.value as any)}
-            className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm"
+          <button
+            type="button"
+            onClick={() => openManualBooking(new Date())}
+            className="flex min-h-11 items-center gap-2 rounded-xl bg-accent px-3 py-2 text-sm font-semibold text-primary transition hover:bg-accent-light"
           >
-            <option value="dayGridMonth">Mois</option>
-            <option value="timeGridWeek">Semaine</option>
-            <option value="timeGridDay">Jour</option>
-            <option value="listWeek">Liste</option>
-          </select>
+            <Plus size={16} />
+            <span>Add appointment</span>
+          </button>
         </div>
       </div>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
           <div className="flex items-center space-x-3">
             <Calendar className="text-blue-400" size={24} />
             <div>
-              <p className="text-gray-400 text-sm">Total RDV</p>
+              <p className="text-gray-400 text-sm">Total appointments</p>
               <p className="text-white font-bold text-xl">{bookings.length}</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div className="rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.04] p-4">
           <div className="flex items-center space-x-3">
             <CheckCircle className="text-green-400" size={24} />
             <div>
-              <p className="text-gray-400 text-sm">Confirmés</p>
+              <p className="text-gray-400 text-sm">Confirmed</p>
               <p className="text-white font-bold text-xl">
                 {bookings.filter(b => b.status === 'confirmed').length}
               </p>
@@ -446,11 +551,11 @@ export default function AdminCalendar() {
           </div>
         </div>
         
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div className="rounded-2xl border border-amber-400/15 bg-amber-400/[0.04] p-4">
           <div className="flex items-center space-x-3">
             <Clock className="text-yellow-400" size={24} />
             <div>
-              <p className="text-gray-400 text-sm">En attente</p>
+              <p className="text-gray-400 text-sm">Pending</p>
               <p className="text-white font-bold text-xl">
                 {bookings.filter(b => b.status === 'pending').length}
               </p>
@@ -458,11 +563,11 @@ export default function AdminCalendar() {
           </div>
         </div>
         
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div className="rounded-2xl border border-red-400/15 bg-red-400/[0.04] p-4">
           <div className="flex items-center space-x-3">
             <XCircle className="text-red-400" size={24} />
             <div>
-              <p className="text-gray-400 text-sm">Annulés</p>
+              <p className="text-gray-400 text-sm">Cancelled</p>
               <p className="text-white font-bold text-xl">
                 {bookings.filter(b => b.status === 'cancelled').length}
               </p>
@@ -472,33 +577,66 @@ export default function AdminCalendar() {
       </div>
 
       {/* Calendrier */}
-      <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-        <div className="calendar-container p-6">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#151515] shadow-2xl shadow-black/20">
+        <div className="flex flex-col gap-3 border-b border-white/10 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="flex min-w-0 items-center gap-2">
+            <button type="button" onClick={() => navigateCalendar('prev')} aria-label="Previous period" className="calendar-nav-button"><ChevronLeft size={18} /></button>
+            <button type="button" onClick={() => navigateCalendar('today')} className="calendar-today-button">Today</button>
+            <button type="button" onClick={() => navigateCalendar('next')} aria-label="Next period" className="calendar-nav-button"><ChevronRight size={18} /></button>
+            <h2 className="ml-1 truncate text-base font-semibold text-white sm:text-lg">{calendarTitle}</h2>
+          </div>
+          <div className="grid grid-cols-4 rounded-xl border border-white/10 bg-black/20 p-1">
+            {([
+              ['timeGridDay', 'Day'],
+              ['timeGridWeek', 'Week'],
+              ['dayGridMonth', 'Month'],
+              ['listWeek', 'List'],
+            ] as const).map(([view, label]) => (
+              <button
+                key={view}
+                type="button"
+                onClick={() => setCurrentView(view)}
+                className={`rounded-lg px-2 py-2 text-xs font-medium transition sm:px-3 ${currentView === view ? 'bg-accent text-primary' : 'text-gray-400 hover:bg-white/10 hover:text-white'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="calendar-container px-1 py-2 sm:p-5">
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
             initialView={currentView}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-            }}
+            headerToolbar={false}
             events={events}
-            editable={false}
+            editable={true}
             selectable={true}
+            selectMirror={true}
+            select={(selectionInfo) => openManualBooking(selectionInfo.start)}
+            eventDrop={moveBooking}
+            eventResize={moveBooking}
             dayMaxEvents={3}
             weekends={true}
             eventClick={handleEventClick}
             dateClick={handleDateClick}
             height="auto"
             locale="fr"
+            allDaySlot={false}
+            nowIndicator={true}
+            slotDuration="00:15:00"
+            slotLabelInterval="01:00:00"
+            scrollTime="09:00:00"
             slotMinTime="08:00:00"
             slotMaxTime="20:00:00"
+            expandRows={true}
+            stickyHeaderDates={true}
             businessHours={{
               daysOfWeek: [1, 2, 3, 4, 5, 6],
               startTime: '09:00',
               endTime: '18:00'
             }}
+            datesSet={(dateInfo) => setCalendarTitle(dateInfo.view.title)}
             eventDidMount={(info) => {
               // Styles personnalisés pour les événements
               const element = info.el
@@ -506,7 +644,8 @@ export default function AdminCalendar() {
               
               if (info.event.extendedProps.type === 'booking') {
                 const booking = info.event.extendedProps.data as Booking
-                element.title = `${booking.name} - ${booking.service}\n${booking.phone}\nStatut: ${booking.status}`
+                element.style.touchAction = 'manipulation'
+                element.title = `${booking.name} - ${booking.service}\n${booking.phone}\nStatus: ${booking.status}`
               }
             }}
           />
@@ -519,29 +658,61 @@ export default function AdminCalendar() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={() => setShowModal(false)}
         >
           <motion.div
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0.95 }}
-            className="bg-gray-800 rounded-lg border border-gray-700 p-6 max-w-md w-full"
+            className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-white/10 bg-[#181818] p-5 shadow-2xl sm:rounded-2xl sm:p-6"
             onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
           >
+            {modalType === 'create' && (
+              <form className="space-y-4" onSubmit={createManualBooking}>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Add appointment</h2>
+                  <p className="text-gray-400 text-sm mt-1">Tarek&apos;s schedule</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input required placeholder="Customer name" value={manualBooking.name} onChange={(e) => setManualBooking({ ...manualBooking, name: e.target.value })} className="admin-calendar-input" />
+                  <input required type="tel" placeholder="Phone" value={manualBooking.phone} onChange={(e) => setManualBooking({ ...manualBooking, phone: e.target.value })} className="admin-calendar-input" />
+                  <input required type="email" placeholder="Email" value={manualBooking.email} onChange={(e) => setManualBooking({ ...manualBooking, email: e.target.value })} className="admin-calendar-input" />
+                  <select required value={manualBooking.service} onChange={(e) => setManualBooking({ ...manualBooking, service: e.target.value })} className="admin-calendar-input">
+                    <option value="">Choose a service</option>
+                    {services.map(service => <option key={service.id} value={service.name}>{service.name} · {service.duration} min</option>)}
+                  </select>
+                  <input required type="date" value={manualBooking.date} onChange={(e) => setManualBooking({ ...manualBooking, date: e.target.value })} className="admin-calendar-input" />
+                  <input required type="time" step="900" value={manualBooking.time} onChange={(e) => setManualBooking({ ...manualBooking, time: e.target.value })} className="admin-calendar-input" />
+                </div>
+                <textarea placeholder="Note (optional)" value={manualBooking.message} onChange={(e) => setManualBooking({ ...manualBooking, message: e.target.value })} className="admin-calendar-input min-h-20" />
+                <button disabled={manualBookingLoading} className="w-full bg-accent text-primary px-4 py-3 rounded-lg font-semibold disabled:opacity-50">
+                  {manualBookingLoading ? 'Adding...' : 'Add to calendar'}
+                </button>
+              </form>
+            )}
+
             {modalType === 'booking' && selectedEvent && (
               <div className="space-y-4">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <User size={20} />
-                  Détails du RDV
-                </h2>
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="flex items-center gap-2 text-xl font-bold text-white">
+                    <User className="text-accent" size={20} />
+                    Appointment details
+                  </h2>
+                  <span className="rounded-full bg-accent/15 px-2 py-1 text-[11px] font-medium text-accent">
+                    Select an action
+                  </span>
+                </div>
                 
                 {(() => {
                   const booking = selectedEvent.extendedProps.data as Booking
                   return (
                     <div className="space-y-3">
                       <div>
-                        <p className="text-gray-400 text-sm">Client</p>
+                        <p className="text-gray-400 text-sm">Customer</p>
                         <p className="text-white font-medium">{booking.name}</p>
                       </div>
                       
@@ -551,7 +722,7 @@ export default function AdminCalendar() {
                           <p className="text-white">{new Date(booking.date).toLocaleDateString('fr-FR')}</p>
                         </div>
                         <div>
-                          <p className="text-gray-400 text-sm">Heure</p>
+                          <p className="text-gray-400 text-sm">Time</p>
                           <p className="text-white">{booking.time}</p>
                         </div>
                       </div>
@@ -563,8 +734,8 @@ export default function AdminCalendar() {
                       
                       <div>
                         <p className="text-gray-400 text-sm">Contact</p>
-                        <p className="text-white">{booking.email}</p>
-                        <p className="text-white">{booking.phone}</p>
+                        <a href={`mailto:${booking.email}`} className="block break-all text-accent hover:underline">{booking.email}</a>
+                        <a href={`tel:${booking.phone}`} className="block text-accent hover:underline">{booking.phone}</a>
                       </div>
                       
                       {booking.message && (
@@ -586,19 +757,21 @@ export default function AdminCalendar() {
                         </span>
                       </div>
                       
-                      {booking.status === 'pending' && (
-                        <div className="flex gap-3 pt-4">
+                      {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                        <div className="grid grid-cols-1 gap-2 border-t border-white/10 pt-4 sm:grid-cols-2">
+                          {booking.status === 'pending' && (
                           <button
                             onClick={() => updateBookingStatus(booking.id, 'confirmed')}
-                            className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                            className="min-h-11 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-emerald-400"
                           >
-                            Confirm
+                            Confirm appointment
                           </button>
+                          )}
                           <button
                             onClick={() => updateBookingStatus(booking.id, 'cancelled')}
-                            className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                            className="min-h-11 rounded-xl bg-red-500/15 px-4 py-2 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/25"
                           >
-                            Cancel
+                            Cancel appointment
                           </button>
                         </div>
                       )}
@@ -615,7 +788,7 @@ export default function AdminCalendar() {
                   <Clock className="text-blue-400" size={24} />
                   <div>
                     <h3 className="text-lg font-semibold text-white">
-                      Disponibilité - {new Date(selectedDate).toLocaleDateString('fr-FR', {
+                      Availability - {new Date(selectedDate).toLocaleDateString('en-US', {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
@@ -623,7 +796,7 @@ export default function AdminCalendar() {
                       })}
                     </h3>
                     <p className="text-gray-400 text-sm">
-                      Définir les créneaux de disponibilité
+                      Set availability hours
                     </p>
                   </div>
                 </div>
@@ -641,7 +814,7 @@ export default function AdminCalendar() {
               onClick={() => setShowModal(false)}
               className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
             >
-              Fermer
+              Close
             </button>
           </motion.div>
         </motion.div>
@@ -651,82 +824,175 @@ export default function AdminCalendar() {
       <style jsx global>{`
         .calendar-container .fc {
           font-family: inherit;
+          color: #d6d3d1;
         }
         
         .calendar-container .fc-theme-standard td,
         .calendar-container .fc-theme-standard th {
-          border-color: #374151;
+          border-color: rgba(255, 255, 255, 0.08);
         }
         
         .calendar-container .fc-theme-standard .fc-scrollgrid {
-          border-color: #374151;
+          border-color: rgba(255, 255, 255, 0.08);
+          border-radius: 0.75rem;
+          overflow: hidden;
         }
         
         .calendar-container .fc-col-header {
-          background: #1f2937;
+          background: #1b1b1b;
         }
         
         .calendar-container .fc-col-header-cell {
-          background: #1f2937;
-          color: #d1d5db;
+          background: #1b1b1b;
+          color: #a8a29e;
+          font-size: 0.72rem;
           font-weight: 600;
-          padding: 8px;
+          letter-spacing: 0.04em;
+          padding: 10px 6px;
+          text-transform: uppercase;
         }
         
         .calendar-container .fc-daygrid-day {
-          background: #111827;
+          background: #151515;
         }
         
         .calendar-container .fc-daygrid-day:hover {
-          background: #1f2937;
+          background: #202020;
         }
         
         .calendar-container .fc-day-today {
-          background: rgba(212, 175, 55, 0.1) !important;
+          background: rgba(184, 115, 51, 0.13) !important;
         }
         
         .calendar-container .fc-daygrid-day-number {
-          color: #d1d5db;
+          color: #d6d3d1;
           font-weight: 500;
+          padding: 8px;
         }
         
-        .calendar-container .fc-button {
-          background: #374151;
-          border-color: #4b5563;
-          color: #d1d5db;
+        .calendar-container .fc-timegrid-col,
+        .calendar-container .fc-timegrid-axis,
+        .calendar-container .fc-timegrid-slot {
+          background: #151515;
         }
         
-        .calendar-container .fc-button:hover {
-          background: #4b5563;
-          border-color: #6b7280;
+        .calendar-container .fc-timegrid-slot-label {
+          color: #78716c;
+          font-size: 0.7rem;
         }
         
-        .calendar-container .fc-button-active {
-          background: #b87333 !important;
-          border-color: #b87333 !important;
-          color: black !important;
+        .calendar-container .fc-timegrid-now-indicator-line {
+          border-color: #d97706;
+          border-width: 2px;
+        }
+
+        .calendar-container .fc-timegrid-now-indicator-arrow {
+          border-bottom-color: #d97706;
+          border-top-color: #d97706;
         }
         
         .calendar-container .fc-event {
-          border-radius: 4px;
+          border-radius: 7px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
           font-size: 12px;
           font-weight: 500;
+          min-height: 30px;
+          padding: 3px 5px;
         }
         
-        .calendar-container .fc-timegrid-slot {
-          color: #9ca3af;
+        .calendar-container .fc-event-main {
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         
-        .calendar-container .fc-timegrid-axis {
-          color: #9ca3af;
+        .calendar-container .fc-list {
+          border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .calendar-container .fc-list-day-cushion {
+          background: #24201d;
+        }
+
+        .calendar-container .fc-list-event td {
+          background: #151515;
+          border-color: rgba(255, 255, 255, 0.06);
+          padding: 10px 8px;
         }
         
+        .calendar-container .fc-list-event:hover td {
+          background: #24201d;
+        }
+
+        .calendar-nav-button,
+        .calendar-today-button {
+          align-items: center;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #d6d3d1;
+          display: inline-flex;
+          justify-content: center;
+          min-height: 38px;
+          transition: background-color 150ms ease, color 150ms ease;
+        }
+
+        .calendar-nav-button {
+          border-radius: 0.65rem;
+          min-width: 38px;
+        }
+
+        .calendar-today-button {
+          border-radius: 0.65rem;
+          font-size: 0.78rem;
+          padding: 0 0.75rem;
+        }
+
+        .calendar-nav-button:hover,
+        .calendar-today-button:hover {
+          background: rgba(184, 115, 51, 0.15);
+          color: #f0b27a;
+        }
+
         .calendar-container .fc-list-event {
           cursor: pointer;
         }
-        
-        .calendar-container .fc-list-event:hover {
-          background: #1f2937;
+
+        .admin-calendar-input {
+          width: 100%;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 0.5rem;
+          background: #171717;
+          color: white;
+          padding: 0.7rem 0.8rem;
+        }
+
+        @media (max-width: 640px) {
+          .calendar-container {
+            font-size: 0.8rem;
+          }
+
+          .calendar-container .fc-timegrid-slot {
+            height: 3rem;
+          }
+
+          .calendar-container .fc-timegrid-axis {
+            width: 3.25rem;
+            font-size: 0.7rem;
+          }
+
+          .calendar-container .fc-event {
+            font-size: 0.68rem;
+            line-height: 1.2;
+            min-height: 32px;
+            padding: 3px;
+          }
+
+          .calendar-container .fc-col-header-cell {
+            font-size: 0.62rem;
+            padding: 8px 2px;
+          }
+
+          .calendar-container .fc-daygrid-day-number {
+            padding: 6px;
+          }
         }
       `}</style>
     </div>

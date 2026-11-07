@@ -2,42 +2,81 @@
 
 import { useCallback, useEffect, useState, memo } from 'react'
 import { motion } from 'framer-motion'
-import { Star, Quote, Sparkles, RefreshCw } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Star, RefreshCw, ExternalLink } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
-import TestimonialForm from './TestimonialForm'
 
-interface Testimonial {
+interface GoogleReview {
   id: string
-  name: string
-  email: string
   rating: number
-  message: string
-  service: string | null
-  is_approved: boolean
-  created_at: string
+  text: string
+  publishTime: string | null
+  relativePublishTimeDescription: string
+  authorName: string
+  authorPhoto: string | null
+}
+
+interface GoogleReviewsResponse {
+  name: string
+  rating: number | null
+  userRatingCount: number
+  reviews: GoogleReview[]
 }
 
 const Testimonials = memo(function Testimonials() {
   const { t } = useLanguage()
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
+  const [reviews, setReviews] = useState<GoogleReviewsResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const reviewsPerPage = 4
 
   const fetchTestimonials = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     
     try {
-      const response = await fetch('/api/testimonials', {
-        cache: 'no-store',
-      })
-      
-      if (!response.ok) {
+      const googleResponse = await fetch('/api/google-reviews')
+
+      if (googleResponse.ok) {
+        const data: GoogleReviewsResponse = await googleResponse.json()
+        if (data.reviews.length > 0) {
+          setReviews(data)
+          setCurrentPage(1)
+          return
+        }
+      }
+
+      // Keep the existing approved testimonials until Google Business is configured.
+      const legacyResponse = await fetch('/api/testimonials', { cache: 'no-store' })
+      if (!legacyResponse.ok) {
         throw new Error('Failed to fetch testimonials')
       }
-      
-      const data = await response.json()
-      setTestimonials(data)
+
+      const legacyTestimonials = await legacyResponse.json() as Array<{
+        id: string
+        rating: number
+        message: string
+        name: string
+        created_at: string
+      }>
+
+      setReviews({
+        name: 'Tarek Salon',
+        rating: legacyTestimonials.length > 0
+          ? legacyTestimonials.reduce((total, testimonial) => total + testimonial.rating, 0) / legacyTestimonials.length
+          : null,
+        userRatingCount: legacyTestimonials.length,
+        reviews: legacyTestimonials.map((testimonial) => ({
+          id: testimonial.id,
+          rating: testimonial.rating,
+          text: testimonial.message,
+          publishTime: testimonial.created_at,
+          relativePublishTimeDescription: '',
+          authorName: testimonial.name,
+          authorPhoto: null,
+        })),
+      })
+      setCurrentPage(1)
     } catch (err) {
       console.error('Error fetching testimonials:', err)
       setError(t.testimonials.error)
@@ -71,22 +110,19 @@ const Testimonials = memo(function Testimonials() {
   }
 
   // Calculate statistics
-  const avgRating = testimonials.length > 0
-    ? (testimonials.reduce((acc, t) => acc + t.rating, 0) / testimonials.length).toFixed(1)
-    : '5.0'
-  
-  const totalCount = testimonials.length
-  const satisfactionRate = testimonials.length > 0
-    ? Math.round((testimonials.filter(t => t.rating >= 4).length / testimonials.length) * 100)
-    : 100
+  const avgRating = reviews?.rating?.toFixed(1) ?? '0.0'
+  const totalCount = reviews?.userRatingCount ?? 0
+  const totalPages = reviews ? Math.ceil(reviews.reviews.length / reviewsPerPage) : 0
+  const visibleReviews = reviews
+    ? reviews.reviews.slice((currentPage - 1) * reviewsPerPage, currentPage * reviewsPerPage)
+    : []
 
   return (
     <section className="relative py-16 sm:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent" />
         <div className="absolute top-1/3 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[150px] opacity-30" />
-        <div className="absolute bottom-1/3 right-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px] opacity-20" />
+        <div className="absolute bottom-1/3 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] opacity-20" />
       </div>
 
       <div className="max-w-7xl mx-auto">
@@ -106,13 +142,13 @@ const Testimonials = memo(function Testimonials() {
             viewport={{ once: true }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-6"
           >
-            <Sparkles className="w-4 h-4 text-accent" />
+            <span className="w-8 h-px bg-accent" />
             <span className="text-sm font-medium text-white/80">{t.testimonials.badge}</span>
           </motion.div>
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6">
             {t.testimonials.title}{' '}
-            <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-white via-gray-300 to-accent bg-clip-text text-transparent">
               {t.testimonials.titleAccent}
             </span>
           </h2>
@@ -143,16 +179,15 @@ const Testimonials = memo(function Testimonials() {
               {t.testimonials.retry}
             </button>
           </div>
-        ) : testimonials.length === 0 ? (
+        ) : !reviews || reviews.reviews.length === 0 ? (
           /* Empty State */
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-20 px-4"
           >
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/5 rounded-2xl mb-6">
-              <Star className="w-10 h-10 text-accent" />
-            </div>
+            {/* TODO(contenu): connecter la fiche Google Business pour afficher les vrais avis. */}
+            <div className="w-12 h-px bg-accent mb-6 mx-auto" />
             <h3 className="text-2xl font-bold text-white mb-3">
               {t.testimonials.emptyTitle}
             </h3>
@@ -168,33 +203,24 @@ const Testimonials = memo(function Testimonials() {
             viewport={{ once: true }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6"
           >
-            {testimonials.map((testimonial) => {
-              // Generate avatar emoji based on name first letter
-              const firstLetter = testimonial.name.charAt(0).toUpperCase()
-              const avatarEmoji = firstLetter.charCodeAt(0) % 2 === 0 ? '👨' : '👩'
-              
+            {visibleReviews.map((review) => {
               return (
                 <motion.div
-                  key={testimonial.id}
+                  key={review.id}
                   variants={itemVariants}
                   whileHover={{ y: -8, scale: 1.02 }}
-                  className="group relative bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-sm border border-white/10 rounded-2xl p-5 sm:p-6 hover:border-accent/40 transition-all duration-500 shadow-xl shadow-black/20 overflow-hidden"
+                  className="group relative bg-white/[0.03] border border-white/10 rounded-2xl p-5 sm:p-6 hover:border-accent/50 transition-all duration-500 shadow-xl shadow-black/20 overflow-hidden"
                 >
                   {/* Background glow on hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-accent/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                   </div>
 
-                  {/* Quote Icon */}
-                  <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <Quote size={40} className="text-accent" />
-                  </div>
-
                   {/* Content */}
                   <div className="relative z-10">
                     {/* Stars */}
                     <div className="flex gap-1 mb-4">
-                      {Array.from({ length: testimonial.rating }).map((_, i) => (
+                      {Array.from({ length: review.rating }).map((_, i) => (
                         <motion.div
                           key={i}
                           initial={{ opacity: 0, scale: 0 }}
@@ -208,20 +234,22 @@ const Testimonials = memo(function Testimonials() {
                     </div>
 
                     {/* Review Content */}
-                    <p className="text-gray-300 mb-6 text-sm sm:text-base leading-relaxed line-clamp-4">
-                      &ldquo;{testimonial.message}&rdquo;
+                    <p className="text-zinc-300 mb-6 text-sm sm:text-base leading-relaxed line-clamp-4">
+                      &ldquo;{review.text}&rdquo;
                     </p>
 
                     {/* Author */}
                     <div className="flex items-center gap-3 pt-4 border-t border-white/10">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center text-2xl">
-                        {avatarEmoji}
+                      <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl">
+                        {review.authorPhoto ? (
+                          <img src={review.authorPhoto} alt="" className="w-full h-full rounded-xl object-cover" />
+                        ) : (
+                          review.authorName.charAt(0).toUpperCase()
+                        )}
                       </div>
                       <div>
-                        <p className="font-bold text-white text-sm">{testimonial.name}</p>
-                        {testimonial.service && (
-                          <p className="text-accent/80 text-xs">{testimonial.service}</p>
-                        )}
+                        <p className="font-bold text-white text-sm">{review.authorName}</p>
+                        <p className="text-accent/80 text-xs">{review.relativePublishTimeDescription}</p>
                       </div>
                     </div>
                   </div>
@@ -229,6 +257,34 @@ const Testimonials = memo(function Testimonials() {
               )
             })}
           </motion.div>
+        )}
+
+        {reviews && totalPages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              aria-label="Previous reviews"
+              className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-white/10 px-3 text-sm text-gray-300 transition hover:border-accent/50 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronLeft size={16} />
+              Previous
+            </button>
+            <span className="min-w-20 text-center text-sm text-gray-400">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              disabled={currentPage === totalPages}
+              aria-label="Next reviews"
+              className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-white/10 px-3 text-sm text-gray-300 transition hover:border-accent/50 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+              <ChevronRight size={16} />
+            </button>
+          </div>
         )}
 
         {/* Trust Indicators */}
@@ -240,30 +296,33 @@ const Testimonials = memo(function Testimonials() {
           className="mt-12 sm:mt-16 flex flex-wrap items-center justify-center gap-8 sm:gap-12"
         >
           <div className="text-center">
-            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
+            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-gray-300 bg-clip-text text-transparent">
               {avgRating}/5
             </p>
             <p className="text-gray-400 text-sm mt-1">{t.testimonials.averageRating}</p>
           </div>
           <div className="w-px h-12 bg-white/10 hidden sm:block" />
           <div className="text-center">
-            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
+            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-gray-300 bg-clip-text text-transparent">
               {totalCount}+
             </p>
             <p className="text-gray-400 text-sm mt-1">{t.testimonials.clientReviews}</p>
           </div>
           <div className="w-px h-12 bg-white/10 hidden sm:block" />
           <div className="text-center">
-            <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-orange-300 bg-clip-text text-transparent">
-              {satisfactionRate}%
-            </p>
-            <p className="text-gray-400 text-sm mt-1">{t.testimonials.satisfaction}</p>
+            <a
+              href="https://g.page/r/CQIG5Mt4inBSEBM/review"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 text-accent hover:text-white transition-colors"
+            >
+              {t.testimonials.viewOnGoogle}
+              <ExternalLink size={16} />
+            </a>
           </div>
         </motion.div>
       </div>
 
-      {/* Testimonial Form - Floating Button */}
-      <TestimonialForm onSuccess={fetchTestimonials} />
     </section>
   )
 })

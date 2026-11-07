@@ -16,7 +16,7 @@ const Hero = memo(function Hero() {
       <div className="absolute inset-0 z-0">
         <Image
           src="/hero-bg1.jpeg"
-          alt={t.hero.imageAlt}
+          alt="TODO(contenu): remplacer par une photo premium validée du salon"
           fill
           priority
           quality={75}
@@ -32,13 +32,12 @@ const Hero = memo(function Hero() {
       {/* Content Container - CSS animations instead of Framer Motion */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 animate-fadeIn">
         <div className="max-w-5xl mx-auto text-center">
-          {/* Main Title with gradient */}
           <h1
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-6 leading-[1.05] tracking-tight drop-shadow-[0_3px_16px_rgba(0,0,0,0.75)] animate-fadeInUp"
             style={{ animationDelay: '0.1s' }}
           >
             {t.hero.title}
-            <span className="block mt-2 bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+            <span className="block mt-2 text-accent drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
               {t.hero.titleAccent}
             </span>
           </h1>
@@ -57,19 +56,18 @@ const Hero = memo(function Hero() {
             style={{ animationDelay: '0.3s' }}
           >
             <BookingLink className="w-full sm:w-auto">
-              <button className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-full transition-all duration-300 text-base sm:text-lg shadow-xl shadow-accent/25 hover:from-orange-300 hover:to-accent hover:shadow-2xl hover:shadow-accent/40 hover:scale-105 active:scale-98">
+              <button className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 sm:py-5 bg-accent text-ink font-bold rounded-full transition-all duration-300 text-base sm:text-lg shadow-xl shadow-accent/25 hover:bg-accent-hover hover:shadow-2xl hover:shadow-accent/40 hover:scale-105 active:scale-98">
                 {t.hero.btnBook}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </button>
             </BookingLink>
 
-            <Link href="/pricing" className="w-full sm:w-auto">
+            <Link href="/fr/pricing" className="w-full sm:w-auto">
               <button className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-black/40 backdrop-blur-md text-white font-semibold rounded-full border border-white/40 transition-all duration-300 text-base sm:text-lg hover:bg-black/60 hover:scale-105 active:scale-98">
                 {t.hero.btnLearn}
               </button>
             </Link>
           </div>
-
         </div>
       </div>
 

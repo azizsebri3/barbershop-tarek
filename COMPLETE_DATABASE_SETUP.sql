@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   time TIME NOT NULL,
   service VARCHAR(100) NOT NULL,
   message TEXT,
+  language VARCHAR(2) NOT NULL DEFAULT 'fr',
   status VARCHAR(50) DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()

@@ -100,7 +100,7 @@ export default function AdminLogin() {
             <Sparkles className="text-black" size={36} />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Administration</h1>
-          <p className="text-gray-400">Accès réservé aux administrateurs</p>
+          <p className="text-gray-400">Administrator access only</p>
         </div>
 
         {/* Formulaire de connexion */}
@@ -279,7 +279,7 @@ export default function AdminLogin() {
 
         {/* Footer */}
         <p className="text-center text-gray-500 text-sm mt-6">
-          Tarek Salon © 2026 - Tous droits réservés
+          Tarek Salon © 2026 - All rights reserved
         </p>
       </div>
     </div>

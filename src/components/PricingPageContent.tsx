@@ -4,9 +4,8 @@ import { motion } from 'framer-motion'
 import ServiceCard from '@/components/ServiceCard'
 import BookingLink from '@/components/BookingLink'
 import { useServices } from '@/lib/useServicesCached'
-import { Check, Sparkles, HelpCircle, ArrowRight } from 'lucide-react'
+import { Check, HelpCircle, ArrowRight } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
-import ClientPortfolio from '@/components/ClientPortfolio'
 
 export default function PricingPageContent() {
   const { t } = useLanguage()
@@ -34,7 +33,6 @@ export default function PricingPageContent() {
   if (loading) {
     return (
       <>
-        <ClientPortfolio />
         <div className="relative py-24 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent/10 mb-4">
@@ -49,14 +47,6 @@ export default function PricingPageContent() {
 
   return (
     <>
-      {/* SEO Hidden Content */}
-      <div className="sr-only">
-        <h1>{t.pricing.seoTitle}</h1>
-        <p>{t.pricing.seoDescription}</p>
-      </div>
-
-      <ClientPortfolio />
-
       {/* Pricing Header */}
       <section className="relative py-24 sm:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Background */}
@@ -70,7 +60,7 @@ export default function PricingPageContent() {
           <motion.div 
             animate={{ opacity: [0.1, 0.3, 0.1] }}
             transition={{ duration: 7, repeat: Infinity, delay: 1 }}
-            className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px]" 
+            className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px]"
           />
         </div>
 
@@ -87,13 +77,13 @@ export default function PricingPageContent() {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 mb-6"
           >
-            <Sparkles className="w-4 h-4 text-accent" />
+            <span className="w-8 h-px bg-accent" />
             <span className="text-sm font-medium text-white/80">{t.pricing.badge}</span>
           </motion.div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
             {t.pricing.title}{' '}
-            <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
+            <span className="text-accent">
               {t.pricing.titleAccent}
             </span>
           </h1>
@@ -115,6 +105,8 @@ export default function PricingPageContent() {
           {services.map((service) => (
             <motion.div key={service.id} variants={itemVariants}>
               <ServiceCard
+                id={service.id}
+                translationKey={service.translationKey}
                 title={service.name}
                 description={service.description}
                 nameEn={service.nameEn}
@@ -144,7 +136,7 @@ export default function PricingPageContent() {
               <motion.button
                 whileHover={{ scale: 1.03, boxShadow: '0 20px 40px rgba(212, 175, 55, 0.3)' }}
                 whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-xl shadow-lg shadow-accent/20"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-ink font-bold rounded-full shadow-lg shadow-accent/20 hover:bg-accent-hover"
               >
                 {t.pricing.ctaButton}
                 <ArrowRight size={18} />
@@ -183,7 +175,7 @@ export default function PricingPageContent() {
 
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
               {t.pricing.faqTitle}{' '}
-              <span className="bg-gradient-to-r from-orange-200 via-orange-400 to-accent bg-clip-text text-transparent">
+              <span className="text-accent">
                 {t.pricing.faqTitleAccent}
               </span>
             </h2>

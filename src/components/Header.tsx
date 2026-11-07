@@ -80,7 +80,7 @@ export default function Header() {
     { href: `/${locale}`, label: t.nav.home, icon: Home, active: pathname === `/${locale}` || pathname === `/${locale}/` || pathname === '/' },
     { href: `/${locale}/#about`, label: t.nav.about, icon: Info, active: false },
     { href: `/${locale}/#services`, label: t.nav.services, icon: Scissors, active: false },
-    { href: '/pricing', label: t.nav.pricing, icon: Tag, active: pathname.includes('/pricing') },
+    { href: `/${locale}/pricing`, label: t.nav.pricing, icon: Tag, active: pathname.includes('/pricing') },
     { href: `/${locale}/#contact`, label: t.nav.contact, icon: Phone, active: false },
   ], [locale, pathname, t.nav.about, t.nav.contact, t.nav.home, t.nav.pricing, t.nav.services])
 
@@ -96,12 +96,16 @@ export default function Header() {
       suppressHydrationWarning
     >
       <nav className={`max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 transition-all duration-500 ${scrolled ? 'h-[4.5rem]' : 'h-16 sm:h-[4.5rem]'}`}>
-        <div className="w-full h-full px-3 sm:px-4 rounded-2xl border border-white/10 bg-black/45 backdrop-blur-xl shadow-2xl shadow-black/20 flex justify-between items-center">
+        <div className="w-full h-full px-3 sm:px-4 rounded-2xl border border-white/10 bg-ink/70 backdrop-blur-md shadow-2xl shadow-black/20 flex justify-between items-center">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2.5 group shrink-0">
           <img
             src={settings.logo_url || '/logo.svg'}
             alt={settings.salonName}
+            onError={(event) => {
+              event.currentTarget.onerror = null
+              event.currentTarget.src = '/logo.svg'
+            }}
             className={`object-contain rounded-full bg-black/30 p-1 ring-1 ring-white/20 group-hover:ring-accent/70 transition-all duration-500 ease-out ${
               scrolled ? 'w-11 h-11 scale-105' : 'w-10 h-10 scale-100'
             }`}
@@ -134,7 +138,7 @@ export default function Header() {
 
           {/* CTA Button */}
           <BookingLink
-            className="ml-2 px-4 py-2.5 bg-accent hover:bg-orange-300 text-primary rounded-xl font-black text-[10px] uppercase tracking-[0.12em] transition-all duration-300 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5"
+            className="ml-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-ink rounded-full font-black text-[10px] uppercase tracking-[0.12em] transition-all duration-300 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-0.5"
             suppressHydrationWarning
           >
             {t.nav.booking}
@@ -177,15 +181,7 @@ export default function Header() {
                   <LogOut size={18} />
                 </button>
               </>
-            ) : (
-              <Link
-                href="/admin"
-                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-lg transition-colors duration-200 text-sm font-medium"
-              >
-                <LayoutDashboard size={16} />
-                <span className="hidden lg:inline">Login</span>
-              </Link>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -194,7 +190,7 @@ export default function Header() {
           <LanguageSwitcher />
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="w-10 h-10 rounded-xl bg-accent text-primary hover:bg-orange-300 shadow-lg shadow-accent/20 transition-all duration-200 flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-accent text-ink hover:bg-accent-hover shadow-lg shadow-accent/20 transition-all duration-200 flex items-center justify-center"
             aria-label={isOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
           >
             {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -235,27 +231,6 @@ export default function Header() {
                   {t.nav.booking}
                 </BookingLink>
                 
-                {/* Mobile Admin */}
-                {isAdmin ? (
-                  <Link
-                    href="/admin/dashboard"
-                    className="flex items-center gap-2 w-full px-4 py-3 mt-3 bg-white/5 text-white rounded-lg font-medium border border-white/10"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <LayoutDashboard size={20} />
-                    Admin Panel
-                  </Link>
-                ) : (
-                  <Link
-                    href="/admin"
-                    className="flex items-center gap-2 w-full px-4 py-3 mt-3 bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg font-medium border border-white/10 transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <LayoutDashboard size={20} />
-                    Login
-                  </Link>
-                )}
-
               </div>
             </div>
           </motion.div>

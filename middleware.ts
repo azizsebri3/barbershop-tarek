@@ -2,12 +2,18 @@ import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 
 const intlMiddleware = createMiddleware({
-  locales: ['en', 'fr'],
+  locales: ['en', 'fr', 'nl'],
   defaultLocale: 'fr',
   localePrefix: 'always'
 });
 
 export default async function middleware(request: NextRequest) {
+  if (request.nextUrl.hostname.startsWith('www.')) {
+    const canonicalUrl = request.nextUrl.clone();
+    canonicalUrl.hostname = canonicalUrl.hostname.slice(4);
+    return NextResponse.redirect(canonicalUrl, 301);
+  }
+
   // Vérifier l'authentification admin pour les routes protégées
   if (request.nextUrl.pathname.startsWith('/admin') && 
       !request.nextUrl.pathname.includes('/admin/login') &&
@@ -45,5 +51,5 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/(en|fr)/:path*', '/admin/:path*']
+  matcher: ['/', '/(en|fr|nl)/:path*', '/admin/:path*']
 };

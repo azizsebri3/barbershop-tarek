@@ -8,6 +8,7 @@ import { fr } from 'date-fns/locale'
 import { Clock, ChevronRight, Sparkles } from 'lucide-react'
 import { useOpeningHours } from '@/lib/useOpeningHoursCached'
 import { useServices } from '@/lib/useServicesCached'
+import { useLanguage } from '@/lib/language-context'
 import '../styles/calendar.css'
 
 type CalendarValue = Date | Date[] | null | [Date | null, Date | null]
@@ -24,6 +25,7 @@ interface TimeSlot {
 }
 
 export default function CalendarBooking({ onBookingSelect, selectedService }: CalendarBookingProps) {
+  const { t, locale } = useLanguage()
   const { hours: openingHours } = useOpeningHours()
   const { services } = useServices()
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
@@ -52,11 +54,11 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
     
     // Vérifier si c'est un ID (format UUID) ou un nom
     const serviceById = services.find(s => s.id === currentService)
-    if (serviceById) return serviceById.name
+    if (serviceById) return t.services.serviceCatalog[serviceById.translationKey as keyof typeof t.services.serviceCatalog]?.name || serviceById.name
     
     // Sinon c'est déjà un nom
     return currentService
-  }, [currentService, services])
+  }, [currentService, services, t])
 
   // Générer les créneaux horaires disponibles
   const generateTimeSlots = useCallback((date: Date, serviceDuration: number = 30) => {
@@ -175,7 +177,9 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
   const handleTimeSelect = (time: string) => {
     // Récupérer le nom du service sélectionné
     const selectedServiceData = services.find(s => s.id === currentService)
-    const serviceName = selectedServiceData?.name || currentService
+    const serviceName = selectedServiceData
+      ? t.services.serviceCatalog[selectedServiceData.translationKey as keyof typeof t.services.serviceCatalog]?.name || selectedServiceData.name
+      : currentService
 
     setSelectedTime(time)
     onBookingSelect({
@@ -250,13 +254,13 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-semibold text-white">{service.name}</h4>
-                    <p className="text-gray-400 text-sm mt-1">{service.description}</p>
+                    <h4 className="font-semibold text-white">{t.services.serviceCatalog[service.translationKey as keyof typeof t.services.serviceCatalog]?.name || service.name}</h4>
+                    <p className="text-gray-400 text-sm mt-1">{t.services.serviceCatalog[service.translationKey as keyof typeof t.services.serviceCatalog]?.description || service.description}</p>
                     <div className="flex items-center gap-4 mt-2 text-sm">
                       <span className="text-accent font-medium">{service.price}€</span>
                       <span className="text-gray-500 flex items-center gap-1">
                         <Clock size={14} />
-                        {service.duration}min
+                        {service.duration} {t.services.durationUnit}
                       </span>
                     </div>
                   </div>
@@ -276,12 +280,12 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
           className="space-y-4"
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-white">Choisissez une date</h3>
+            <h3 className="text-xl font-bold text-white">{t.booking.chooseDate}</h3>
             <button
               onClick={() => setStep('service')}
               className="text-accent hover:text-accent/80 text-sm"
             >
-              ← Changer le service
+              ← {t.booking.changeService}
             </button>
           </div>
           
@@ -293,13 +297,13 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
               tileClassName={tileClassName}
               minDate={new Date()}
               maxDate={addDays(new Date(), 60)}
-              locale="fr-FR"
+              locale={locale === 'nl' ? 'nl-NL' : locale === 'en' ? 'en-GB' : 'fr-FR'}
               className="modern-calendar"
             />
           </div>
           
           <div className="text-sm text-gray-400 text-center">
-            ℹ️ Fermé le dimanche
+            {t.booking.closedSunday}
           </div>
         </motion.div>
       )}
@@ -314,13 +318,13 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
         >
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-white">
-              Créneaux disponibles
+              {t.booking.availableSlots}
             </h3>
             <button
               onClick={() => setStep('date')}
               className="text-accent hover:text-accent/80 text-sm"
             >
-              ← Changer la date
+              ← {t.booking.changeDate}
             </button>
           </div>
           
@@ -367,7 +371,7 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
                   {slot.time}
                   {slot.isBooked && (
                     <span className="absolute inset-0 flex items-center justify-center bg-red-900/80 text-red-200 text-xs">
-                      Occupé
+                      {t.booking.occupied}
                     </span>
                   )}
                   {selectedTime === slot.time && (
@@ -389,8 +393,8 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
               className="text-center py-12"
             >
               <Sparkles className="mx-auto mb-4 text-gray-400" size={48} />
-              <p className="text-gray-400 text-lg">Aucun créneau disponible ce jour</p>
-              <p className="text-gray-500 text-sm mt-2">Essayez un autre jour</p>
+              <p className="text-gray-400 text-lg">{t.booking.noSlots}</p>
+              <p className="text-gray-500 text-sm mt-2">{t.booking.tryAnotherDay}</p>
             </motion.div>
           )}
         </motion.div>

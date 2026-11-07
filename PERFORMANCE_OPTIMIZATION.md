@@ -66,7 +66,7 @@
 
 ### High Impact (Easy to implement)
 1. **Code-split heavy pages:**
-   - `src/components/BookingForm.tsx` - Dynamic import with `ssr: false`
+   - `src/components/ModernBookingForm.tsx` - Dynamic import with `ssr: false`
    - `src/components/Gallery.tsx` - Lazy load with intersection observer
 
 2. **Image optimization:**

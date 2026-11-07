@@ -215,7 +215,7 @@ projet-tarek/
 │   │   ├── Footer.tsx
 │   │   ├── Hero.tsx
 │   │   ├── ServiceCard.tsx
-│   │   ├── BookingForm.tsx
+│   │   ├── ModernBookingForm.tsx
 │   │   └── OpeningHours.tsx
 │   │
 │   └── lib/                    # Fonctions utilitaires

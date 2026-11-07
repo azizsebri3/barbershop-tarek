@@ -33,6 +33,15 @@ const OpeningHours = memo(function OpeningHours() {
   const open = isOpenNow()
   const days = Object.entries(hours)
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+  const dayLabels: Record<string, string> = {
+    monday: t.hours.days.monday,
+    tuesday: t.hours.days.tuesday,
+    wednesday: t.hours.days.wednesday,
+    thursday: t.hours.days.thursday,
+    friday: t.hours.days.friday,
+    saturday: t.hours.days.saturday,
+    sunday: t.hours.days.sunday,
+  }
 
   if (loading) {
     return (
@@ -122,7 +131,7 @@ const OpeningHours = memo(function OpeningHours() {
             >
               <span className={`capitalize font-medium text-sm ${isToday ? 'text-accent' : 'text-gray-400'}`}>
                 {isToday && <span className="mr-2">•</span>}
-                {day}
+                {dayLabels[day] || day}
               </span>
               <span className={`text-sm font-medium ${
                 dayHours.closed 

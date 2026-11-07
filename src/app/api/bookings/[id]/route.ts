@@ -232,7 +232,8 @@ export async function PUT(
           date: booking.date,
           time: booking.time,
           service: booking.service,
-          message: booking.message
+          message: booking.message,
+          language: booking.language
         }, lang)
       } else if (status === 'cancelled') {
         await sendBookingCancelledEmail({
@@ -243,7 +244,8 @@ export async function PUT(
           time: booking.time,
           service: booking.service,
           message: booking.message,
-          cancelNote: cancel_note
+          cancelNote: cancel_note,
+          language: booking.language
         }, lang)
       }
 

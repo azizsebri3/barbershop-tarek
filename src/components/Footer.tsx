@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import BookingLink from '@/components/BookingLink'
-import { MapPin, Phone, Mail, ArrowRight, Sparkles, Clock, Instagram, Facebook } from 'lucide-react'
+import { MapPin, Phone, Mail, ArrowRight, Clock, Instagram, Facebook, Scissors } from 'lucide-react'
 import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettingsCached'
 import { useLanguage } from '@/lib/language-context'
 
@@ -30,13 +30,10 @@ export default function Footer() {
 
   const footerLinks = {
     services: [
-      { label: t.footer.serviceHaircut, href: '/pricing' },
-      { label: t.footer.serviceFade, href: '/pricing' },
-      { label: t.footer.serviceBeard, href: '/pricing' },
-      { label: t.footer.serviceChild, href: '/pricing' },
-    ],
-    zones: [
-      t.footer.serviceArea,
+      { label: t.footer.serviceHaircut, href: `/${locale}/booking?service=coupe-homme` },
+      { label: t.footer.serviceFade, href: `/${locale}/booking?service=degrade` },
+      { label: t.footer.serviceBeard, href: `/${locale}/booking?service=barbe` },
+      { label: t.footer.serviceChild, href: `/${locale}/booking?service=coupe-enfant` },
     ],
   }
 
@@ -45,7 +42,7 @@ export default function Footer() {
       {/* Background decorative elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[150px]" />
-        <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[120px]" />
+        <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[120px]" />
       </div>
 
       {/* Main Footer Content */}
@@ -63,7 +60,7 @@ export default function Footer() {
             >
               <Link href="/" className="inline-flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-gradient-to-br from-accent to-orange-300 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-accent/20">
-                  ✂️
+                  <Scissors aria-hidden="true" size={22} />
                 </div>
                 <span className="text-xl font-bold text-white">{settings.salonName || 'Tarek Salon'}</span>
               </Link>
@@ -118,7 +115,7 @@ export default function Footer() {
               viewport={{ once: true }}
             >
               <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
-                <Sparkles size={18} className="text-accent" />
+                <span className="w-8 h-px bg-accent" />
                 {t.footer.servicesTitle}
               </h3>
               <ul className="space-y-3">
@@ -136,7 +133,7 @@ export default function Footer() {
               </ul>
             </motion.div>
 
-            {/* Zone de Service Column */}
+            {/* Opening Hours Column */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -144,19 +141,9 @@ export default function Footer() {
               viewport={{ once: true }}
             >
               <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
-                <MapPin size={18} className="text-accent" />
-                {t.footer.serviceAreaTitle}
+                <Clock size={18} className="text-accent" />
+                {t.footer.hoursTitle}
               </h3>
-              <ul className="space-y-3">
-                {footerLinks.zones.map((zone, index) => (
-                  <li key={index} className="flex items-center gap-2 text-gray-400 text-sm">
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-                    {zone}
-                  </li>
-                ))}
-              </ul>
-              
-              {/* Opening Hours Preview */}
               <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
                 <div className="flex items-center gap-2 text-white font-medium mb-2">
                   <Clock size={16} className="text-accent" />
@@ -214,7 +201,6 @@ export default function Footer() {
                 <BookingLink
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-accent to-orange-300 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-accent/20 hover:shadow-xl hover:shadow-accent/30"
                 >
-                  <Sparkles size={16} />
                   {t.footer.bookButton}
                 </BookingLink>
               </motion.div>
@@ -237,11 +223,6 @@ export default function Footer() {
             viewport={{ once: true }}
             className="mt-16 pt-8 border-t border-white/10"
           >
-            {/* SEO Keywords */}
-            <p className="text-gray-600 text-xs text-center mb-6 max-w-4xl mx-auto">
-              {t.footer.seoKeywords}
-            </p>
-            
             {/* Copyright */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-gray-500 text-sm">

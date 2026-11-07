@@ -10,6 +10,8 @@ function getResend() {
   return resend
 }
 
+export type EmailLanguage = 'fr' | 'en' | 'nl'
+
 interface BookingDetails {
   id?: string
   name: string
@@ -22,6 +24,7 @@ interface BookingDetails {
   cancelNote?: string
   oldDate?: string
   oldTime?: string
+  language?: EmailLanguage
 }
 
 // Email de confirmation au client
@@ -40,7 +43,7 @@ export async function sendClientConfirmation(booking: BookingDetails) {
     const { data, error } = await resendClient.emails.send({
       from: `${salonName} <${salonEmail}>`,
       to: booking.email,
-      subject: `✅ Confirmation de votre réservation - ${salonName}`,
+      subject: `${booking.language === 'en' ? '✅ Booking confirmation' : booking.language === 'nl' ? '✅ Bevestiging van uw afspraak' : '✅ Confirmation de votre réservation'} - ${salonName}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -54,15 +57,15 @@ export async function sendClientConfirmation(booking: BookingDetails) {
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); padding: 30px; text-align: center;">
               <h1 style="color: #0a0a0a; margin: 0; font-size: 28px;">✂️ ${salonName}</h1>
-              <p style="color: #0a0a0a; margin: 10px 0 0 0; font-size: 16px;">Confirmation de réservation</p>
+              <p style="color: #0a0a0a; margin: 10px 0 0 0; font-size: 16px;">${booking.language === 'en' ? 'Booking confirmation' : booking.language === 'nl' ? 'Bevestiging van uw afspraak' : 'Confirmation de réservation'}</p>
             </div>
             
             <!-- Content -->
             <div style="padding: 30px;">
-              <h2 style="color: #d4af37; margin-top: 0;">Bonjour ${booking.name} ! 👋</h2>
+              <h2 style="color: #d4af37; margin-top: 0;">${booking.language === 'en' ? 'Hello' : booking.language === 'nl' ? 'Hallo' : 'Bonjour'} ${booking.name} ! 👋</h2>
               
               <p style="color: #cccccc; line-height: 1.6;">
-                Votre réservation a bien été enregistrée. Voici les détails :
+                ${booking.language === 'en' ? 'Your booking has been received. Here are the details:' : booking.language === 'nl' ? 'Uw afspraak is geregistreerd. Dit zijn de details:' : 'Votre réservation a bien été enregistrée. Voici les détails :'}
               </p>
               
               <!-- Booking Details Card -->
@@ -99,9 +102,9 @@ export async function sendClientConfirmation(booking: BookingDetails) {
                   Vous pourrez ajouter une note expliquant la raison de l'annulation.
                 </p>
                 <div style="text-align: center;">
-                  <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'}/fr/booking/cancel/${booking.id}" 
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'}/fr/booking/cancel/${booking.id}?email=${encodeURIComponent(booking.email)}"
                      style="display: inline-block; background-color: #ef4444; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 14px; transition: background-color 0.3s;">
-                    Annuler mon rendez-vous
+                    ${booking.language === 'en' ? 'Cancel my appointment' : booking.language === 'nl' ? 'Mijn afspraak annuleren' : 'Annuler mon rendez-vous'}
                   </a>
                 </div>
                 <p style="color: #888888; margin: 15px 0 0 0; font-size: 12px;">
@@ -111,7 +114,7 @@ export async function sendClientConfirmation(booking: BookingDetails) {
               ` : ''}
               
               <p style="color: #cccccc; line-height: 1.6;">
-                À très bientôt ! 🙌
+                ${booking.language === 'en' ? 'See you soon!' : booking.language === 'nl' ? 'Tot binnenkort!' : 'À très bientôt !'} 🙌
               </p>
             </div>
             
@@ -242,7 +245,7 @@ export async function sendBookingEmails(booking: BookingDetails) {
 }
 
 // Email de confirmation de rendez-vous (quand admin confirme)
-export async function sendBookingConfirmedEmail(booking: BookingDetails, lang: 'fr' | 'en' = 'fr') {
+export async function sendBookingConfirmedEmail(booking: BookingDetails, lang: EmailLanguage = booking.language || 'fr') {
   const resendClient = getResend()
   
   if (!resendClient) {
@@ -288,7 +291,7 @@ export async function sendBookingConfirmedEmail(booking: BookingDetails, lang: '
     }
   }
 
-  const t = texts[lang]
+  const t = texts[lang === 'nl' ? 'en' : lang]
 
   try {
     const { data, error } = await resendClient.emails.send({
@@ -344,7 +347,7 @@ export async function sendBookingConfirmedEmail(booking: BookingDetails, lang: '
                      style="flex: 1; display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 14px; text-align: center; transition: background-color 0.3s;">
                     📅 ${lang === 'fr' ? 'Modifier la date' : 'Reschedule'}
                   </a>
-                  <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'}/${lang}/booking/cancel/${booking.id}" 
+                  <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'}/${lang}/booking/cancel/${booking.id}?email=${encodeURIComponent(booking.email)}"
                      style="flex: 1; display: inline-block; background-color: #ef4444; color: #ffffff; text-decoration: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 14px; text-align: center; transition: background-color 0.3s;">
                     ❌ ${lang === 'fr' ? 'Annuler' : 'Cancel'}
                   </a>
@@ -384,7 +387,7 @@ export async function sendBookingConfirmedEmail(booking: BookingDetails, lang: '
 }
 
 // Email de confirmation d'annulation au client (quand client annule lui-même)
-export async function sendClientCancellationConfirmation(booking: BookingDetails, lang: 'fr' | 'en' = 'fr') {
+export async function sendClientCancellationConfirmation(booking: BookingDetails, lang: EmailLanguage = booking.language || 'fr') {
   const resendClient = getResend()
 
   if (!resendClient) {
@@ -429,7 +432,7 @@ export async function sendClientCancellationConfirmation(booking: BookingDetails
     }
   }
 
-  const t = texts[lang]
+  const t = texts[lang === 'nl' ? 'en' : lang]
 
   try {
     const { data, error } = await resendClient.emails.send({
@@ -518,7 +521,7 @@ export async function sendClientCancellationConfirmation(booking: BookingDetails
 }
 
 // Email de notification d'annulation à l'admin (quand client annule)
-export async function sendAdminCancellationNotification(booking: BookingDetails, lang: 'fr' | 'en' = 'fr') {
+export async function sendAdminCancellationNotification(booking: BookingDetails, lang: EmailLanguage = booking.language || 'fr') {
   const resendClient = getResend()
 
   if (!resendClient) {
@@ -561,7 +564,7 @@ export async function sendAdminCancellationNotification(booking: BookingDetails,
     }
   }
 
-  const t = texts[lang]
+  const t = texts[lang === 'nl' ? 'en' : lang]
 
   try {
     const { data, error } = await resendClient.emails.send({
@@ -648,7 +651,7 @@ export async function sendAdminCancellationNotification(booking: BookingDetails,
 }
 
 // Email d'annulation de rendez-vous (quand admin annule)
-export async function sendBookingCancelledEmail(booking: BookingDetails, lang: 'fr' | 'en' = 'fr') {
+export async function sendBookingCancelledEmail(booking: BookingDetails, lang: EmailLanguage = booking.language || 'fr') {
   const resendClient = getResend()
   
   if (!resendClient) {
@@ -694,7 +697,7 @@ export async function sendBookingCancelledEmail(booking: BookingDetails, lang: '
     }
   }
 
-  const t = texts[lang]
+  const t = texts[lang === 'nl' ? 'en' : lang]
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tareksalon.be'
 
   try {
@@ -792,7 +795,7 @@ export async function sendBookingCancelledEmail(booking: BookingDetails, lang: '
 }
 
 // Email de confirmation reschedule
-export async function sendBookingRescheduledEmail(booking: BookingDetails, lang: 'fr' | 'en' = 'fr') {
+export async function sendBookingRescheduledEmail(booking: BookingDetails, lang: EmailLanguage = booking.language || 'fr') {
   const resendClient = getResend()
   
   if (!resendClient) {
@@ -838,7 +841,7 @@ export async function sendBookingRescheduledEmail(booking: BookingDetails, lang:
     }
   }
 
-  const t = texts[lang]
+  const t = texts[lang === 'nl' ? 'en' : lang]
 
   try {
     const { data, error } = await resendClient.emails.send({
@@ -931,7 +934,7 @@ export async function sendBookingRescheduledEmail(booking: BookingDetails, lang:
 }
 
 // Email notification when admin modifies a booking
-export async function sendAdminModifiedBookingEmail(oldBooking: BookingDetails, newBooking: BookingDetails, lang: 'fr' | 'en' = 'fr') {
+export async function sendAdminModifiedBookingEmail(oldBooking: BookingDetails, newBooking: BookingDetails, lang: EmailLanguage = newBooking.language || oldBooking.language || 'fr') {
   const resendClient = getResend()
   
   if (!resendClient) {
@@ -984,7 +987,7 @@ export async function sendAdminModifiedBookingEmail(oldBooking: BookingDetails, 
     }
   }
 
-  const t = texts[lang]
+  const t = texts[lang === 'nl' ? 'en' : lang]
 
   try {
     const changesHtml = changes.map(change => {
@@ -1090,4 +1093,3 @@ export async function sendAdminModifiedBookingEmail(oldBooking: BookingDetails, 
     return { success: false, error: String(error) }
   }
 }
-

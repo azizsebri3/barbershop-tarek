@@ -81,6 +81,7 @@ export async function POST(
       time: booking.time,
       service: booking.service,
       message: booking.message,
+      language: booking.language,
       cancelNote: cancelNote
     })
 

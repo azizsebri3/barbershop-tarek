@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { useEffect, useState, type AnchorHTMLAttributes, type MouseEvent, type ReactNode } from 'react'
 import { getBookingHref, isSalonkeeBookingConfigured, type BookingMode } from '@/lib/booking'
 import { useLanguage } from '@/lib/language-context'
+import { track } from '@vercel/analytics'
 
 interface BookingLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
   children: ReactNode
@@ -49,6 +50,8 @@ export default function BookingLink({ children, fallbackHref, ...props }: Bookin
   }, [isChoiceOpen])
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    track('booking_cta_click', { source: 'booking-link' })
+    track('booking_started', { source: 'booking-link' })
     if (!isSalonkeeBookingConfigured() || bookingMode === 'website') {
       props.onClick?.(event)
       return

@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { MapPin } from 'lucide-react'
+import { useState } from 'react'
+import Image from 'next/image'
+import { MapPin, Phone, Mail } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
+import { track } from '@vercel/analytics'
 
 export default function LazyMap() {
   const { t } = useLanguage()
@@ -14,25 +16,6 @@ export default function LazyMap() {
       : 'Hello, I would like to book an appointment at Tarek Salon.'
   )}`
   const [isLoaded, setIsLoaded] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsLoaded(true)
-          observer.unobserve(entry.target)
-        }
-      },
-      { rootMargin: '100px' }
-    )
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current)
-    }
-
-    return () => observer.disconnect()
-  }, [])
 
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
@@ -45,7 +28,6 @@ export default function LazyMap() {
         </div>
 
         <div 
-          ref={containerRef}
           className="rounded-2xl overflow-hidden shadow-2xl border border-primary/50 hover:border-accent/50 transition-colors mb-12 animate-fadeInUp" 
           style={{ animationDelay: '100ms' }}
         >
@@ -62,10 +44,24 @@ export default function LazyMap() {
               className="w-full"
             />
           ) : (
-            <div className="w-full h-[500px] bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+            <div className="relative flex h-[500px] w-full items-center justify-center bg-slate-900">
+              <Image
+                src="/hero-bg1.jpeg"
+                alt="TODO(contenu): photo de façade du salon"
+                fill
+                sizes="100vw"
+                className="object-cover opacity-35"
+              />
               <div className="text-center">
                 <MapPin className="w-12 h-12 text-accent mx-auto mb-3 animate-pulse" />
-                <p className="text-gray-400">{t.location.mapLoading}</p>
+                <p className="mb-4 text-gray-400">{t.location.mapLoading}</p>
+                <button
+                  type="button"
+                  onClick={() => setIsLoaded(true)}
+                  className="min-h-11 rounded-full bg-accent px-5 py-3 font-semibold text-primary hover:bg-accent-hover"
+                >
+                  {t.location.mapButton}
+                </button>
               </div>
             </div>
           )}
@@ -105,10 +101,10 @@ export default function LazyMap() {
           </div>
 
           <div className="min-w-0 rounded-xl bg-primary p-6 text-center border border-primary/50 hover:border-accent/50 transition-colors">
-            <div className="w-8 h-8 text-accent mx-auto mb-3">📞</div>
+            <Phone aria-hidden="true" className="w-8 h-8 text-accent mx-auto mb-3" />
             <h3 className="text-lg font-bold text-white mb-2">{t.location.phone}</h3>
             <div className="mt-1 flex flex-col items-center gap-3">
-              <a href="tel:+32465632205" className="text-gray-400 hover:text-accent transition-colors">+32 465 63 22 05</a>
+              <a href="tel:+32465632205" onClick={() => track('phone_click', { source: 'contact-card' })} className="text-gray-400 hover:text-accent transition-colors">+32 465 63 22 05</a>
               <a
                 href={whatsappUrl}
                 target="_blank"
@@ -121,7 +117,7 @@ export default function LazyMap() {
           </div>
 
           <div className="min-w-0 rounded-xl bg-primary p-6 text-center border border-primary/50 hover:border-accent/50 transition-colors sm:col-span-2 lg:col-span-1">
-            <div className="w-8 h-8 text-accent mx-auto mb-3">📧</div>
+            <Mail aria-hidden="true" className="w-8 h-8 text-accent mx-auto mb-3" />
             <h3 className="text-lg font-bold text-white mb-2">{t.location.email}</h3>
             <a href="mailto:contact@tareksalon.be" className="break-all text-gray-400 hover:text-accent transition-colors">contact@tareksalon.be</a>
           </div>

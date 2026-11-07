@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import BookingPageContent from '@/components/BookingPageContent'
 
-const locales = ['fr', 'en'] as const
+const locales = ['fr', 'en', 'nl'] as const
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
@@ -29,6 +29,14 @@ export async function generateMetadata({
         'fr-BE': 'https://tareksalon.be/fr/booking',
         'en-BE': 'https://tareksalon.be/en/booking',
       },
+    },
+    openGraph: {
+      title: isFrench ? 'Réserver | Tarek Salon' : 'Book | Tarek Salon',
+      description: isFrench
+        ? 'Choisissez votre prestation et votre créneau chez Tarek Salon à Namur.'
+        : 'Choose your service and time at Tarek Salon in Namur.',
+      url: `https://tareksalon.be/${locale}/booking`,
+      images: ['/hero-bg1.jpeg'],
     },
   }
 }

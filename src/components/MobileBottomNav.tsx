@@ -1,98 +1,34 @@
 'use client'
 
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Home, Scissors, Calendar, Phone } from 'lucide-react'
-import { useLanguage } from '@/lib/language-context'
-import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { MessageCircle } from 'lucide-react'
 import BookingLink from '@/components/BookingLink'
-
-// Mobile bottom navigation component
+import { useLanguage } from '@/lib/language-context'
+import { track } from '@vercel/analytics'
 
 export default function MobileBottomNav() {
-  const { t, locale } = useLanguage()
-  const pathname = usePathname()
-  const [hash, setHash] = useState('')
-
-  useEffect(() => {
-    setHash(window.location.hash)
-    const handleHashChange = () => setHash(window.location.hash)
-    window.addEventListener('hashchange', handleHashChange)
-    return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [])
-
-  // Masquer sur les pages admin
-  if (pathname.startsWith('/admin')) {
-    return null
-  }
-
-  const navItems = [
-    {
-      href: `/${locale}`,
-      label: t.nav.home,
-      icon: Home,
-      active: (pathname === '/' || pathname === '/fr' || pathname === '/en' || pathname === '/fr/' || pathname === '/en/') && hash === ''
-    },
-    {
-      href: `/${locale}/#services`,
-      label: t.nav.services,
-      icon: Scissors,
-      active: (pathname === '/' || pathname === '/fr' || pathname === '/en' || pathname === '/fr/' || pathname === '/en/') && hash === '#services'
-    },
-    {
-      href: `/${locale}/booking`,
-      label: t.nav.booking,
-      icon: Calendar,
-      active: pathname.includes('/booking')
-    },
-    {
-      href: `/${locale}/#contact`,
-      label: t.nav.contact,
-      icon: Phone,
-      active: (pathname === '/' || pathname === '/fr' || pathname === '/en' || pathname === '/fr/' || pathname === '/en/') && hash === '#contact'
-    }
-  ]
+  const { locale, t } = useLanguage()
 
   return (
-    <motion.nav
-      initial={{ y: 100 }}
-      animate={{ y: 0 }}
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-xl border-t border-white/10 safe-area-bottom"
-    >
-      <div className="flex items-center justify-around px-2 py-2">
-        {navItems.map((item, index) => {
-          const Icon = item.icon
-          return (
-            item.label === t.nav.booking ? (
-            <BookingLink
-              key={index}
-              className={`flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-300 min-w-0 flex-1 ${
-                item.active
-                  ? 'bg-accent/20 text-accent'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Icon size={20} className="mb-1" />
-              <span className="text-xs font-medium truncate">{item.label}</span>
-            </BookingLink>
-            ) : (
-            <Link
-              key={index}
-              href={item.href}
-              className={`flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all duration-300 min-w-0 flex-1 ${
-                item.active
-                  ? 'bg-accent/20 text-accent'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Icon size={20} className="mb-1" />
-              <span className="text-xs font-medium truncate">{item.label}</span>
-            </Link>
-            )
-          )
-        })}
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-ink/90 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
+      <div className="flex items-center gap-3">
+        <BookingLink className="flex min-h-11 flex-1 items-center justify-center rounded-full bg-accent px-4 py-3 text-sm font-bold text-ink transition-colors hover:bg-accent-hover">
+          {t.nav.booking}
+        </BookingLink>
+        <a
+          href={`https://wa.me/32465632205?text=${encodeURIComponent(
+            locale === 'fr'
+              ? 'Bonjour, je voudrais prendre rendez-vous chez Tarek Salon.'
+              : 'Hello, I would like to book an appointment at Tarek Salon.',
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => track('whatsapp_click', { source: 'mobile-bar' })}
+          aria-label={locale === 'fr' ? 'Contacter Tarek Salon sur WhatsApp' : 'Contact Tarek Salon on WhatsApp'}
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-full bg-[#25D366] text-white transition-transform hover:scale-105"
+        >
+          <MessageCircle aria-hidden="true" size={22} />
+        </a>
       </div>
-    </motion.nav>
+    </nav>
   )
 }

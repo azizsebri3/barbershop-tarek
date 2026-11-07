@@ -9,9 +9,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: '#111111',     // Charcoal black
-        secondary: '#2b2b2b',   // Concrete gray
-        accent: '#b87333',      // Warm bronze
+        ink: '#0b0b0c',
+        surface: '#141416',
+        bone: '#f5f1ea',
+        muted: '#a1a1aa',
+        primary: '#0b0b0c',
+        secondary: '#141416',
+        accent: '#b87333',
+        'accent-hover': '#d4985a',
       },
       animation: {
         fadeIn: 'fadeIn 0.5s ease-in',

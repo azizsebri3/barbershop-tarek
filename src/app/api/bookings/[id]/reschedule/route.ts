@@ -192,6 +192,7 @@ export async function PUT(
       .update({
         date: newDate,
         time: newTime,
+        language: booking.language,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)

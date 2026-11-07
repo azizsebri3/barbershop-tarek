@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, User, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
@@ -23,14 +23,23 @@ interface Booking {
 export default function CancelBookingPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const bookingId = params.id as string
   const { t } = useLanguage()
 
   const [booking, setBooking] = useState<Booking | null>(null)
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
+  const [email, setEmail] = useState('')
   const [cancelNote, setCancelNote] = useState('')
   const [cancelled, setCancelled] = useState(false)
+
+  useEffect(() => {
+    const emailFromLink = searchParams.get('email')
+    if (emailFromLink) {
+      setEmail(emailFromLink)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -64,6 +73,11 @@ export default function CancelBookingPage() {
   const handleCancel = async () => {
     if (!booking) return
 
+    if (!email.trim()) {
+      toast.error(t.cancel.emailRequired)
+      return
+    }
+
     setCancelling(true)
     try {
       const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
@@ -72,6 +86,7 @@ export default function CancelBookingPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          email: email.trim(),
           cancelNote: cancelNote.trim() || undefined
         }),
       })
@@ -201,6 +216,23 @@ export default function CancelBookingPage() {
               <p className="text-gray-300 text-sm">{booking.message}</p>
             </div>
           )}
+        </div>
+
+        {/* Cancellation Note */}
+        <div className="mb-6">
+          <label htmlFor="cancellation-email" className="block text-sm font-medium text-gray-300 mb-2">
+            {t.cancel.emailLabel}
+          </label>
+          <input
+            id="cancellation-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t.cancel.emailPlaceholder}
+            disabled={cancelling}
+            required
+            className="w-full px-3 py-2 bg-primary/50 border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:border-accent focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          />
         </div>
 
         {/* Cancellation Note */}
