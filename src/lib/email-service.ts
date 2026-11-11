@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { escapeHtml, renderBookingEmail, type BookingDetails, type EmailKind, type EmailLanguage } from './booking-email-template'
 import { createRescheduleToken } from './reschedule-token'
+import { createBookingCalendar } from './booking-ics'
 
 export type { EmailLanguage } from './booking-email-template'
 
@@ -98,10 +99,28 @@ export async function sendAdminNotification(booking: BookingDetails) {
   }
 
   try {
+    let attachments: { filename: string; content: Buffer }[] | undefined
+    try {
+      const params = new URLSearchParams({
+        date: booking.date,
+        time: booking.time,
+        service: `${booking.service} - ${booking.name}`,
+        salon: salonName,
+        reminder: '30',
+      })
+      if (booking.duration_minutes) params.set('duration', String(booking.duration_minutes))
+      attachments = [{
+        filename: 'rendez-vous.ics',
+        content: Buffer.from(createBookingCalendar(params), 'utf-8'),
+      }]
+    } catch (error) {
+      console.error('Unable to build admin calendar file; sending without it:', error)
+    }
     const { data, error } = await resendClient.emails.send({
       from: `${salonName} <${salonEmail}>`,
       to: adminEmail,
       subject: `🔔 Nouvelle réservation - ${booking.name}`,
+      attachments,
       html: `
         <!DOCTYPE html>
         <html>

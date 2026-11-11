@@ -8,6 +8,10 @@ export function createBookingCalendar(params: URLSearchParams, now = new Date())
   const salon = params.get('salon') || ''
   const address = params.get('address') || ''
   const duration = params.get('duration')
+  const reminder = params.get('reminder')
+  if (reminder !== null && (!/^\d+$/.test(reminder) || Number(reminder) > 10080)) {
+    throw new Error('Invalid calendar details')
+  }
   if (!isValidDateKey(date) || !/^([01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(time) ||
       !service || service.length > 200 || !salon || salon.length > 200 || address.length > 500 ||
       (duration !== null && (!/^\d+$/.test(duration) || Number(duration) < 1 || Number(duration) > 1440))) {
@@ -60,6 +64,13 @@ export function createBookingCalendar(params: URLSearchParams, now = new Date())
     ...(duration ? [`DURATION:PT${duration}M`] : []),
     `SUMMARY:${escape(`${salon} - ${service}`)}`,
     ...(address ? [`LOCATION:${escape(address)}`] : []),
+    ...(reminder !== null ? [
+      'BEGIN:VALARM',
+      'ACTION:DISPLAY',
+      `DESCRIPTION:${escape(`${salon} - ${service}`)}`,
+      `TRIGGER:-PT${reminder}M`,
+      'END:VALARM',
+    ] : []),
     'END:VEVENT',
     'END:VCALENDAR',
   ]

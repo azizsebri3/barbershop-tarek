@@ -29,6 +29,7 @@ function setup({ settingsError = null } = {}) {
     resend: { Resend },
     '@supabase/supabase-js': { createClient: () => client },
     './reschedule-token': { createRescheduleToken: async id => `signed-${id}` },
+    './booking-ics': { createBookingCalendar: params => `ICS:${params.get('reminder')}:${params.get('duration')}` },
     './booking-email-template': {
       renderBookingEmail: args => { rendered.push(args); return { subject: 'Subject', html: '<p>Body</p>' } },
       escapeHtml: value => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
@@ -41,8 +42,10 @@ function setup({ settingsError = null } = {}) {
       if (!(name in dependencies)) throw new Error(`Unexpected dependency: ${name}`)
       return dependencies[name]
     },
-    process: { env: { RESEND_API_KEY: 'test', NEXT_PUBLIC_SUPABASE_URL: 'https://example.invalid', SUPABASE_SERVICE_ROLE_KEY: 'test' } },
+    process: { env: { RESEND_API_KEY: 'test', ADMIN_EMAIL: 'admin@example.invalid', NEXT_PUBLIC_SUPABASE_URL: 'https://example.invalid', SUPABASE_SERVICE_ROLE_KEY: 'test' } },
     console: { log() {}, error: (...args) => errors.push(args) },
+    Buffer,
+    URLSearchParams,
   })
   return { api: exports, messages, rendered, errors }
 }
@@ -77,6 +80,14 @@ test('address lookup errors are logged without inventing an address', async () =
   assert.equal(rendered[0].address, '')
   assert.equal(messages.length, 1)
   assert.equal(errors.length, 1)
+})
+
+test('admin new-booking notification attaches a calendar file with a reminder', async () => {
+  const { api, messages } = setup()
+  const result = await api.sendAdminNotification(booking)
+  assert.equal(result.success, true)
+  assert.equal(messages[0].attachments[0].filename, 'rendez-vous.ics')
+  assert.equal(messages[0].attachments[0].content.toString(), 'ICS:30:45')
 })
 
 test('admin cancellation notification escapes the reason', async () => {
