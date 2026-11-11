@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendBookingConfirmedEmail, sendBookingCancelledEmail } from '@/lib/email-service'
+import { verifyAdminToken } from '@/lib/admin-session'
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -13,18 +14,26 @@ function getSupabaseClient() {
   return createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 }
 
-// ✨ FIX 5: Helper pour vérifier authentification admin
-function verifyAdminToken(request: NextRequest): boolean {
-  const token = request.cookies.get('admin_token')?.value
-  return !!token && token.length > 0
+function toMinutes(time: string): number {
+  const [hours, minutes] = time.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
+function isMissingAvailabilityTable(error: { code?: string; message?: string }): boolean {
+  return error.code === '42P01' ||
+    error.code === 'PGRST205' ||
+    error.message?.toLowerCase().includes('availability_slots') === true
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
   try {
+    if (!await verifyAdminToken(request.cookies.get('admin_token')?.value)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('bookings')
@@ -34,7 +43,7 @@ export async function GET(
 
     if (error) {
       return NextResponse.json(
-        { error: 'Réservation non trouvée' },
+        { error: 'Appointment not found' },
         { status: 404 }
       )
     }
@@ -43,7 +52,7 @@ export async function GET(
   } catch (error) {
     console.error('GET booking error:', error)
     return NextResponse.json(
-      { error: 'Une erreur serveur s\'est produite' },
+      { error: 'A server error occurred' },
       { status: 500 }
     )
   }
@@ -55,20 +64,15 @@ export async function PUT(
 ) {
   const { id } = await params
   try {
+    if (!await verifyAdminToken(request.cookies.get('admin_token')?.value)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const body = await request.json()
-    const { status, lang = 'fr', cancel_note, cancelled_by, name, email, phone, date, time, service, message, notifyClient } = body
+    const { status, lang, cancel_note, name, email, phone, date, time, service, message, duration_minutes, notifyClient } = body
 
     // Check if it's a full booking edit (admin modification)
     const isFullEdit = name && email && phone && date && time && service
     
-    // ✨ FIX 5: Vérifier authentification admin pour modifications
-    if (isFullEdit && !verifyAdminToken(request)) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Admin token required' },
-        { status: 401 }
-      )
-    }
-
     const supabase = getSupabaseClient()
     
     // Récupérer les détails de la réservation avant mise à jour
@@ -80,7 +84,7 @@ export async function PUT(
 
     if (fetchError || !booking) {
       console.error('❌ Réservation non trouvée:', fetchError)
-      return NextResponse.json({ error: 'Réservation non trouvée' }, { status: 404 })
+      return NextResponse.json({ error: 'Appointment not found' }, { status: 404 })
     }
 
     // ✨ FIX 3: Si admin modifie le RDV, vérifier la validation 1h aussi
@@ -93,24 +97,78 @@ export async function PUT(
       ]
       
       const selectedService = services.find(s => s.name === service)
-      const serviceDuration = selectedService?.duration || 30
+      const serviceDuration = Number(duration_minutes) || Number(booking.duration_minutes) || selectedService?.duration || 30
       
       const [startHour, startMin] = time.split(':').map(Number)
       const startMinutes = startHour * 60 + startMin
       const endMinutes = startMinutes + serviceDuration
-      
+
+      const { data: availabilitySlots, error: availabilityError } = await supabase
+        .from('availability_slots')
+        .select('start_time, end_time, is_available, is_all_day')
+        .eq('date', date)
+
+      if (availabilityError && !isMissingAvailabilityTable(availabilityError)) {
+        console.error('Error fetching configured availability:', availabilityError)
+        return NextResponse.json(
+          { error: 'Unable to verify availability' },
+          { status: 500 }
+        )
+      }
+
+      if (availabilitySlots && availabilitySlots.length > 0) {
+        const isWithinAvailableSlot = availabilitySlots.some(slot => {
+          if (!slot.is_available) return false
+          const slotStart = slot.is_all_day ? 0 : toMinutes(slot.start_time)
+          const slotEnd = slot.is_all_day ? 24 * 60 : toMinutes(slot.end_time)
+          return startMinutes >= slotStart && endMinutes <= slotEnd
+        })
+        const overlapsUnavailableSlot = availabilitySlots.some(slot => {
+          if (slot.is_available) return false
+          const slotStart = slot.is_all_day ? 0 : toMinutes(slot.start_time)
+          const slotEnd = slot.is_all_day ? 24 * 60 : toMinutes(slot.end_time)
+          return startMinutes < slotEnd && endMinutes > slotStart
+        })
+
+        if (!isWithinAvailableSlot || overlapsUnavailableSlot) {
+          return NextResponse.json(
+            { error: 'The appointment must remain entirely within the configured availability.' },
+            { status: 409 }
+          )
+        }
+      }
+
+      const { data: blockedSlots, error: blockedSlotsError } = await supabase
+        .from('blocked_time_slots')
+        .select('start_time, end_time')
+        .eq('date', date)
+
+      if (blockedSlotsError) {
+        console.error('Error fetching blocked time slots:', blockedSlotsError)
+        return NextResponse.json({ error: 'Unable to verify blocked time slots.' }, { status: 500 })
+      }
+
+      if ((blockedSlots || []).some(slot =>
+        startMinutes < toMinutes(slot.end_time) && endMinutes > toMinutes(slot.start_time)
+      )) {
+        return NextResponse.json(
+          { error: 'This appointment overlaps a blocked time slot. Please unblock it first.' },
+          { status: 409 }
+        )
+      }
+
       // Récupérer les conflits (SAUF cette réservation)
       const { data: existingBookings, error: fetchError2 } = await supabase
         .from('bookings')
-        .select('time, service, status')
+        .select('time, service, duration_minutes, status')
         .eq('date', date)
         .neq('id', id)
-        .in('status', ['confirmed'])
+        .in('status', ['confirmed', 'pending'])
       
       if (!fetchError2 && existingBookings) {
         for (const existingBooking of existingBookings) {
           const existingService = services.find(s => s.name === existingBooking.service)
-          const existingDuration = existingService?.duration || 30
+          const existingDuration = existingBooking.duration_minutes || existingService?.duration || 30
           
           const [existingHour, existingMin] = existingBooking.time.split(':').map(Number)
           const existingStartMinutes = existingHour * 60 + existingMin
@@ -118,7 +176,7 @@ export async function PUT(
           
           if (startMinutes < existingEndMinutes && endMinutes > existingStartMinutes) {
             return NextResponse.json(
-              { error: 'Ce créneau n\'est pas disponible (conflict avec un autre RDV)' },
+              { error: 'This time conflicts with another appointment.' },
               { status: 409 }
             )
           }
@@ -148,7 +206,7 @@ export async function PUT(
             const minGapMinutes = 60
             if (startMinutes >= (bookingHour * 60 + bookingMin) - minGapMinutes && startMinutes < bookingEndMinutes + minGapMinutes) {
               return NextResponse.json(
-                { error: `Client a déjà un RDV ce jour. Minimum 1h d'écart requis.` },
+                { error: 'This client already has an appointment that day. A minimum one-hour gap is required.' },
                 { status: 409 }
               )
             }
@@ -166,8 +224,12 @@ export async function PUT(
         date,
         time,
         service,
+        duration_minutes: Number(duration_minutes) || undefined,
         message,
         updated_at: new Date().toISOString()
+      }
+      if (booking.visit_outcome && (booking.date !== date || booking.time.slice(0, 5) !== time.slice(0, 5))) {
+        updateData.visit_outcome = null
       }
 
       const { error } = await supabase
@@ -184,7 +246,11 @@ export async function PUT(
       try {
         if (notifyClient) {
           const { sendAdminModifiedBookingEmail } = await import('@/lib/email-service')
-          await sendAdminModifiedBookingEmail(booking, { ...booking, ...updateData }, lang)
+          await sendAdminModifiedBookingEmail(booking, {
+            ...booking,
+            ...updateData,
+            duration_minutes: updateData.duration_minutes ?? booking.duration_minutes,
+          }, lang)
         }
       } catch (emailError) {
         console.error('⚠️ Email notification failed:', emailError)
@@ -196,20 +262,24 @@ export async function PUT(
       // Status update only
       if (!status || !['pending', 'confirmed', 'cancelled'].includes(status)) {
         return NextResponse.json(
-          { error: 'Statut invalide' },
+          { error: 'Invalid status' },
           { status: 400 }
         )
       }
 
+      if (status === 'cancelled' && cancel_note != null && typeof cancel_note !== 'string') {
+        return NextResponse.json({ error: 'Invalid cancellation reason' }, { status: 400 })
+      }
+      const cancellationReason = typeof cancel_note === 'string' ? cancel_note.trim() : ''
+
       // Mettre à jour le statut
       const updateData: any = { status, updated_at: new Date().toISOString() }
+      if (booking.visit_outcome && status !== 'confirmed') {
+        updateData.visit_outcome = null
+      }
       if (status === 'cancelled') {
-        if (cancel_note) {
-          updateData.cancel_note = cancel_note
-        }
-        if (cancelled_by) {
-          updateData.cancelled_by = cancelled_by
-        }
+        updateData.cancel_note = cancellationReason || null
+        updateData.cancelled_by = 'admin'
       }
 
       const { error } = await supabase
@@ -233,10 +303,11 @@ export async function PUT(
           time: booking.time,
           service: booking.service,
           message: booking.message,
+          duration_minutes: booking.duration_minutes,
           language: booking.language
         }, lang)
       } else if (status === 'cancelled') {
-        await sendBookingCancelledEmail({
+        const notification = await sendBookingCancelledEmail({
           name: booking.name,
           email: booking.email,
           phone: booking.phone,
@@ -244,9 +315,14 @@ export async function PUT(
           time: booking.time,
           service: booking.service,
           message: booking.message,
-          cancelNote: cancel_note,
+          cancelNote: cancellationReason || undefined,
           language: booking.language
-        }, lang)
+        }, lang).catch((error) => {
+          console.error('Cancellation email failed:', error)
+          return { success: false }
+        })
+        if (!notification.success) console.error('Cancellation email was not sent')
+        return NextResponse.json({ success: true, clientNotified: notification.success })
       }
 
       return NextResponse.json({ success: true })
@@ -254,7 +330,7 @@ export async function PUT(
   } catch (error) {
     console.error('❌ Erreur lors de la mise à jour:', error)
     return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
@@ -266,15 +342,10 @@ export async function DELETE(
 ) {
   const { id } = await params
   
-  // ✨ FIX 6: Vérifier authentification admin pour suppression
-  if (!verifyAdminToken(request)) {
-    return NextResponse.json(
-      { error: 'Unauthorized: Admin token required' },
-      { status: 401 }
-    )
-  }
-  
   try {
+    if (!await verifyAdminToken(request.cookies.get('admin_token')?.value)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const supabase = getSupabaseClient()
     const { error } = await supabase
       .from('bookings')
@@ -290,7 +361,7 @@ export async function DELETE(
   } catch (error) {
     console.error('❌ Erreur lors de la suppression:', error)
     return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

@@ -14,7 +14,8 @@ import {
   Bell,
   Palette,
   Building,
-  User
+  User,
+  Package
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAdminAuth } from '@/lib/useAdminAuth'
@@ -86,6 +87,19 @@ export default function AdminMobileNav() {
           router.push('/admin/dashboard')
         }
         window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'services' }))
+      }
+    },
+    {
+      id: 'products',
+      label: 'Products',
+      icon: Package,
+      onClick: () => {
+        window.scrollTo(0, 0)
+        if (pathname !== '/admin/dashboard') {
+          router.push('/admin/dashboard?tab=products')
+        } else {
+          window.dispatchEvent(new CustomEvent('changeAdminTab', { detail: 'products' }))
+        }
       }
     },
     {

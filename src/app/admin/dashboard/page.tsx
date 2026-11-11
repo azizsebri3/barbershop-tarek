@@ -16,7 +16,8 @@ import {
   Palette,
   LogOut,
   X,
-  CheckCircle
+  CheckCircle,
+  Package
 } from 'lucide-react'
 import AdminHours from '@/components/admin/AdminHours'
 import AdminServices from '@/components/admin/AdminServices'
@@ -28,11 +29,11 @@ import AdminTestimonials from '@/components/admin/AdminTestimonials'
 import AdminBranding from '@/components/admin/AdminBranding'
 import PushNotificationToggle from '@/components/admin/PushNotificationToggle'
 import ProfileManagement from '@/components/admin/ProfileManagement'
-import { supabase } from '@/lib/supabase'
+import AdminProducts from '@/components/admin/AdminProducts'
 import { renewAdminSession, getSessionInfo } from '@/lib/admin-auth'
 import { useAdminAuth } from '@/lib/useAdminAuth'
 
-type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'history' | 'testimonials' | 'branding' | 'notifications' | 'profile'
+type TabType = 'general' | 'hours' | 'services' | 'images' | 'bookings' | 'history' | 'testimonials' | 'branding' | 'notifications' | 'profile' | 'products'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('general')
@@ -51,6 +52,7 @@ export default function AdminDashboard() {
     { id: 'services' as TabType, label: 'Services', icon: Scissors },
     { id: 'images' as TabType, label: 'Gallery', icon: Image },
     { id: 'branding' as TabType, label: 'Logo & Branding', icon: Palette },
+    { id: 'products' as TabType, label: 'Products', icon: Package },
     { id: 'profile' as TabType, label: 'My profile', icon: Settings },
     { id: 'bookings' as TabType, label: 'Bookings', icon: Calendar, badge: pendingCount },
     { id: 'history' as TabType, label: 'History', icon: History },
@@ -60,14 +62,10 @@ export default function AdminDashboard() {
 
   const fetchPendingCount = useCallback(async () => {
     try {
-      const { count, error } = await supabase!
-        .from('bookings')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending')
-
-      if (!error && count !== null) {
-        setPendingCount(count)
-      }
+      const response = await fetch('/api/admin/bookings?count=pending', { cache: 'no-store' })
+      if (!response.ok) return
+      const { pending } = await response.json() as { pending: number }
+      setPendingCount(pending)
     } catch (error) {
       console.error('Error counting bookings:', error)
     }
@@ -251,6 +249,7 @@ export default function AdminDashboard() {
             {activeTab === 'general' && <AdminGeneral />}
             {activeTab === 'hours' && <AdminHours />}
             {activeTab === 'services' && <AdminServices />}
+            {activeTab === 'products' && <AdminProducts />}
             {activeTab === 'images' && <AdminImages />}
             {activeTab === 'branding' && <AdminBranding />}
             {activeTab === 'profile' && <ProfileManagement />}

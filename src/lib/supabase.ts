@@ -26,12 +26,14 @@ export interface Booking {
   phone: string
   date: string
   time: string
+  duration_minutes?: number
   service: string
   message?: string
   cancel_note?: string
   cancelled_by?: 'client' | 'admin'
   created_at: string
   status: 'pending' | 'confirmed' | 'cancelled'
+  visit_outcome?: 'completed' | 'no_show' | null
   language?: 'fr' | 'en' | 'nl'
 }
 

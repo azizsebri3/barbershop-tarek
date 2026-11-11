@@ -1,238 +1,115 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendBookingRescheduledEmail } from '@/lib/email-service'
+import { sendAdminBookingPush } from '@/lib/admin-booking-push'
+import { DEFAULT_BOOKING_HORIZON_MONTHS, normalizeBookingHorizonMonths } from '@/lib/booking-calendar'
+import { bearerToken, verifyRescheduleToken } from '@/lib/reschedule-token'
+import { durationForBooking, validateRescheduleTime } from '@/lib/reschedule-availability'
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !serviceKey) {
-    throw new Error('Missing Supabase environment variables')
-  }
-
-  return createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error('Missing Supabase environment variables')
+  return createClient(url, key, { auth: { autoRefreshToken: false } })
 }
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params
-  
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const supabase = getSupabaseClient()
-    
-    // Get booking details
-    const { data: booking, error: fetchError } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (fetchError || !booking) {
-      return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+    const { id } = await params
+    if (!await verifyRescheduleToken(bearerToken(request.headers.get('authorization')), id)) {
+      return NextResponse.json({ error: 'Invalid or expired link' }, { status: 401 })
     }
-
-    // Return booking info without sensitive data
+    const { data: booking, error } = await getSupabaseClient()
+      .from('bookings').select('id,name,date,time,service,status,duration_minutes').eq('id', id).maybeSingle()
+    if (error) throw error
+    if (!booking) return NextResponse.json({ error: 'Appointment not found' }, { status: 404 })
+    if (booking.status === 'cancelled') return NextResponse.json({ error: 'Appointment is cancelled' }, { status: 409 })
     return NextResponse.json({
       booking: {
-        id: booking.id,
-        name: booking.name,
-        email: booking.email,
-        date: booking.date,
-        time: booking.time,
-        service: booking.service
-      }
-    })
+        id: booking.id, name: booking.name, date: booking.date, time: booking.time,
+        service: booking.service, duration_minutes: durationForBooking(booking.duration_minutes, booking.service),
+      },
+    }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
-    console.error('❌ Error fetching booking:', error)
-    return NextResponse.json(
-      { error: 'Server error' },
-      { status: 500 }
-    )
+    console.error('Error loading reschedule:', error)
+    return NextResponse.json({ error: 'Unable to load appointment' }, { status: 500 })
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params
-  
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const body = await request.json()
-    const { newDate, newTime, email, lang = 'fr' } = body
-
-    // ✨ FIX 8: Vérifier que le client fournit son email pour reschedule
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Email required to reschedule booking' },
-        { status: 400 }
-      )
+    const { id } = await params
+    if (!await verifyRescheduleToken(bearerToken(request.headers.get('authorization')), id)) {
+      return NextResponse.json({ error: 'Invalid or expired link' }, { status: 401 })
     }
-
-    if (!newDate || !newTime) {
-      return NextResponse.json(
-        { error: 'Date and time are required' },
-        { status: 400 }
-      )
+    const { newDate, newTime, lang } = await request.json()
+    if (typeof newDate !== 'string' || typeof newTime !== 'string' ||
+      !/^([01]\d|2[0-3]):[0-5]\d$/.test(newTime)) {
+      return NextResponse.json({ error: 'Invalid date or time' }, { status: 400 })
     }
-
     const supabase = getSupabaseClient()
-
-    // Get current booking
-    const { data: booking, error: fetchError } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (fetchError || !booking) {
-      return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+    const { data: booking, error: bookingError } = await supabase
+      .from('bookings').select('*').eq('id', id).maybeSingle()
+    if (bookingError) throw bookingError
+    if (!booking) return NextResponse.json({ error: 'Appointment not found' }, { status: 404 })
+    if (booking.status === 'cancelled') return NextResponse.json({ error: 'Appointment is cancelled' }, { status: 409 })
+    if (booking.date === newDate && booking.time.slice(0, 5) === newTime) {
+      return NextResponse.json({ error: 'Choose a different date or time' }, { status: 400 })
     }
 
-    // ✨ FIX 8: Vérifier que l'email du client correspond à la réservation
-    if (booking.email.toLowerCase() !== email.toLowerCase()) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Email does not match booking' },
-        { status: 403 }
-      )
-    }
-
-    // Check if booking is cancelled
-    if (booking.status === 'cancelled') {
-      return NextResponse.json(
-        { error: 'Cannot reschedule a cancelled booking' },
-        { status: 400 }
-      )
-    }
-
-    const oldDate = booking.date
-    const oldTime = booking.time
-
-    // ✨ FIX 9: Vérifier la validation 1h entre RDVs lors d'une reschedulisation
-    // Récupérer les détails du service pour calculer la durée
-    const services = [
-      { name: 'Coupe Homme', duration: 30 },
-      { name: 'Barbe + Coupe', duration: 60 },
-      { name: 'Barbe', duration: 30 }
-    ]
-    
-    const selectedService = services.find(s => s.name === booking.service)
-    const serviceDuration = selectedService?.duration || 30
-    
-    // Vérifier que la nouvelle date n'a pas de conflit avec le créneau horaire
-    const [startHour, startMin] = newTime.split(':').map(Number)
-    const startMinutes = startHour * 60 + startMin
-    const endMinutes = startMinutes + serviceDuration
-    
-    const { data: existingBookings, error: fetchError2 } = await supabase
-      .from('bookings')
-      .select('time, service, status')
-      .eq('date', newDate)
-      .neq('id', id) // Exclure cette réservation
-      .in('status', ['confirmed', 'pending'])
-    
-    if (!fetchError2 && existingBookings) {
-      for (const existingBooking of existingBookings) {
-        const existingService = services.find(s => s.name === existingBooking.service)
-        const existingDuration = existingService?.duration || 30
-        
-        const [existingHour, existingMin] = existingBooking.time.split(':').map(Number)
-        const existingStartMinutes = existingHour * 60 + existingMin
-        const existingEndMinutes = existingStartMinutes + existingDuration
-        
-        // Vérifier conflit de créneau
-        if (startMinutes < existingEndMinutes && endMinutes > existingStartMinutes) {
-          return NextResponse.json(
-            { error: 'This time slot is not available' },
-            { status: 409 }
-          )
-        }
+    const [horizon, hours, availability, blocked, bookings] = await Promise.all([
+      supabase.from('settings').select('value').eq('key', 'booking_horizon_months').maybeSingle(),
+      supabase.from('settings').select('value').eq('key', 'opening_hours').maybeSingle(),
+      supabase.from('availability_slots').select('start_time,end_time,is_available,is_all_day').eq('date', newDate),
+      supabase.from('blocked_time_slots').select('start_time,end_time').eq('date', newDate),
+      supabase.from('bookings').select('time,service,duration_minutes,email,status').eq('date', newDate)
+        .neq('id', id).in('status', ['confirmed', 'pending']),
+    ])
+    for (const result of [horizon, hours, availability, blocked, bookings]) {
+      if (result.error) {
+        console.error('Error checking reschedule availability:', result.error)
+        return NextResponse.json({ error: 'Unable to verify availability' }, { status: 500 })
       }
     }
-    
-    // Vérifier la règle 1h minimum entre RDVs du même client (SAUF si dates différentes)
-    if (newDate === booking.date) {
-      // Même jour - vérifier l'écart 1h
-      const { data: clientBookings, error: fetchError3 } = await supabase
-        .from('bookings')
-        .select('time, service, status')
-        .eq('email', booking.email.toLowerCase())
-        .eq('date', newDate)
-        .neq('id', id) // Exclure cette réservation
-        .eq('status', 'confirmed')
-      
-      if (!fetchError3 && clientBookings && clientBookings.length > 0) {
-        for (const otherBooking of clientBookings) {
-          const otherService = services.find(s => s.name === otherBooking.service)
-          const otherDuration = otherService?.duration || 30
-          
-          const [otherHour, otherMin] = otherBooking.time.split(':').map(Number)
-          const otherStartMinutes = otherHour * 60 + otherMin
-          const otherEndMinutes = otherStartMinutes + otherDuration
-          
-          // Vérifier écart minimum de 1h (60 minutes)
-          const gapBefore = otherStartMinutes - endMinutes
-          const gapAfter = startMinutes - otherEndMinutes
-          
-          if ((gapBefore >= 0 && gapBefore < 60) || (gapAfter >= 0 && gapAfter < 60)) {
-            return NextResponse.json(
-              { error: `Minimum 1 hour gap required between appointments. Next available: ${String(Math.floor(otherEndMinutes / 60)).padStart(2, '0')}:${String(otherEndMinutes % 60).padStart(2, '0')}` },
-              { status: 409 }
-            )
-          }
-        }
-      }
-    }
-
-    // Update booking with new date/time
-    const { error: updateError } = await supabase
-      .from('bookings')
-      .update({
-        date: newDate,
-        time: newTime,
-        language: booking.language,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-
-    if (updateError) {
-      console.error('❌ Error updating booking:', updateError)
-      return NextResponse.json(
-        { error: 'Failed to reschedule' },
-        { status: 500 }
-      )
-    }
-
-    // Send confirmation email to client
-    await sendBookingRescheduledEmail(
-      {
-        id: booking.id,
-        name: booking.name,
-        email: booking.email,
-        phone: booking.phone,
-        date: newDate,
-        time: newTime,
-        service: booking.service,
-        message: booking.message,
-        oldDate,
-        oldTime
-      },
-      lang as 'fr' | 'en'
-    )
-
-    console.log(`✅ Booking ${id} rescheduled from ${oldDate} ${oldTime} to ${newDate} ${newTime}`)
-
-    return NextResponse.json({
-      success: true,
-      message: 'Booking rescheduled successfully'
+    const duration = durationForBooking(booking.duration_minutes, booking.service)
+    const reason = validateRescheduleTime({
+      date: newDate, time: newTime, duration,
+      horizon: normalizeBookingHorizonMonths(horizon.data?.value ?? DEFAULT_BOOKING_HORIZON_MONTHS),
+      hours: hours.data?.value || null,
+      availability: availability.data || [],
+      blocked: blocked.data || [],
+      bookings: bookings.data || [],
+      email: booking.email,
     })
+    if (reason) return NextResponse.json({ error: reason }, { status: 409 })
+    const updateData: { date: string; time: string; updated_at: string; visit_outcome?: null } = {
+      date: newDate, time: newTime, updated_at: new Date().toISOString(),
+    }
+    if (booking.visit_outcome) updateData.visit_outcome = null
+    const { data: updated, error: updateError } = await supabase.from('bookings')
+      .update(updateData)
+      .eq('id', id).eq('date', booking.date).eq('time', booking.time).eq('status', booking.status)
+      .select('id').maybeSingle()
+    if (updateError) throw updateError
+    if (!updated) return NextResponse.json({ error: 'Appointment changed; reload and try again' }, { status: 409 })
+    await sendAdminBookingPush(supabase, {
+      kind: 'rescheduled', name: booking.name, service: booking.service,
+      date: newDate, time: newTime, oldDate: booking.date, oldTime: booking.time,
+    })
+    const language = lang === 'fr' || lang === 'en' || lang === 'nl'
+      ? lang : booking.language === 'en' || booking.language === 'nl' ? booking.language : 'fr'
+    const emailResult = await sendBookingRescheduledEmail({
+      id: booking.id, name: booking.name, email: booking.email, phone: booking.phone,
+      date: newDate, time: newTime, service: booking.service, message: booking.message,
+      oldDate: booking.date, oldTime: booking.time, duration_minutes: duration, language,
+    }, language)
+    if (!emailResult.success) {
+      console.error('Rescheduled appointment email failed:', emailResult.error)
+      return NextResponse.json({ success: true, emailSent: false })
+    }
+    return NextResponse.json({ success: true, emailSent: true })
   } catch (error) {
-    console.error('❌ Error rescheduling booking:', error)
-    return NextResponse.json(
-      { error: 'Server error' },
-      { status: 500 }
-    )
+    console.error('Error rescheduling appointment:', error)
+    return NextResponse.json({ error: 'Unable to reschedule appointment' }, { status: 500 })
   }
 }

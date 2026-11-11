@@ -28,7 +28,7 @@ export default function AdminGalleryPage() {
       setPhotos(data.photos || [])
     } catch (error) {
       console.error('❌ Erreur chargement photos:', error)
-      toast.error('Erreur de chargement des photos')
+      toast.error('Unable to load photos')
     } finally {
       setLoading(false)
     }
@@ -54,14 +54,14 @@ export default function AdminGalleryPage() {
         const data = await response.json()
 
         if (!response.ok) {
-          toast.error(data.error || 'Erreur upload')
+          toast.error(data.error || 'Upload failed')
           continue
         }
 
         toast.success(`Photo ${file.name} uploaded!`)
       } catch (error) {
         console.error('Erreur upload:', error)
-        toast.error(`Erreur upload de ${file.name}`)
+        toast.error(`Unable to upload ${file.name}`)
       }
     }
 
@@ -81,7 +81,7 @@ export default function AdminGalleryPage() {
   })
 
   const deletePhoto = async (fileName: string, path?: string) => {
-    if (!confirm('Supprimer cette photo ?')) return
+    if (!confirm('Delete this photo?')) return
 
     try {
       const response = await fetch('/api/gallery/remove', {
@@ -94,11 +94,11 @@ export default function AdminGalleryPage() {
         toast.success('Photo deleted')
         fetchPhotos()
       } else {
-        toast.error('Erreur de suppression')
+        toast.error('Unable to delete photo')
       }
     } catch (error) {
       console.error('Erreur suppression:', error)
-      toast.error('Erreur de suppression')
+      toast.error('Unable to delete photo')
     }
   }
 

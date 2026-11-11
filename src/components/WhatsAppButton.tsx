@@ -3,9 +3,16 @@
 import { MessageCircle } from 'lucide-react'
 import { useLanguage } from '@/lib/language-context'
 import { track } from '@vercel/analytics'
+import { usePathname } from 'next/navigation'
 
 export default function WhatsAppButton() {
   const { locale } = useLanguage()
+  const pathname = usePathname()
+
+  if (pathname?.startsWith('/admin')) {
+    return null
+  }
+
   const message = locale === 'fr'
     ? 'Bonjour, je voudrais prendre rendez-vous chez Tarek Salon.'
     : 'Hello, I would like to book an appointment at Tarek Salon.'

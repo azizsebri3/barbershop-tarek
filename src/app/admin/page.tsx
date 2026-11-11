@@ -49,10 +49,10 @@ export default function AdminLogin() {
         // Redirection forcée
         window.location.href = '/admin/dashboard'
       } else {
-        setError(data.error || 'Identifiants incorrects')
+        setError(data.error || 'Incorrect username or password')
       }
     } catch {
-      setError('Erreur de connexion')
+      setError('Unable to sign in')
     } finally {
       setIsLoading(false)
     }

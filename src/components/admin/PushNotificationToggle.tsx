@@ -48,7 +48,7 @@ export default function PushNotificationToggle() {
       // Demander la permission
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') {
-        toast.error('Permission de notification refusée')
+        toast.error('Notification permission was denied')
         return
       }
 
@@ -60,8 +60,7 @@ export default function PushNotificationToggle() {
       const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
 
       if (!publicKey) {
-        toast.error('Clé VAPID non configurée')
-        throw new Error('Clé VAPID non configurée')
+        throw new Error('VAPID key is not configured')
       }
 
       // Vérifier si déjà abonné
@@ -87,14 +86,15 @@ export default function PushNotificationToggle() {
 
       if (!saveResponse.ok) {
         const error = await saveResponse.json()
-        throw new Error(error.error || 'Erreur enregistrement subscription')
+        console.error('Push subscription error:', error.error)
+        throw new Error('Unable to register for notifications')
       }
 
       setIsSubscribed(true)
-      toast.success('🔔 Notifications activées!')
+      toast.success('🔔 Notifications enabled!')
     } catch (error) {
       console.error('Erreur activation notifications:', error)
-      toast.error(`Erreur: ${error instanceof Error ? error.message : 'Activation impossible'}`)
+      toast.error(error instanceof Error ? error.message : 'Unable to enable notifications')
     } finally {
       setIsLoading(false)
     }
@@ -120,10 +120,10 @@ export default function PushNotificationToggle() {
       }
 
       setIsSubscribed(false)
-      toast.success('Notifications désactivées')
+      toast.success('Notifications disabled')
     } catch (error) {
       console.error('Erreur désactivation:', error)
-      toast.error('Erreur lors de la désactivation')
+      toast.error('Unable to disable notifications')
     } finally {
       setIsLoading(false)
     }

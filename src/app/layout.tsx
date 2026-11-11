@@ -4,6 +4,7 @@ import './globals.css'
 import { LanguageProvider } from '@/lib/language-context'
 import WhatsAppButton from '@/components/WhatsAppButton'
 import MobileBottomNav from '@/components/MobileBottomNav'
+import PageContent from '@/components/PageContent'
 import { Analytics } from '@vercel/analytics/react'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
 
@@ -271,9 +272,9 @@ export default function RootLayout({
       <body className={`${displayFont.variable} ${bodyFont.variable} bg-ink text-bone`}>
         <LanguageProvider>
           <Header />
-          <main className="pb-20 pt-16 md:pb-0">
+          <PageContent>
             {children}
-          </main>
+          </PageContent>
           <Footer />
           <WhatsAppButton />
           <MobileBottomNav />

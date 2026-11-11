@@ -32,6 +32,105 @@ SMTP_PASSWORD=votre-mot-de-passe
 EMAIL_FROM=noreply@example.com
 ```
 
+### Session administrateur
+
+Configurez la variable serveur `JWT_SECRET` avec une valeur aléatoire unique
+d'au moins 32 octets dans `.env.local` et dans chaque environnement de
+déploiement. Ne la publiez pas et n'utilisez pas le préfixe `NEXT_PUBLIC_`.
+Vous pouvez générer une valeur avec :
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Modifier cette clé déconnecte les sessions existantes. Les anciens cookies non
+signés ne sont plus acceptés : les administrateurs devront se reconnecter.
+
+### Liens de modification de rendez-vous
+
+Configurez aussi `BOOKING_LINK_SECRET` avec une clé aléatoire distincte d'au
+moins 32 octets dans chaque environnement, sans préfixe `NEXT_PUBLIC_`. Les
+nouveaux e-mails contiennent un lien signé valable un an. Les anciens liens non
+signés ne fonctionnent plus : le salon doit renvoyer un nouveau lien.
+Changer la clé invalide tous les liens précédents. Si la clé est absente,
+l'e-mail est envoyé sans lien de modification et l'erreur est enregistrée.
+Les tables `availability_slots`, `blocked_time_slots` et la colonne
+`bookings.duration_minutes` doivent exister pour vérifier les disponibilités.
+
+### Notifications push administrateur
+
+Configurer `NEXT_PUBLIC_VAPID_PUBLIC_KEY` et `VAPID_PRIVATE_KEY` ainsi que la
+table `push_subscriptions`. Chaque appareil administrateur doit autoriser les
+notifications et être abonné depuis l'administration. Les nouvelles réservations
+(y compris celles créées manuellement), les annulations et les déplacements
+effectués par le client déclenchent une push. Les changements effectués par
+Tarek ne déclenchent pas de push d'annulation ou de déplacement.
+
+La push affiche le nom, le service et l'horaire ; pour un déplacement, elle
+affiche l'ancien et le nouvel horaire. Elle n'inclut pas la raison d'annulation.
+Une erreur d'envoi est journalisée et ne revient pas sur la réservation ; la
+livraison dépend du navigateur et du système de notifications de l'appareil.
+
+### Langue de réservation
+
+L'agenda affiche la langue enregistrée avec le rendez-vous, et non une garantie
+de la langue parlée par le client. Vérifiez que la colonne `bookings.language`
+existe ; le script `supabase/add_booking_language.sql` permet de l'ajouter
+si nécessaire. Sans cette colonne, le site accepte encore les réservations,
+mais l'agenda affiche « Not recorded » et les e-mails ultérieurs utilisent
+le français par défaut. Le script attribue `fr` aux anciennes réservations ;
+les rendez-vous créés manuellement utilisent aussi le français par défaut.
+Ces valeurs ne prouvent donc pas la langue choisie par le client.
+
+### Vue du jour et historique client
+
+La vue **Today** utilise le fuseau Europe/Brussels et les disponibilités de
+l'agenda. Les plages affichées sont calculées par intervalles de 15 minutes ;
+elles ne garantissent pas qu'une prestation plus longue puisse y tenir.
+Après le début d'un rendez-vous confirmé, l'administrateur peut marquer la
+visite terminée ou le client absent, puis corriger ou retirer ce statut.
+Ce statut ne change pas la confirmation ni l'occupation du créneau.
+
+La migration `supabase/migrations/20261110_visit_outcomes_and_client_notes.sql`
+ajoute un statut de visite facultatif et une table de notes privées protégée
+par RLS, accessible uniquement par les routes administrateur. Les notes sont
+regroupées par adresse e-mail normalisée ; des clients partageant une adresse
+partagent donc la note. Les anciennes réservations restent inchangées et ne
+sont comptées comme visites terminées qu'après une indication manuelle.
+Vérifier et sauvegarder la base avant toute migration en production ; ne pas
+réexécuter cette migration sans vérifier la contrainte existante.
+
+### Boutique de produits
+
+Exécutez la migration `supabase/migrations/20261108_products.sql` dans le projet
+Supabase avant d'utiliser la boutique. Elle crée la table `products` protégée
+par RLS et le bucket public `product-photos` (les écritures passent par les
+routes serveur protégées par la session administrateur).
+
+Dans l'administration, **Products** permet de gérer les noms, descriptions,
+prix, photos et stocks. L'anglais est obligatoire pour le nom ; les traductions
+française et néerlandaise sont facultatives et remplacées par l'anglais si
+elles sont absentes. Le stock est mis à jour manuellement par Tarek.
+Un produit épuisé peut rester visible ou être masqué selon son réglage.
+
+Le panier ouvre WhatsApp ou le logiciel d'e-mail avec un message préparé que le
+client doit encore envoyer : il ne réserve pas le
+stock, n'enregistre pas de commande et ne prélève aucun paiement. Tarek doit
+confirmer la disponibilité ; paiement et retrait ont lieu au salon. WhatsApp
+utilise le numéro du salon déjà configuré dans le site, et l'e-mail provient
+des paramètres généraux. Les photos téléversées et ensuite remplacées ou
+retirées ne sont pas supprimées automatiquement du stockage.
+La suppression définitive d'un produit demande confirmation et ne supprime
+pas non plus son image du stockage.
+
+La boutique utilise les dépendances existantes du projet (Framer Motion,
+Lucide, react-dropzone et Sharp) : aucun paquet supplémentaire n'est requis.
+Le dépôt se prépare avec `npm install` si les dépendances ne sont pas encore
+installées. L'onglet **Products** de l'administration permet de déposer une
+photo, de modifier les traductions par onglet et d'ajuster rapidement le prix,
+le stock ou la visibilité. Les photos sont redimensionnées sans recadrage ;
+la progression indique l'envoi au serveur, puis le traitement et la sauvegarde.
+
 ### Avis Google
 
 La section des témoignages affiche les avis publics de la fiche Google Business
@@ -104,6 +203,13 @@ Configuration :
 ```env
 RESEND_API_KEY=re_votre_cle_api
 ```
+
+Les e-mails transactionnels utilisent Resend. Configurez aussi `RESEND_FROM_EMAIL`,
+`NEXT_PUBLIC_SALON_NAME` et `NEXT_PUBLIC_SITE_URL` avec l'URL publique du site :
+les liens de modification, d'annulation et de téléchargement du calendrier en
+dépendent. L'adresse affichée provient des paramètres généraux du salon. Le
+fichier `.ics` utilise le fuseau `Europe/Brussels` et inclut la durée lorsqu'elle
+est connue.
 
 Utilisation dans `src/app/api/bookings/route.ts` :
 ```typescript

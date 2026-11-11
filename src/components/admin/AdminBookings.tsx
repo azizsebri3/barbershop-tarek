@@ -91,14 +91,19 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                             newStatus === 'cancelled' ? t.bookingCancelled : 
                             'Booking updated'
       toast.success(successMessage)
+      if (newStatus === 'cancelled' && data.clientNotified === false) {
+        toast.error('Appointment cancelled, but the client email could not be sent.')
+      }
       
       // Notify parent to update pending count
       if (onStatusChange) {
         onStatusChange()
       }
+      return true
     } catch (error) {
       console.error('❌ Error updating:', error)
       toast.error(t.error)
+      return false
     } finally {
       if (onLoading) onLoading(false)
     }
@@ -109,7 +114,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   }
 
   const cancelBooking = async (bookingId: string, cancelNote?: string) => {
-    await updateBookingStatus(bookingId, 'cancelled', cancelNote, setCancelLoading)
+    return updateBookingStatus(bookingId, 'cancelled', cancelNote, setCancelLoading)
   }
 
   const deleteSingleBooking = async (bookingId: string) => {
@@ -121,7 +126,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Erreur lors de la suppression')
+        throw new Error(data.error || 'Unable to delete appointment')
       }
 
       // Pas besoin de mettre à jour manuellement - Realtime le fait automatiquement
@@ -150,13 +155,13 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
     if (!cancelBookingId) return
 
     try {
-      await cancelBooking(cancelBookingId, cancelNote)
+      if (!await cancelBooking(cancelBookingId, cancelNote)) return
       setCancelModalOpen(false)
       setCancelBookingId(null)
       setCancelNote('')
     } catch (error) {
       console.error('Erreur lors de l\'annulation:', error)
-      toast.error('Erreur lors de l\'annulation')
+      toast.error('Unable to cancel appointment')
     }
   }
 
@@ -243,7 +248,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
 
         if (!response.ok) {
           const data = await response.json()
-          throw new Error(data.error || 'Erreur lors de la suppression')
+          throw new Error(data.error || 'Unable to delete appointment')
         }
 
         return bookingId
@@ -632,7 +637,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setCancelModalOpen(false)}
+            onClick={() => { if (!cancelLoading) setCancelModalOpen(false) }}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -646,7 +651,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
               </h3>
               
               <p className="text-gray-300 mb-4">
-                Are you sure you want to cancel this booking?
+                Are you sure you want to cancel this booking? The reason, if provided, is included in the client&apos;s email.
               </p>
               
               <div className="mb-4">

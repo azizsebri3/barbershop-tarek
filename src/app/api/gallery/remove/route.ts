@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   try {
     const { path } = await request.json()
     if (!path) {
-      return NextResponse.json({ error: 'Chemin du fichier requis' }, { status: 400 })
+      return NextResponse.json({ error: 'File path is required' }, { status: 400 })
     }
 
     const { error } = await supabaseAdmin.storage.from(BUCKET).remove([path])
@@ -20,6 +20,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true })
   } catch (e: any) {
     console.error('❌ Remove error:', e)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

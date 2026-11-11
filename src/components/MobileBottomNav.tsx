@@ -10,7 +10,7 @@ export default function MobileBottomNav() {
   const { locale, t } = useLanguage()
   const pathname = usePathname()
 
-  if (pathname?.includes('/booking')) {
+  if (pathname?.startsWith('/admin') || pathname?.includes('/booking')) {
     return null
   }
 

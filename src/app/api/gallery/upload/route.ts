@@ -14,15 +14,15 @@ export async function POST(request: Request) {
     const file = form.get('file') as File | null
 
     if (!file) {
-      return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 })
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
     if (!ALLOWED.includes(file.type)) {
-      return NextResponse.json({ error: 'Type non autorisé (JPEG, PNG, WEBP)' }, { status: 400 })
+      return NextResponse.json({ error: 'File type not allowed (JPEG, PNG, WEBP)' }, { status: 400 })
     }
 
     if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: 'Fichier trop volumineux (max 10MB)' }, { status: 400 })
+      return NextResponse.json({ error: 'File is too large (maximum 10MB)' }, { status: 400 })
     }
 
     const ext = file.name.split('.').pop() || 'jpg'
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       })
 
     if (error || !data) {
-      return NextResponse.json({ error: error?.message || 'Erreur upload' }, { status: 500 })
+      return NextResponse.json({ error: error?.message || 'Upload failed' }, { status: 500 })
     }
 
     const { data: pub } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(data.path)
@@ -52,6 +52,6 @@ export async function POST(request: Request) {
     })
   } catch (e: any) {
     console.error('❌ Upload error:', e)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

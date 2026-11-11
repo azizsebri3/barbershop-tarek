@@ -155,6 +155,19 @@ export default function EditBookingModal({
                   />
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">Duration (minutes) *</label>
+                  <input
+                    type="number"
+                    min="15"
+                    step="15"
+                    value={formData.duration_minutes || 30}
+                    onChange={(e) => handleChange('duration_minutes', Number(e.target.value))}
+                    disabled={isSaving}
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-accent outline-none transition disabled:opacity-50"
+                  />
+                </div>
+
                 {/* Date & Time Picker */}
                 <div>
                   <label className="block text-sm font-medium text-white mb-2">📅 Date & Heure *</label>

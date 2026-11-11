@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyAdminToken } from '@/lib/admin-session'
+import {
+  MAX_BOOKING_HORIZON_MONTHS,
+  MIN_BOOKING_HORIZON_MONTHS,
+  normalizeBookingHorizonMonths,
+} from '@/lib/booking-calendar'
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -16,32 +22,35 @@ function getSupabaseClient() {
 export async function GET() {
   try {
     const supabase = getSupabaseClient()
-    const { data, error } = await supabase
-      .from('settings')
-      .select('value')
-      .eq('key', 'opening_hours')
-      .single()
+    const [{ data: hoursSetting, error: hoursError }, { data: horizonSetting, error: horizonError }] =
+      await Promise.all([
+        supabase.from('settings').select('value').eq('key', 'opening_hours').maybeSingle(),
+        supabase.from('settings').select('value').eq('key', 'booking_horizon_months').maybeSingle(),
+      ])
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 = not found
-      console.error('❌ Erreur DB:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (hoursError) {
+      console.error('❌ Erreur DB:', hoursError)
+      return NextResponse.json({ error: hoursError.message }, { status: 500 })
+    }
+    if (horizonError) {
+      console.error('❌ Erreur DB:', horizonError)
+      return NextResponse.json({ error: horizonError.message }, { status: 500 })
     }
 
-    if (data) {
-      return NextResponse.json({ hours: data.value })
-    } else {
-      // Retourner les horaires par défaut
-      const defaultHours = {
-        monday: { open: '09:30', close: '19:00', closed: false },
-        tuesday: { open: '09:30', close: '19:00', closed: false },
-        wednesday: { open: '09:30', close: '19:00', closed: false },
-        thursday: { open: '09:30', close: '19:00', closed: false },
-        friday: { open: '09:30', close: '19:00', closed: false },
-        saturday: { open: '09:30', close: '19:00', closed: false },
-        sunday: { open: '00:00', close: '00:00', closed: true }
-      }
-      return NextResponse.json({ hours: defaultHours })
+    const hours = hoursSetting?.value || {
+      monday: { open: '09:30', close: '19:00', closed: false },
+      tuesday: { open: '09:30', close: '19:00', closed: false },
+      wednesday: { open: '09:30', close: '19:00', closed: false },
+      thursday: { open: '09:30', close: '19:00', closed: false },
+      friday: { open: '09:30', close: '19:00', closed: false },
+      saturday: { open: '09:30', close: '19:00', closed: false },
+      sunday: { open: '00:00', close: '00:00', closed: true },
     }
+
+    return NextResponse.json({
+      hours,
+      bookingHorizonMonths: normalizeBookingHorizonMonths(horizonSetting?.value),
+    })
   } catch (error) {
     console.error('❌ Erreur lors du chargement des horaires:', error)
     return NextResponse.json(
@@ -54,8 +63,12 @@ export async function GET() {
 // POST /api/hours - Sauvegarder les horaires d'ouverture
 export async function POST(request: NextRequest) {
   try {
+    if (!await verifyAdminToken(request.cookies.get('admin_token')?.value)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
-    const { hours } = body
+    const { hours, bookingHorizonMonths } = body
 
     if (!hours) {
       return NextResponse.json(
@@ -64,16 +77,33 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (
+      bookingHorizonMonths !== undefined &&
+      (!Number.isInteger(bookingHorizonMonths) ||
+        bookingHorizonMonths < MIN_BOOKING_HORIZON_MONTHS ||
+        bookingHorizonMonths > MAX_BOOKING_HORIZON_MONTHS)
+    ) {
+      return NextResponse.json(
+        { error: `Booking window must be between ${MIN_BOOKING_HORIZON_MONTHS} and ${MAX_BOOKING_HORIZON_MONTHS} months` },
+        { status: 400 },
+      )
+    }
+
     const supabase = getSupabaseClient()
-    const { error } = await supabase
-      .from('settings')
-      .upsert({
+    const settings = [{
         key: 'opening_hours',
         value: hours,
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'key'
+        updated_at: new Date().toISOString(),
+      }]
+    if (bookingHorizonMonths !== undefined) {
+      settings.push({
+        key: 'booking_horizon_months',
+        value: bookingHorizonMonths,
+        updated_at: new Date().toISOString(),
       })
+    }
+
+    const { error } = await supabase.from('settings').upsert(settings, { onConflict: 'key' })
 
     if (error) {
       console.error('❌ Erreur DB:', error)

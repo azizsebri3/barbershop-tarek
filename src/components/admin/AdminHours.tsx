@@ -6,6 +6,13 @@ import { Save, RefreshCw, Clock } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { openingHours as defaultHours } from '@/lib/data'
 import { adminTranslations } from '@/lib/admin-translations'
+import { invalidateHoursCache } from '@/lib/useOpeningHoursCached'
+import {
+  DEFAULT_BOOKING_HORIZON_MONTHS,
+  MAX_BOOKING_HORIZON_MONTHS,
+  MIN_BOOKING_HORIZON_MONTHS,
+  normalizeBookingHorizonMonths,
+} from '@/lib/booking-calendar'
 
 interface OpeningHours {
   monday: { open: string; close: string; closed: boolean }
@@ -20,6 +27,7 @@ interface OpeningHours {
 export default function AdminHours() {
   const t = adminTranslations.hours
   const [hours, setHours] = useState<OpeningHours>(defaultHours)
+  const [bookingHorizonMonths, setBookingHorizonMonths] = useState(DEFAULT_BOOKING_HORIZON_MONTHS)
   const [isSaving, setIsSaving] = useState(false)
 
   const daysOfWeek = [
@@ -50,6 +58,7 @@ export default function AdminHours() {
         }
       } else if (data.hours) {
         setHours(data.hours)
+        setBookingHorizonMonths(normalizeBookingHorizonMonths(data.bookingHorizonMonths))
       }
     } catch (error) {
       console.error('❌ Erreur lors du chargement des horaires:', error)
@@ -69,7 +78,7 @@ export default function AdminHours() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ hours }),
+        body: JSON.stringify({ hours, bookingHorizonMonths }),
       })
 
       const data = await response.json()
@@ -83,6 +92,7 @@ export default function AdminHours() {
 
       // Also save to localStorage as backup
       localStorage.setItem('admin_opening_hours', JSON.stringify(hours))
+      invalidateHoursCache()
       toast.success(t.hoursSaved)
     } catch (error) {
       console.error('❌ Erreur lors de la sauvegarde:', error)
@@ -122,6 +132,30 @@ export default function AdminHours() {
       </div>
 
       <div className="space-y-3 sm:space-y-4">
+        <div className="rounded-lg border border-accent/20 bg-primary/50 p-3 sm:p-4">
+          <label htmlFor="booking-horizon" className="mb-2 block text-sm font-semibold text-white">
+            Client booking window
+          </label>
+          <p className="mb-3 text-sm text-gray-400">
+            How far in advance clients can book an appointment.
+          </p>
+          <select
+            id="booking-horizon"
+            value={bookingHorizonMonths}
+            onChange={event => setBookingHorizonMonths(Number(event.target.value))}
+            className="w-full rounded border border-accent/20 bg-secondary px-3 py-2 text-white sm:max-w-xs"
+          >
+            {Array.from(
+              { length: MAX_BOOKING_HORIZON_MONTHS - MIN_BOOKING_HORIZON_MONTHS + 1 },
+              (_, index) => index + MIN_BOOKING_HORIZON_MONTHS,
+            ).map(months => (
+              <option key={months} value={months}>
+                {months} {months === 1 ? 'month' : 'months'}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {daysOfWeek.map((day) => (
           <motion.div
             key={day.key}

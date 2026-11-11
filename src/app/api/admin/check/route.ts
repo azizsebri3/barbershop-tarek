@@ -1,43 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyAdminToken } from '@/lib/admin-session'
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('admin_token')?.value
-
-    if (!token) {
-      return NextResponse.json({ authenticated: false })
-    }
-
-    try {
-      // Décoder le token base64
-      const sessionData = JSON.parse(Buffer.from(token, 'base64').toString())
-
-      // Vérifier l'expiration
-      if (!sessionData.exp || sessionData.exp < Date.now()) {
-        return NextResponse.json({ authenticated: false })
-      }
-
-      // Vérifier que les données nécessaires sont présentes
-      if (!sessionData.userId || !sessionData.role) {
-        return NextResponse.json({ authenticated: false })
-      }
-
-      return NextResponse.json({
-        authenticated: true,
-        user: {
-          id: sessionData.userId,
-          username: sessionData.username,
-          email: sessionData.email,
-          role: sessionData.role
-        }
-      })
-    } catch (error) {
-      // Token invalide
-      console.error('Token decode error:', error)
-      return NextResponse.json({ authenticated: false })
-    }
+    const session = await verifyAdminToken(request.cookies.get('admin_token')?.value)
+    if (!session) return NextResponse.json({ authenticated: false })
+    return NextResponse.json({
+      authenticated: true,
+      user: { id: session.userId, username: session.username, email: session.email, role: session.role },
+    }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
-    console.error('Erreur vérification admin:', error)
-    return NextResponse.json({ authenticated: false })
+    console.error('Admin session verification failed:', error)
+    return NextResponse.json({ error: 'Admin session verification unavailable' }, { status: 500 })
   }
 }

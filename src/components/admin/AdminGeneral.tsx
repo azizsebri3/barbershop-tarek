@@ -15,9 +15,10 @@ import {
   Settings,
   BarChart3
 } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import type { Booking } from '@/lib/supabase'
 import { useGeneralSettings } from '@/lib/useGeneralSettings'
 import type { BookingMode } from '@/lib/booking'
+import AdminToday from './AdminToday'
 
 interface DashboardStats {
   totalBookings: number
@@ -89,11 +90,9 @@ export default function AdminGeneral() {
       setLoading(true)
 
       // Récupérer toutes les réservations
-      const { data: bookings, error } = await supabase!
-        .from('bookings')
-        .select('*')
-
-      if (error) throw error
+      const response = await fetch('/api/admin/bookings', { cache: 'no-store' })
+      if (!response.ok) throw new Error('Unable to load bookings')
+      const { bookings } = await response.json() as { bookings: Booking[] }
 
       const today = new Date().toISOString().split('T')[0]
       const todayBookings = bookings?.filter(b => b.date === today) || []
@@ -206,6 +205,7 @@ export default function AdminGeneral() {
 
   return (
     <div className="space-y-8">
+      <AdminToday />
       {/* Welcome Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

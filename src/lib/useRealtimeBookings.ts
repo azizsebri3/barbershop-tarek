@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { supabase, Booking } from './supabase'
-import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import type { Booking } from './supabase'
 import toast from 'react-hot-toast'
+
+const POLL_INTERVAL_MS = 15000
 
 interface UseRealtimeBookingsOptions {
   /** Active ou non les notifications toast pour les changements */
@@ -14,9 +15,9 @@ interface UseRealtimeBookingsOptions {
   onUpdate?: (booking: Booking) => void
   /** Callback appelé lors d'un delete */
   onDelete?: (bookingId: string) => void
-  /** Callback de fallback en cas d'erreur de connexion */
+  /** Callback appelé en cas d'erreur de chargement */
   onError?: (error: Error) => void
-  /** Désactive le realtime (utile pour les tests) */
+  /** Désactive le rafraîchissement automatique */
   disabled?: boolean
 }
 
@@ -25,26 +26,13 @@ interface UseRealtimeBookingsReturn {
   loading: boolean
   error: Error | null
   isRealtimeConnected: boolean
-  refetch: () => Promise<void>
+  refetch: () => Promise<boolean>
 }
 
 /**
- * Hook personnalisé pour gérer les réservations avec Supabase Realtime
- * 
- * Fonctionnalités:
- * - Fetch initial des réservations
- * - Abonnement en temps réel aux changements (INSERT, UPDATE, DELETE)
- * - Notifications toast optionnelles
- * - Gestion automatique de la déconnexion (cleanup)
- * - Fallback sur fetch manuel en cas d'erreur
- * 
- * @example
- * ```tsx
- * const { bookings, loading, isRealtimeConnected, refetch } = useRealtimeBookings({
- *   enableNotifications: true,
- *   onInsert: (booking) => console.log('Nouvelle réservation:', booking)
- * })
- * ```
+ * Charge les réservations via l'API admin (session requise) et les rafraîchit
+ * automatiquement. Les changements détectés entre deux chargements déclenchent
+ * les callbacks et notifications.
  */
 export function useRealtimeBookings(
   options: UseRealtimeBookingsOptions = {}
@@ -62,199 +50,99 @@ export function useRealtimeBookings(
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false)
-  
-  const channelRef = useRef<RealtimeChannel | null>(null)
+
   const isMountedRef = useRef(true)
-  
-  // Utiliser des refs pour éviter les re-renders
+  const previousRef = useRef<Map<string, Booking> | null>(null)
   const callbacksRef = useRef({ onInsert, onUpdate, onDelete, onError })
-  
-  // Mettre à jour les callbacks sans causer de re-render
+
   useEffect(() => {
     callbacksRef.current = { onInsert, onUpdate, onDelete, onError }
   }, [onInsert, onUpdate, onDelete, onError])
 
-  /**
-   * Récupère toutes les réservations depuis Supabase
-   */
-  const fetchBookings = useCallback(async () => {
-    if (!supabase) {
-      const err = new Error('Supabase client non disponible')
-      console.error('❌ Erreur:', err)
-      
-      if (isMountedRef.current) {
-        setError(err)
-        setLoading(false)
-        if (callbacksRef.current.onError) callbacksRef.current.onError(err)
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
+  const announceChanges = useCallback((next: Booking[]) => {
+    const previous = previousRef.current
+    previousRef.current = new Map(next.map(booking => [booking.id, booking]))
+    if (!previous) return
+
+    const nextIds = new Set(next.map(booking => booking.id))
+    const { onInsert, onUpdate, onDelete } = callbacksRef.current
+
+    for (const booking of next) {
+      const before = previous.get(booking.id)
+      if (!before) {
         if (enableNotifications) {
-          toast.error('Configuration Supabase manquante')
+          toast.success(`Nouvelle réservation: ${booking.name}`, { icon: '🎉', duration: 4000 })
         }
+        onInsert?.(booking)
+      } else if (JSON.stringify(before) !== JSON.stringify(booking)) {
+        if (enableNotifications) {
+          const statusEmoji = { confirmed: '✅', cancelled: '❌', pending: '⏳' }[booking.status] || '📝'
+          toast(`Réservation mise à jour: ${booking.name}`, { icon: statusEmoji, duration: 3000 })
+        }
+        onUpdate?.(booking)
       }
-      return
     }
 
-    try {
-      setLoading(true)
-      setError(null)
-
-      const { data, error: fetchError } = await supabase
-        .from('bookings')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (fetchError) throw fetchError
-
-      if (isMountedRef.current) {
-        setBookings(data || [])
-      }
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Erreur lors du chargement')
-      console.error('❌ Erreur fetchBookings:', error)
-      
-      if (isMountedRef.current) {
-        setError(error)
-        if (callbacksRef.current.onError) callbacksRef.current.onError(error)
-        if (enableNotifications) {
-          toast.error('Erreur de chargement des réservations')
-        }
-      }
-    } finally {
-      if (isMountedRef.current) {
-        setLoading(false)
+    for (const id of previous.keys()) {
+      if (!nextIds.has(id)) {
+        if (enableNotifications) toast('Réservation supprimée', { icon: '🗑️', duration: 2000 })
+        onDelete?.(id)
       }
     }
   }, [enableNotifications])
 
-  /**
-   * Configure l'abonnement Realtime
-   */
-  useEffect(() => {
-    if (!supabase || disabled) {
-      fetchBookings()
-      return
-    }
+  const fetchBookings = useCallback(async (silent = false) => {
+    try {
+      if (!silent) setLoading(true)
 
-    console.log('🔌 Setup Realtime subscription')
+      const response = await fetch('/api/admin/bookings', { cache: 'no-store' })
+      if (!response.ok) throw new Error(`Erreur de chargement (${response.status})`)
+      const { bookings: data } = await response.json() as { bookings: Booking[] }
 
-    // Fetch initial
-    fetchBookings()
-
-    const channel = supabase
-      .channel('bookings-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // INSERT, UPDATE, DELETE
-          schema: 'public',
-          table: 'bookings'
-        },
-        (payload: RealtimePostgresChangesPayload<Booking>) => {
-          console.log('🔔 Realtime event:', payload.eventType)
-
-          if (!isMountedRef.current) return
-
-          switch (payload.eventType) {
-            case 'INSERT':
-              if (payload.new) {
-                const newBooking = payload.new as Booking
-                setBookings(prev => [newBooking, ...prev])
-                
-                if (enableNotifications) {
-                  toast.success(`Nouvelle réservation: ${newBooking.name}`, {
-                    icon: '🎉',
-                    duration: 4000
-                  })
-                }
-                
-                if (callbacksRef.current.onInsert) callbacksRef.current.onInsert(newBooking)
-              }
-              break
-
-            case 'UPDATE':
-              if (payload.new) {
-                const updatedBooking = payload.new as Booking
-                setBookings(prev => 
-                  prev.map(booking => 
-                    booking.id === updatedBooking.id ? updatedBooking : booking
-                  )
-                )
-                
-                if (enableNotifications) {
-                  const statusEmoji = {
-                    confirmed: '✅',
-                    cancelled: '❌',
-                    pending: '⏳'
-                  }[updatedBooking.status] || '📝'
-                  
-                  toast(`Réservation mise à jour: ${updatedBooking.name}`, {
-                    icon: statusEmoji,
-                    duration: 3000
-                  })
-                }
-                
-                if (callbacksRef.current.onUpdate) callbacksRef.current.onUpdate(updatedBooking)
-              }
-              break
-
-            case 'DELETE':
-              if (payload.old) {
-                const deletedId = (payload.old as Booking).id
-                setBookings(prev => prev.filter(booking => booking.id !== deletedId))
-                
-                if (enableNotifications) {
-                  toast('Réservation supprimée', {
-                    icon: '🗑️',
-                    duration: 2000
-                  })
-                }
-                
-                if (callbacksRef.current.onDelete) callbacksRef.current.onDelete(deletedId)
-              }
-              break
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('📡 Realtime status:', status)
-        
-        if (isMountedRef.current) {
-          if (status === 'SUBSCRIBED') {
-            setIsRealtimeConnected(true)
-            console.log('✅ Realtime connecté')
-          } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-            setIsRealtimeConnected(false)
-            console.warn('⚠️ Realtime déconnecté, fallback sur fetch manuel')
-            
-            // Fallback: refetch les données après 2 secondes
-            setTimeout(() => {
-              if (isMountedRef.current) {
-                fetchBookings()
-              }
-            }, 2000)
-          }
-        }
-      })
-
-    channelRef.current = channel
-
-    // Cleanup à l'unmount
-    return () => {
-      console.log('🧹 Nettoyage Realtime subscription')
-      
-      if (channelRef.current && supabase) {
-        supabase.removeChannel(channelRef.current)
-        channelRef.current = null
+      if (isMountedRef.current) {
+        setBookings(data || [])
+        setError(null)
+        setIsRealtimeConnected(true)
+        announceChanges(data || [])
       }
-      
-      setIsRealtimeConnected(false)
-    }
-  }, [disabled, enableNotifications, fetchBookings])
+      return true
+    } catch (err) {
+      const failure = err instanceof Error ? err : new Error('Erreur lors du chargement')
+      console.error('Erreur fetchBookings:', failure)
 
-  return {
-    bookings,
-    loading,
-    error,
-    isRealtimeConnected,
-    refetch: fetchBookings
-  }
+      if (isMountedRef.current) {
+        setIsRealtimeConnected(false)
+        if (!silent) {
+          setError(failure)
+          callbacksRef.current.onError?.(failure)
+          if (enableNotifications) toast.error('Erreur de chargement des réservations')
+        }
+      }
+      return false
+    } finally {
+      if (isMountedRef.current && !silent) setLoading(false)
+    }
+  }, [announceChanges, enableNotifications])
+
+  useEffect(() => {
+    fetchBookings()
+    if (disabled) return
+
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') fetchBookings(true)
+    }, POLL_INTERVAL_MS)
+
+    return () => clearInterval(timer)
+  }, [disabled, fetchBookings])
+
+  const refetch = useCallback(() => fetchBookings(), [fetchBookings])
+
+  return { bookings, loading, error, isRealtimeConnected, refetch }
 }

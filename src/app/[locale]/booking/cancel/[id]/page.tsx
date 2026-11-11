@@ -6,7 +6,6 @@ import { motion } from 'framer-motion'
 import { Calendar, Clock, User, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import { useLanguage } from '@/lib/language-context'
-import { supabase } from '@/lib/supabase'
 
 interface Booking {
   id: string
@@ -33,6 +32,7 @@ export default function CancelBookingPage() {
   const [email, setEmail] = useState('')
   const [cancelNote, setCancelNote] = useState('')
   const [cancelled, setCancelled] = useState(false)
+  const [notificationFailed, setNotificationFailed] = useState(false)
 
   useEffect(() => {
     const emailFromLink = searchParams.get('email')
@@ -44,19 +44,11 @@ export default function CancelBookingPage() {
   useEffect(() => {
     const fetchBooking = async () => {
       try {
-        if (!supabase) {
-          throw new Error('Database not available')
-        }
-
-        const { data, error } = await supabase
-          .from('bookings')
-          .select('*')
-          .eq('id', bookingId)
-          .single()
-
-        if (error || !data) {
+        const response = await fetch(`/api/bookings/${bookingId}/cancel`, { cache: 'no-store' })
+        if (!response.ok) {
           throw new Error(t.cancel.notFound)
         }
+        const { booking: data } = await response.json() as { booking: Booking }
         setBooking(data)
       } catch (error) {
         console.error('Error loading booking:', error)
@@ -91,11 +83,12 @@ export default function CancelBookingPage() {
         }),
       })
 
+      const data = await response.json()
       if (!response.ok) {
-        const data = await response.json()
         throw new Error(data.error || t.cancel.error)
       }
 
+      setNotificationFailed(data.clientNotified === false || data.adminNotified === false)
       setCancelled(true)
       toast.success(t.cancel.successMessage)
     } catch (error) {
@@ -163,6 +156,7 @@ export default function CancelBookingPage() {
           <p className="text-gray-300 mb-6">
             {t.cancel.successMessage}
           </p>
+          {notificationFailed && <p role="alert" className="text-amber-400 mb-6">{t.cancel.notificationFailed}</p>}
           <button
             onClick={() => router.push('/')}
             className="w-full bg-accent hover:bg-accent/80 text-primary font-semibold py-3 px-6 rounded-lg transition-colors"
@@ -237,10 +231,11 @@ export default function CancelBookingPage() {
 
         {/* Cancellation Note */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label htmlFor="cancellation-reason" className="block text-sm font-medium text-gray-300 mb-2">
             {t.cancel.reasonLabel}
           </label>
           <textarea
+            id="cancellation-reason"
             value={cancelNote}
             onChange={(e) => setCancelNote(e.target.value)}
             placeholder={t.cancel.reasonPlaceholder}
@@ -248,6 +243,7 @@ export default function CancelBookingPage() {
             className="w-full px-3 py-2 bg-primary/50 border border-accent/20 rounded-lg text-white placeholder-gray-500 focus:border-accent focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             rows={3}
           />
+          <p className="mt-2 text-sm text-gray-400">{t.cancel.reasonShared}</p>
         </div>
 
         {/* Action Buttons */}

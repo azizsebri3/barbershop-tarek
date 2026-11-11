@@ -44,8 +44,8 @@ self.addEventListener('push', (event) => {
   console.log('Push notification received:', event);
   
   let data = {
-    title: 'Nouvelle Réservation!',
-    body: 'Un client vient de faire une réservation.',
+    title: 'New booking!',
+    body: 'A client has just booked an appointment.',
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-72x72.png',
     tag: 'booking-notification',
@@ -75,8 +75,8 @@ self.addEventListener('push', (event) => {
       vibrate: data.vibrate,
       data: data.data,
       actions: [
-        { action: 'view', title: 'Voir' },
-        { action: 'close', title: 'Fermer' }
+        { action: 'view', title: 'View' },
+        { action: 'close', title: 'Dismiss' }
       ]
     })
   );

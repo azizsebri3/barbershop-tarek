@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import bcrypt from 'bcryptjs'
+import { createAdminToken } from '@/lib/admin-session'
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,14 +9,14 @@ export async function POST(request: NextRequest) {
 
     if (!username || !password) {
       return NextResponse.json(
-        { error: 'Username et password requis' },
+        { error: 'Username and password are required' },
         { status: 400 }
       )
     }
 
     if (!supabaseAdmin) {
       return NextResponse.json(
-        { error: 'Configuration serveur manquante' },
+        { error: 'Server configuration is missing' },
         { status: 500 }
       )
     }
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     if (error || !user) {
       return NextResponse.json(
-        { error: 'Identifiants incorrects' },
+        { error: 'Incorrect username or password' },
         { status: 401 }
       )
     }
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     if (!passwordMatch) {
       return NextResponse.json(
-        { error: 'Identifiants incorrects' },
+        { error: 'Incorrect username or password' },
         { status: 401 }
       )
     }
@@ -52,15 +53,16 @@ export async function POST(request: NextRequest) {
     //   .eq('id', user.id)
 
     // Créer le token de session
-    const sessionData = {
+    if (user.role !== 'admin' && user.role !== 'super_admin') {
+      return NextResponse.json({ error: 'Incorrect username or password' }, { status: 401 })
+    }
+
+    const token = await createAdminToken({
       userId: user.id,
       username: user.username,
       email: user.email,
       role: user.role,
-      exp: Date.now() + 24 * 60 * 60 * 1000 // 24h
-    }
-
-    const token = Buffer.from(JSON.stringify(sessionData)).toString('base64')
+    })
 
     // Créer la réponse avec cookie
     const response = NextResponse.json({
@@ -86,7 +88,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(
-      { error: 'Erreur serveur' },
+      { error: 'Server error' },
       { status: 500 }
     )
   }

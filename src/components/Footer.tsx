@@ -6,6 +6,7 @@ import BookingLink from '@/components/BookingLink'
 import { MapPin, Phone, Mail, ArrowRight, Clock, Instagram, Facebook, Scissors } from 'lucide-react'
 import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettingsCached'
 import { useLanguage } from '@/lib/language-context'
+import { usePathname } from 'next/navigation'
 
 // TikTok icon component
 const TikTokIcon = ({ size = 18 }: { size?: number }) => (
@@ -24,6 +25,12 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
   const { settings } = usePublicGeneralSettings()
   const { t, locale } = useLanguage()
+  const pathname = usePathname()
+
+  if (pathname?.startsWith('/admin')) {
+    return null
+  }
+
   const description = settings.description === t.footer.defaultDescriptionFr
     ? t.footer.defaultDescription
     : settings.description || t.footer.defaultDescription

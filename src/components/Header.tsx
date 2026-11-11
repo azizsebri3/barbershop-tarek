@@ -2,14 +2,13 @@
 
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Bell, LogOut, LayoutDashboard, Home, Info, Scissors, Tag, Phone } from 'lucide-react'
+import { Menu, X, Bell, LogOut, LayoutDashboard, Home, Info, Scissors, Tag, Phone, ShoppingBag } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import LanguageSwitcher from './LanguageSwitcher'
 import { useLanguage } from '@/lib/language-context'
 import { usePublicGeneralSettings } from '@/lib/usePublicGeneralSettingsCached'
 import { useAdminAuth } from '@/lib/useAdminAuth'
-import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
 import BookingLink from '@/components/BookingLink'
@@ -25,6 +24,7 @@ export default function Header() {
   const { isAdmin, logout } = useAdminAuth()
   const router = useRouter()
   const pathname = usePathname()
+  const isAdminRoute = pathname?.startsWith('/admin')
 
   useEffect(() => {
     // Handle scroll effect
@@ -41,14 +41,10 @@ export default function Header() {
 
     const fetchPendingCount = async () => {
       try {
-        const { count, error } = await supabase!
-          .from('bookings')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending')
-
-        if (!error && count !== null) {
-          setPendingCount(count)
-        }
+        const response = await fetch('/api/admin/bookings?count=pending', { cache: 'no-store' })
+        if (!response.ok) return
+        const { pending } = await response.json() as { pending: number }
+        setPendingCount(pending)
       } catch (error) {
         console.error('Erreur comptage réservations:', error)
       }
@@ -81,8 +77,13 @@ export default function Header() {
     { href: `/${locale}/#about`, label: t.nav.about, icon: Info, active: false },
     { href: `/${locale}/#services`, label: t.nav.services, icon: Scissors, active: false },
     { href: `/${locale}/pricing`, label: t.nav.pricing, icon: Tag, active: pathname.includes('/pricing') },
+    { href: `/${locale}/products`, label: locale === 'fr' ? 'Produits' : locale === 'nl' ? 'Producten' : 'Products', icon: ShoppingBag, active: pathname.includes('/products') },
     { href: `/${locale}/#contact`, label: t.nav.contact, icon: Phone, active: false },
   ], [locale, pathname, t.nav.about, t.nav.contact, t.nav.home, t.nav.pricing, t.nav.services])
+
+  if (isAdminRoute) {
+    return null
+  }
 
   return (
     <>

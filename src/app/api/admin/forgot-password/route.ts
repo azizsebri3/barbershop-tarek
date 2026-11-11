@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     if (!supabaseAdmin) {
       return NextResponse.json(
-        { error: 'Configuration serveur manquante' },
+        { error: 'Server configuration is missing' },
         { status: 500 }
       )
     }

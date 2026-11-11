@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import webpush from 'web-push'
 import { sendBookingEmails } from '@/lib/email-service'
+import { sendAdminBookingPush } from '@/lib/admin-booking-push'
+import { verifyAdminToken } from '@/lib/admin-session'
+import { openingHours as defaultOpeningHours } from '@/lib/data'
+import {
+  DEFAULT_BOOKING_HORIZON_MONTHS,
+  isWithinBookingHorizon,
+  normalizeBookingHorizonMonths,
+  weekdayKeyForDate,
+} from '@/lib/booking-calendar'
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -14,66 +22,12 @@ function getSupabaseClient() {
   return createClient(url, serviceKey, { auth: { autoRefreshToken: false } })
 }
 
-// Configure VAPID for push notifications
-const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY
-
-if (vapidPublicKey && vapidPrivateKey) {
-  webpush.setVapidDetails(
-    'mailto:admin@elitebarbershop.com',
-    vapidPublicKey,
-    vapidPrivateKey
-  )
-}
-
-// Fonction pour envoyer une notification push à tous les admins
-async function sendPushNotification(booking: { name: string; service: string; date: string; time: string }) {
-  try {
-    const supabase = getSupabaseClient()
-    
-    // Récupérer toutes les subscriptions
-    const { data: subscriptions } = await supabase
-      .from('push_subscriptions')
-      .select('*')
-    
-    if (!subscriptions || subscriptions.length === 0) {
-      return
-    }
-
-    const payload = JSON.stringify({
-      title: '🔔 Nouvelle Réservation!',
-      body: `${booking.name} - ${booking.service}\n📅 ${booking.date} à ${booking.time}`,
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-72x72.png',
-      tag: 'booking-' + Date.now(),
-      data: { url: '/admin/dashboard' }
-    })
-
-    for (const sub of subscriptions) {
-      try {
-        await webpush.sendNotification(sub.subscription, payload)
-      } catch (err) {
-        console.error('❌ Erreur envoi push:', err)
-        // Si subscription expirée, la supprimer
-        const webPushError = err as { statusCode?: number }
-        if (webPushError.statusCode === 410 || webPushError.statusCode === 404) {
-          await supabase
-            .from('push_subscriptions')
-            .delete()
-            .eq('endpoint', sub.endpoint)
-        }
-      }
-    }
-  } catch (error) {
-    console.error('❌ Erreur notification push:', error)
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { name, email, phone, date, time, service, message, language = 'fr' } = body
     const bookingLanguage = ['fr', 'en', 'nl'].includes(language) ? language : 'fr'
+    const isAdminBooking = await verifyAdminToken(request.cookies.get('admin_token')?.value)
 
     // Validation
     if (!name || !email || !phone || !date || !time || !service) {
@@ -83,7 +37,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (typeof date !== 'string') {
+      return NextResponse.json({ error: 'Invalid booking date' }, { status: 400 })
+    }
+
     const supabase = getSupabaseClient()
+    const { data: horizonSetting, error: horizonError } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'booking_horizon_months')
+      .maybeSingle()
+
+    if (horizonError) {
+      console.error('Error fetching booking window:', horizonError)
+      return NextResponse.json(
+        { error: 'Unable to verify booking window' },
+        { status: 500 },
+      )
+    }
+
+    const bookingHorizonMonths = normalizeBookingHorizonMonths(
+      horizonSetting?.value ?? DEFAULT_BOOKING_HORIZON_MONTHS,
+    )
+    if (!isAdminBooking && !isWithinBookingHorizon(date, bookingHorizonMonths)) {
+      return NextResponse.json(
+        { error: `Clients can book from today up to ${bookingHorizonMonths} months in advance` },
+        { status: 400 },
+      )
+    }
+
     const { data: generalSettings, error: settingsError } = await supabase
       .from('settings')
       .select('value')
@@ -123,7 +105,7 @@ export async function POST(request: NextRequest) {
     if (availabilityError) {
       if (isMissingAvailabilityTable(availabilityError)) {
         console.warn('availability_slots is not available; using default booking hours')
-      } else {
+      } else if (!isAdminBooking) {
         console.error('Error fetching configured availability:', availabilityError)
         return NextResponse.json(
           { error: 'Unable to verify availability' },
@@ -152,6 +134,54 @@ export async function POST(request: NextRequest) {
           { status: 409 }
         )
       }
+    } else {
+      const { data: hoursSetting, error: hoursError } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'opening_hours')
+        .maybeSingle()
+
+      if (hoursError) {
+        console.error('Error fetching opening hours:', hoursError)
+        return NextResponse.json(
+          { error: 'Unable to verify opening hours' },
+          { status: 500 },
+        )
+      }
+
+      const weekday = weekdayKeyForDate(date)
+      if (!weekday) {
+        return NextResponse.json({ error: 'Invalid booking date' }, { status: 400 })
+      }
+
+      const weeklyHours = (hoursSetting?.value || defaultOpeningHours)[weekday]
+      const openingMinutes = toMinutes(weeklyHours.open)
+      const closingMinutes = toMinutes(weeklyHours.close)
+      if (
+        weeklyHours.closed ||
+        startMinutes < openingMinutes ||
+        endMinutes > closingMinutes
+      ) {
+        return NextResponse.json(
+          { error: 'This time is outside the opening hours' },
+          { status: 409 },
+        )
+      }
+    }
+
+    const { data: blockedSlots, error: blockedSlotsError } = await supabase
+      .from('blocked_time_slots')
+      .select('start_time, end_time')
+      .eq('date', date)
+    if (blockedSlotsError && blockedSlotsError.code !== '42P01' && blockedSlotsError.code !== 'PGRST205') {
+      return NextResponse.json({ error: 'Unable to verify blocked times' }, { status: 500 })
+    }
+    if ((blockedSlots || []).some(slot => {
+      const blockedStart = toMinutes(slot.start_time)
+      const blockedEnd = toMinutes(slot.end_time)
+      return startMinutes < blockedEnd && endMinutes > blockedStart
+    })) {
+      return NextResponse.json({ error: 'This time slot has been blocked by the barbershop.' }, { status: 409 })
     }
     
     // Récupérer les réservations existantes pour cette date
@@ -195,7 +225,7 @@ export async function POST(request: NextRequest) {
       // Vérifier si les créneaux se chevauchent
       if (startMinutes < existingEndMinutes && endMinutes > existingStartMinutes) {
         return NextResponse.json(
-          { error: 'Ce créneau n\'est pas disponible. Veuillez choisir un autre horaire.' },
+          { error: 'This time slot is not available. Please choose another time.' },
           { status: 409 }
         )
       }
@@ -257,6 +287,7 @@ export async function POST(request: NextRequest) {
       phone,
       date,
       time,
+      duration_minutes: serviceDuration,
       service,
       message,
       language: bookingLanguage,
@@ -289,7 +320,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Envoyer une notification push aux admins
-    await sendPushNotification({ name, service, date, time })
+    await sendAdminBookingPush(supabase, { kind: 'created', name, service, date, time })
 
     // Envoyer les emails de confirmation
     await sendBookingEmails({ 
@@ -301,7 +332,9 @@ export async function POST(request: NextRequest) {
       time, 
       service, 
       message 
-      ,language: bookingLanguage
+      ,language: bookingLanguage,
+      status: autoConfirmBookings ? 'confirmed' : 'pending',
+      duration_minutes: serviceDuration,
     })
 
     return NextResponse.json(
@@ -314,7 +347,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Booking API error:', error)
     return NextResponse.json(
-      { error: 'Une erreur serveur s\'est produite' },
+      { error: 'A server error occurred' },
       { status: 500 }
     )
   }
@@ -324,6 +357,10 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url)
     const date = url.searchParams.get('date')
+
+    if (!date && !await verifyAdminToken(request.cookies.get('admin_token')?.value)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     
     const supabase = getSupabaseClient()
     
@@ -337,7 +374,7 @@ export async function GET(request: NextRequest) {
 
       if (error) {
         return NextResponse.json(
-          { error: 'Erreur lors de la récupération des créneaux' },
+          { error: 'Unable to retrieve time slots' },
           { status: 500 }
         )
       }
@@ -363,7 +400,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GET bookings error:', error)
     return NextResponse.json(
-      { error: 'Une erreur serveur s\'est produite' },
+      { error: 'A server error occurred' },
       { status: 500 }
     )
   }

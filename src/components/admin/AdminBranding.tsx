@@ -98,11 +98,11 @@ export default function AdminBranding({}: AdminBrandingProps) {
           window.location.reload()
         }, 1500)
       } else {
-        throw new Error('URL du logo manquante dans la réponse')
+        throw new Error('Logo URL is missing from the response')
       }
     } catch (error: any) {
       console.error('Error uploading logo:', error)
-      toast.error(`❌ Erreur: ${error.message}`)
+      toast.error(`❌ Error: ${error.message}`)
       setPreviewUrl(null)
     } finally {
       setIsUploading(false)

@@ -1,42 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import bcrypt from 'bcryptjs'
+import { verifyAdminToken } from '@/lib/admin-session'
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get('admin_token')?.value
-
-    if (!token) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
-
-    // Décoder le token
-    const sessionData = JSON.parse(Buffer.from(token, 'base64').toString())
-
-    // Vérifier l'expiration
-    if (sessionData.exp < Date.now()) {
-      return NextResponse.json({ error: 'Session expirée' }, { status: 401 })
+    const sessionData = await verifyAdminToken(request.cookies.get('admin_token')?.value)
+    if (!sessionData) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { currentPassword, newPassword } = await request.json()
 
     if (!currentPassword || !newPassword) {
       return NextResponse.json(
-        { error: 'Mot de passe actuel et nouveau requis' },
+        { error: 'Current and new passwords are required' },
         { status: 400 }
       )
     }
 
     if (newPassword.length < 6) {
       return NextResponse.json(
-        { error: 'Le nouveau mot de passe doit contenir au moins 6 caractères' },
+        { error: 'The new password must contain at least 6 characters' },
         { status: 400 }
       )
     }
 
     if (!supabaseAdmin) {
       return NextResponse.json(
-        { error: 'Configuration serveur manquante' },
+        { error: 'Server configuration is missing' },
         { status: 500 }
       )
     }
@@ -50,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     if (fetchError || !user) {
       return NextResponse.json(
-        { error: 'Utilisateur non trouvé' },
+        { error: 'User not found' },
         { status: 404 }
       )
     }
@@ -60,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     if (!passwordMatch) {
       return NextResponse.json(
-        { error: 'Mot de passe actuel incorrect' },
+        { error: 'Current password is incorrect' },
         { status: 401 }
       )
     }
@@ -80,7 +72,7 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       console.error('Update password error:', updateError)
       return NextResponse.json(
-        { error: 'Erreur lors de la mise à jour du mot de passe' },
+        { error: 'Unable to update the password' },
         { status: 500 }
       )
     }
@@ -93,7 +85,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Change password error:', error)
     return NextResponse.json(
-      { error: 'Erreur serveur' },
+      { error: 'Server error' },
       { status: 500 }
     )
   }

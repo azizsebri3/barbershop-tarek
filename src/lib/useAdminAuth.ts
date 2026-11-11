@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { createAdminSession, clearAdminSession } from '@/lib/admin-auth'
+import { clearAdminSession } from '@/lib/admin-auth'
 
 export function useAdminAuth() {
   const [isAdmin, setIsAdmin] = useState(false)
@@ -11,8 +11,9 @@ export function useAdminAuth() {
     
     try {
       const response = await fetch('/api/admin/check')
+      if (!response.ok) throw new Error('Admin session verification failed')
       const data = await response.json()
-      setIsAdmin(data.authenticated)
+      setIsAdmin(data.authenticated === true)
     } catch (error) {
       console.error('Erreur vérification admin:', error)
       setIsAdmin(false)
@@ -25,33 +26,6 @@ export function useAdminAuth() {
   useEffect(() => {
     checkAdminStatus()
   }, [checkAdminStatus])
-
-
-
-  const login = async (password: string) => {
-    try {
-      const response = await fetch('/api/admin/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setIsAdmin(true)
-        createAdminSession(true) // Créer la session localStorage aussi
-        return { success: true }
-      } else {
-        return { success: false, error: data.error }
-      }
-    } catch (error) {
-      console.error('Erreur connexion admin:', error)
-      return { success: false, error: 'Erreur de connexion' }
-    }
-  }
 
   const logout = async () => {
     try {
@@ -66,7 +40,6 @@ export function useAdminAuth() {
   return {
     isAdmin,
     loading,
-    login,
     logout,
     checkAdminStatus
   }

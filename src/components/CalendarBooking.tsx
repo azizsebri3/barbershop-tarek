@@ -3,12 +3,13 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import Calendar from 'react-calendar'
-import { format, addDays, isSameDay, isToday, isBefore, startOfDay } from 'date-fns'
+import { format, addMonths, isSameDay, isToday, isBefore, startOfDay } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Clock, ChevronRight, Sparkles } from 'lucide-react'
 import { useOpeningHours } from '@/lib/useOpeningHoursCached'
 import { useServices } from '@/lib/useServicesCached'
 import { useLanguage } from '@/lib/language-context'
+import { weekdayKeyForDate } from '@/lib/booking-calendar'
 import '../styles/calendar.css'
 
 type CalendarValue = Date | Date[] | null | [Date | null, Date | null]
@@ -26,14 +27,61 @@ interface TimeSlot {
 
 export default function CalendarBooking({ onBookingSelect, selectedService }: CalendarBookingProps) {
   const { t, locale } = useLanguage()
-  const { hours: openingHours } = useOpeningHours()
+  const {
+    hours: openingHours,
+    bookingHorizonMonths,
+    refetch: refetchOpeningHours,
+  } = useOpeningHours()
   const { services } = useServices()
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [selectedTime, setSelectedTime] = useState<string>('')
   const [currentService, setCurrentService] = useState<string>(selectedService || '')
   const [step, setStep] = useState<'service' | 'date' | 'time'>('service')
   const [bookedSlots, setBookedSlots] = useState<string[]>([])
+  const [configuredSlots, setConfiguredSlots] = useState<string[] | null>(null)
+  const [availabilityByDate, setAvailabilityByDate] = useState<
+    Record<string, Array<{ is_available: boolean }>>
+  >({})
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
+  const [slotsError, setSlotsError] = useState(false)
+
+  const loadCalendarAvailability = useCallback(async () => {
+    const today = new Date()
+    const endDate = addMonths(today, bookingHorizonMonths)
+    const startDate = format(today, 'yyyy-MM-dd')
+    const endDateString = format(endDate, 'yyyy-MM-dd')
+
+    try {
+      const response = await fetch(
+        `/api/availability?startDate=${startDate}&endDate=${endDateString}`,
+        { cache: 'no-store' },
+      )
+      if (!response.ok) throw new Error('Unable to load availability')
+
+      const slots: Array<{ date: string; is_available: boolean }> = await response.json()
+      const grouped = slots.reduce<Record<string, Array<{ is_available: boolean }>>>(
+        (result, slot) => {
+          if (!result[slot.date]) result[slot.date] = []
+          result[slot.date].push({ is_available: slot.is_available })
+          return result
+        },
+        {},
+      )
+      setAvailabilityByDate(grouped)
+    } catch (error) {
+      console.error('Error loading calendar availability:', error)
+    }
+  }, [bookingHorizonMonths])
+
+  useEffect(() => {
+    loadCalendarAvailability()
+    refetchOpeningHours()
+    const interval = window.setInterval(() => {
+      loadCalendarAvailability()
+      refetchOpeningHours()
+    }, 15000)
+    return () => window.clearInterval(interval)
+  }, [loadCalendarAvailability, refetchOpeningHours])
 
   // Sync external selectedService prop into internal state so
   // CalendarBooking shows the date/time UI when parent already selected a service.
@@ -103,50 +151,34 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
     return slots
   }, [openingHours, bookedSlots])
 
-  // Charger les créneaux réservés depuis l'API
-  const loadBookedSlots = useCallback(async (date: Date) => {
+  // Charger les créneaux calculés avec les disponibilités configurées par l'admin.
+  const loadAvailableSlots = useCallback(async (date: Date, duration: number) => {
     try {
       setIsLoadingSlots(true)
+      setSlotsError(false)
+      setConfiguredSlots(null)
       const dateStr = format(date, 'yyyy-MM-dd')
-      const response = await fetch(`/api/bookings?date=${dateStr}`)
+      const response = await fetch(
+        `/api/bookings/availability?date=${dateStr}&duration=${duration}`,
+        { cache: 'no-store' }
+      )
       if (response.ok) {
-        const bookings: Array<{ date: string; time: string; service: string; status: string }> = await response.json()
-        
-        // Calculer les créneaux bloqués en tenant compte de la durée des services
-        const blockedSlots: string[] = []
-        
-        bookings.forEach(booking => {
-          // Ne bloquer que les réservations confirmées
-          if (booking.status !== 'confirmed') return
-          
-          // Trouver la durée du service
-          const service = services.find(s => s.name === booking.service)
-          const duration = service?.duration || 30 // durée par défaut de 30 minutes
-          
-          // Convertir l'heure de début en minutes depuis minuit
-          const [startHour, startMin] = booking.time.split(':').map(Number)
-          const startMinutes = startHour * 60 + startMin
-          
-          // Calculer l'heure de fin
-          const endMinutes = startMinutes + duration
-          
-          // Générer tous les créneaux de 15 minutes qui sont occupés par ce service
-          for (let time = startMinutes; time < endMinutes; time += 15) {
-            const hour = Math.floor(time / 60)
-            const min = time % 60
-            const timeString = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`
-            blockedSlots.push(`${booking.date}_${timeString}`)
-          }
-        })
-        
-        setBookedSlots(blockedSlots)
+        const data: { allSlots: string[]; availableSlots: string[] } = await response.json()
+        setConfiguredSlots(data.allSlots)
+        setBookedSlots(data.allSlots.filter(time => !data.availableSlots.includes(time)).map(time => `${dateStr}_${time}`))
+      } else {
+        console.error('Error loading availability slots:', response.status)
+        setSlotsError(true)
+        setConfiguredSlots([])
       }
     } catch (error) {
-      console.error('Error loading booked slots:', error)
+      console.error('Error loading availability slots:', error)
+      setSlotsError(true)
+      setConfiguredSlots([])
     } finally {
       setIsLoadingSlots(false)
     }
-  }, [services])
+  }, [])
 
   // Memoiser les créneaux pour éviter les recalculs inutiles
   const memoizedTimeSlots = useMemo(() => {
@@ -154,15 +186,39 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
     
     // Rechercher le service par ID ou par nom
     const service = services.find(s => s.id === currentService || s.name === currentService)
-    return generateTimeSlots(selectedDate, service?.duration || 30)
-  }, [selectedDate, currentService, services, generateTimeSlots])
+    if (configuredSlots) {
+      return configuredSlots.map(time => ({
+        time,
+        available: !bookedSlots.includes(`${format(selectedDate, 'yyyy-MM-dd')}_${time}`) &&
+          (isToday(selectedDate)
+          ? (new Date().getHours() * 60 + new Date().getMinutes()) <
+            Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5))
+          : true),
+        isBooked: bookedSlots.includes(`${format(selectedDate, 'yyyy-MM-dd')}_${time}`),
+      }))
+    }
+    return generateTimeSlots(selectedDate, service?.duration || 30);
+  }, [selectedDate, currentService, services, configuredSlots, bookedSlots, generateTimeSlots])
 
   // Effet pour charger les créneaux réservés uniquement quand nécessaire
   useEffect(() => {
     if (selectedDate && step === 'time') {
-      loadBookedSlots(selectedDate)
+      const service = services.find(s => s.id === currentService || s.name === currentService)
+      loadAvailableSlots(selectedDate, service?.duration || 30)
     }
-  }, [selectedDate, step, loadBookedSlots])
+  }, [selectedDate, step, currentService, services, loadAvailableSlots])
+
+  useEffect(() => {
+    if (step !== 'time' || !selectedDate || !currentService) return
+
+    const service = services.find(s => s.id === currentService || s.name === currentService)
+    const refreshSlots = () => {
+      loadAvailableSlots(selectedDate, service?.duration || 30)
+    }
+    const interval = window.setInterval(refreshSlots, 15000)
+
+    return () => window.clearInterval(interval)
+  }, [selectedDate, step, currentService, services, loadAvailableSlots])
 
   const handleDateChange = (value: CalendarValue) => {
     if (!value) return
@@ -196,12 +252,16 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
 
   const tileDisabled = ({ date, view }: { date: Date; view: string }) => {
     if (view === 'month') {
-      // Désactiver les dates passées et les dimanches
       const today = startOfDay(new Date())
       const isBeforeToday = isBefore(date, today)
-      const isSunday = date.getDay() === 0
-      
-      return isBeforeToday || isSunday
+      const dateKey = format(date, 'yyyy-MM-dd')
+      const configuredDay = availabilityByDate[dateKey]
+      const hasAvailableSlot = configuredDay?.some(slot => slot.is_available) ?? false
+
+      if (isBeforeToday) return true
+      if (configuredDay) return !hasAvailableSlot
+      const weekday = weekdayKeyForDate(dateKey)
+      return !weekday || openingHours[weekday].closed
     }
     return false
   }
@@ -296,7 +356,7 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
               tileDisabled={tileDisabled}
               tileClassName={tileClassName}
               minDate={new Date()}
-              maxDate={addDays(new Date(), 60)}
+              maxDate={addMonths(new Date(), bookingHorizonMonths)}
               locale={locale === 'nl' ? 'nl-NL' : locale === 'en' ? 'en-GB' : 'fr-FR'}
               className="modern-calendar"
             />
@@ -337,7 +397,13 @@ export default function CalendarBooking({ onBookingSelect, selectedService }: Ca
             </div>
           </div>
 
-          {memoizedTimeSlots.length > 0 ? (
+          {slotsError ? (
+            <p role="alert" className="text-red-300">
+              {locale === 'fr' ? 'Impossible de charger les disponibilités. Réessayez.' :
+                locale === 'nl' ? 'Beschikbaarheid kon niet worden geladen. Probeer opnieuw.' :
+                  'Unable to load availability. Please try again.'}
+            </p>
+          ) : memoizedTimeSlots.length > 0 ? (
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}

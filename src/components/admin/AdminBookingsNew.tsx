@@ -73,7 +73,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   // Fonction de refresh manuel si besoin
   const handleManualRefresh = () => {
     refetch()
-    toast.success('Réservations actualisées')
+    toast.success('Bookings refreshed')
   }
 
   const updateBookingStatus = async (bookingId: string, newStatus: BookingStatus, cancelNote?: string, onLoading?: (loading: boolean) => void) => {
@@ -97,7 +97,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
 
       if (!response.ok) {
         console.error('❌ Erreur API:', data.error)
-        throw new Error(data.error || 'Erreur lors de la mise à jour')
+        throw new Error(data.error || 'Unable to update appointment')
       }
 
       // Pas besoin de mettre à jour manuellement - Realtime le fait automatiquement
@@ -109,14 +109,19 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
                             newStatus === 'cancelled' ? t.bookingCancelled :
                             'Booking updated'
       toast.success(successMessage)
+      if (newStatus === 'cancelled' && data.clientNotified === false) {
+        toast.error('Réservation annulée, mais l’email au client n’a pas pu être envoyé.')
+      }
 
       // Notify parent to update pending count
       if (onStatusChange) {
         onStatusChange()
       }
+      return true
     } catch (error) {
       console.error('❌ Erreur lors de la mise à jour:', error)
       toast.error(t.error)
+      return false
     } finally {
       if (onLoading) onLoading(false)
     }
@@ -127,7 +132,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
   }
 
   const cancelBooking = async (bookingId: string, cancelNote?: string) => {
-    await updateBookingStatus(bookingId, 'cancelled', cancelNote, setCancelLoading)
+    return updateBookingStatus(bookingId, 'cancelled', cancelNote, setCancelLoading)
   }
 
   const deleteSingleBooking = async (bookingId: string) => {
@@ -139,7 +144,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Erreur lors de la suppression')
+        throw new Error(data.error || 'Unable to delete appointment')
       }
 
       // Pas besoin de mettre à jour manuellement - Realtime le fait automatiquement
@@ -168,13 +173,13 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
     if (!cancelBookingId) return
 
     try {
-      await cancelBooking(cancelBookingId, cancelNote)
+      if (!await cancelBooking(cancelBookingId, cancelNote)) return
       setCancelModalOpen(false)
       setCancelBookingId(null)
       setCancelNote('')
     } catch (error) {
       console.error('Erreur lors de l\'annulation:', error)
-      toast.error('Erreur lors de l\'annulation')
+      toast.error('Unable to cancel appointment')
     }
   }
 
@@ -220,7 +225,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
 
         if (!response.ok) {
           const data = await response.json()
-          throw new Error(data.error || 'Erreur lors de la suppression')
+          throw new Error(data.error || 'Unable to delete appointment')
         }
       })
 
@@ -716,7 +721,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setCancelModalOpen(false)}
+            onClick={() => { if (!cancelLoading) setCancelModalOpen(false) }}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -731,7 +736,7 @@ export default function AdminBookings({ onStatusChange }: AdminBookingsProps) {
               </h3>
 
               <p className="text-gray-300 mb-4">
-                Êtes-vous sûr de vouloir annuler cette réservation ? Le client recevra un email de confirmation.
+                Êtes-vous sûr de vouloir annuler cette réservation ? La raison, si indiquée, sera incluse dans l&apos;email au client.
               </p>
 
               <div className="mb-4">

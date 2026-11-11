@@ -91,7 +91,7 @@ export default function AdminTestimonials() {
       fetchTestimonials()
     } catch (error) {
       console.error('Erreur lors de la suppression:', error)
-      toast.error('Erreur lors de la suppression')
+      toast.error('Unable to delete review')
     } finally {
       setDeleteLoading(null)
     }

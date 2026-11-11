@@ -43,7 +43,6 @@ CREATE POLICY "Allow public read access" ON availability_slots
 CREATE POLICY "Allow admin modifications" ON availability_slots
     FOR ALL USING (true);
 
--- Contrainte unique pour éviter les doublons de date/heure
+-- Une seule configuration de disponibilité par jour
 CREATE UNIQUE INDEX unique_availability_slot 
-ON availability_slots(date, start_time, end_time) 
-WHERE is_available = true;
+ON availability_slots(date);

@@ -1,20 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { verifyAdminToken } from '@/lib/admin-session'
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('admin_token')?.value
-
-    if (!token) {
+    const sessionData = await verifyAdminToken(request.cookies.get('admin_token')?.value)
+    if (!sessionData) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
-
-    // Décoder le token
-    const sessionData = JSON.parse(Buffer.from(token, 'base64').toString())
-
-    // Vérifier l'expiration
-    if (sessionData.exp < Date.now()) {
-      return NextResponse.json({ error: 'Session expirée' }, { status: 401 })
     }
 
     if (!supabaseAdmin) {
